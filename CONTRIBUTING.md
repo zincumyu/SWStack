@@ -23,10 +23,9 @@ npm run build
 
 ## 分支与提交
 
-- 从 `main` 创建短生命周期分支, 例如 `feat/login-page`, `fix/header-overflow`.
-- 提交信息使用 Conventional Commits: `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`.
-- 一个提交只处理一件事.
+- 从 `main` 创建短生命周期分支
 - 不提交 `.env`, 真实密钥, `node_modules` 或 `dist`.
+- 不要把你的隐私信息交上来!!!
 
 ## Pull Request
 
