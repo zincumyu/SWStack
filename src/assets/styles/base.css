@@ -561,10 +561,17 @@ svg {
 }
 
 .admin-badge.hidden,
-.admin-badge.suspended {
+.admin-badge.suspended,
+.admin-badge.rejected {
   border-color: #e7c8c8;
   background: #fdf4f4;
   color: var(--danger);
+}
+
+.admin-badge.pending {
+  border-color: #ead9b8;
+  background: #fdf8ed;
+  color: #8a6521;
 }
 
 .admin-badge.admin {

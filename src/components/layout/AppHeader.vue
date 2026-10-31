@@ -10,6 +10,14 @@
 
       <nav class="primary-nav" aria-label="主导航">
         <RouterLink class="nav-link" :class="{ active: questionsActive }" to="/">问答</RouterLink>
+        <RouterLink
+          v-if="projectStore.boardEnabled"
+          class="nav-link"
+          :class="{ active: projectsActive }"
+          to="/projects"
+        >
+          项目
+        </RouterLink>
         <RouterLink class="nav-link" :class="{ active: tagsActive }" to="/tags">标签</RouterLink>
         <RouterLink class="nav-link" :class="{ active: usersActive }" to="/users">开发者</RouterLink>
       </nav>
@@ -31,6 +39,16 @@
           <Bell :size="18" />
           <span class="notification-dot" aria-hidden="true" />
         </button>
+
+        <RouterLink
+          v-if="projectStore.boardEnabled"
+          class="icon-button mobile-project-link"
+          to="/projects"
+          aria-label="项目展示"
+          title="项目展示"
+        >
+          <FolderGit2 :size="18" />
+        </RouterLink>
 
         <RouterLink class="btn btn-primary ask-button" :to="askTarget" aria-label="提问">
           <PenLine :size="15" />
@@ -75,6 +93,15 @@
             >
               <UserRound :size="14" />
               个人主页
+            </RouterLink>
+            <RouterLink
+              class="profile-menu-item"
+              role="menuitem"
+              :to="{ name: 'my-projects' }"
+              @click="closeProfileMenu"
+            >
+              <FolderGit2 :size="14" />
+              我的项目
             </RouterLink>
             <RouterLink
               v-if="sessionStore.isAdmin"
@@ -124,6 +151,7 @@ import {
   Bell,
   ChevronDown,
   Code2,
+  FolderGit2,
   LogIn,
   LogOut,
   PenLine,
@@ -132,6 +160,7 @@ import {
   UserRound,
 } from 'lucide-vue-next'
 import UserAvatar from '@/components/common/UserAvatar.vue'
+import { useProjectStore } from '@/stores/projects'
 import { useSessionStore } from '@/stores/session'
 import { useToastStore } from '@/stores/toast'
 import { formatCompact } from '@/utils/format'
@@ -139,6 +168,7 @@ import { formatCompact } from '@/utils/format'
 const route = useRoute()
 const router = useRouter()
 const sessionStore = useSessionStore()
+const projectStore = useProjectStore()
 const toastStore = useToastStore()
 const searchDraft = ref('')
 const searchInput = ref<HTMLInputElement | null>(null)
@@ -158,6 +188,9 @@ const loginTarget = computed<RouteLocationRaw>(() => ({
 
 const questionsActive = computed(() =>
   ['questions', 'search', 'question-detail'].includes(String(route.name)),
+)
+const projectsActive = computed(() =>
+  ['projects', 'project-detail'].includes(String(route.name)),
 )
 const tagsActive = computed(() => ['tags', 'tag-detail'].includes(String(route.name)))
 const usersActive = computed(() => ['users', 'user-profile'].includes(String(route.name)))
@@ -383,6 +416,10 @@ onBeforeUnmount(() => {
   position: relative;
 }
 
+.mobile-project-link {
+  display: none;
+}
+
 .notification-dot {
   position: absolute;
   top: 6px;
@@ -569,6 +606,10 @@ onBeforeUnmount(() => {
 @media (max-width: 820px) {
   .primary-nav {
     display: none;
+  }
+
+  .mobile-project-link {
+    display: inline-flex;
   }
 
   .global-search {

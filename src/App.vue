@@ -15,13 +15,16 @@ import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import ToastHost from '@/components/common/ToastHost.vue'
 import { useCommunityStore } from '@/stores/community'
+import { useProjectStore } from '@/stores/projects'
 import { useSessionStore } from '@/stores/session'
 
 const sessionStore = useSessionStore()
 const communityStore = useCommunityStore()
+const projectStore = useProjectStore()
 
 void sessionStore.load()
 void communityStore.loadOverview()
+void projectStore.loadBoard()
 </script>
 
 <style scoped>

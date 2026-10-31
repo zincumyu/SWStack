@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750" role="img" aria-label="SWStack mobile app screenshot">
+  <title>SWStack Mobile app</title>
+  <rect width="1200" height="750" fill="#f2f2f1"/>
+  <rect x="0" y="0" width="1200" height="750" fill="#f6f6f6"/>
+  <rect x="58" y="82" width="44" height="8" fill="#f48024"/>
+  <text x="58" y="130" fill="#242729" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="700">SWStack Mobile</text>
+  <text x="58" y="164" fill="#6a737c" font-family="Arial, Helvetica, sans-serif" font-size="16">Campus answers, in your pocket.</text>
+  <text x="58" y="188" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="13">Follow discussions between classes. Read, save, reply.</text>
+  <rect x="58" y="230" width="152" height="34" rx="3" fill="#f48024"/>
+  <text x="83" y="252" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700">View prototype</text>
+  <rect x="222" y="230" width="110" height="34" rx="3" fill="#ffffff" stroke="#d5d8da"/>
+  <text x="244" y="252" fill="#59646b" font-family="Arial, Helvetica, sans-serif" font-size="11">GitHub</text>
+  <text x="58" y="326" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="10" letter-spacing="1.4">FIRST RELEASE</text>
+  <text x="58" y="350" fill="#4f5b62" font-family="Arial, Helvetica, sans-serif" font-size="13">Question feed / Unread / Saved</text>
+  <text x="58" y="626" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="11">Drafted by the SWStack core team.</text>
+  <text x="58" y="646" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="11">Built with Vue 3 and Capacitor.</text>
+  <rect x="440" y="90" width="300" height="580" rx="34" fill="#2b3033"/>
+  <rect x="452" y="102" width="276" height="556" rx="25" fill="#ffffff"/>
+  <rect x="548" y="112" width="84" height="18" rx="9" fill="#2b3033"/>
+  <text x="476" y="168" fill="#242729" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700">SWStack</text>
+  <circle cx="700" cy="160" r="13" fill="#f0d3b8"/>
+  <text x="695" y="164" fill="#8b5c2a" font-family="Arial, Helvetica, sans-serif" font-size="8" font-weight="700">LX</text>
+  <path d="M452 184h276" stroke="#e4e6e8"/>
+  <rect x="470" y="200" width="240" height="30" rx="3" fill="#f6f6f6" stroke="#e4e6e8"/>
+  <text x="484" y="219" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="9">Search questions</text>
+  <rect x="470" y="246" width="68" height="24" rx="2" fill="#fdf1e4" stroke="#f2c79f"/>
+  <text x="486" y="261" fill="#da680b" font-family="Arial, Helvetica, sans-serif" font-size="8" font-weight="700">Newest</text>
+  <rect x="544" y="246" width="54" height="24" rx="2" fill="#ffffff" stroke="#e4e6e8"/>
+  <text x="556" y="261" fill="#6a737c" font-family="Arial, Helvetica, sans-serif" font-size="8">Active</text>
+  <rect x="604" y="246" width="74" height="24" rx="2" fill="#ffffff" stroke="#e4e6e8"/>
+  <text x="616" y="261" fill="#6a737c" font-family="Arial, Helvetica, sans-serif" font-size="8">Unanswered</text>
+  <rect x="470" y="286" width="240" height="104" rx="3" fill="#ffffff" stroke="#e4e6e8"/>
+  <text x="482" y="308" fill="#242729" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">Vue 3 ref 与 reactive</text>
+  <text x="482" y="322" fill="#242729" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">在组合式函数里如何选择</text>
+  <text x="482" y="340" fill="#6a737c" font-family="Arial, Helvetica, sans-serif" font-size="8">封装筛选器时既有单个关键字, 也有</text>
+  <text x="482" y="351" fill="#6a737c" font-family="Arial, Helvetica, sans-serif" font-size="8">需要整体替换的分页对象.</text>
+  <rect x="482" y="362" width="36" height="14" rx="2" fill="#e1ecf4"/>
+  <text x="488" y="372" fill="#2e6489" font-family="Arial, Helvetica, sans-serif" font-size="7">vue3</text>
+  <rect x="522" y="362" width="56" height="14" rx="2" fill="#e1ecf4"/>
+  <text x="528" y="372" fill="#2e6489" font-family="Arial, Helvetica, sans-serif" font-size="7">typescript</text>
+  <text x="638" y="372" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="7">18 分钟前</text>
+  <rect x="470" y="400" width="240" height="96" rx="3" fill="#ffffff" stroke="#e4e6e8"/>
+  <text x="482" y="422" fill="#242729" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">FastAPI 依赖注入如何</text>
+  <text x="482" y="436" fill="#242729" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">复用数据库会话</text>
+  <text x="482" y="454" fill="#6a737c" font-family="Arial, Helvetica, sans-serif" font-size="8">每个路由都声明 Depends(get_session)</text>
+  <text x="482" y="465" fill="#6a737c" font-family="Arial, Helvetica, sans-serif" font-size="8">感觉重复, 想保证异常时能正确回滚.</text>
+  <rect x="482" y="476" width="46" height="14" rx="2" fill="#e1ecf4"/>
+  <text x="488" y="486" fill="#2e6489" font-family="Arial, Helvetica, sans-serif" font-size="7">fastapi</text>
+  <rect x="532" y="476" width="40" height="14" rx="2" fill="#e1ecf4"/>
+  <text x="538" y="486" fill="#2e6489" font-family="Arial, Helvetica, sans-serif" font-size="7">python</text>
+  <text x="638" y="486" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="7">42 分钟前</text>
+  <rect x="470" y="506" width="240" height="82" rx="3" fill="#ffffff" stroke="#e4e6e8"/>
+  <text x="482" y="528" fill="#242729" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">TypeScript 泛型约束在</text>
+  <text x="482" y="542" fill="#242729" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">API 响应包装类型里怎么写</text>
+  <rect x="482" y="554" width="64" height="14" rx="2" fill="#e1ecf4"/>
+  <text x="488" y="564" fill="#2e6489" font-family="Arial, Helvetica, sans-serif" font-size="7">typescript</text>
+  <text x="638" y="564" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="7">1 小时前</text>
+  <path d="M452 612h276" stroke="#e4e6e8"/>
+  <text x="480" y="640" fill="#f48024" font-family="Arial, Helvetica, sans-serif" font-size="8" font-weight="700">HOME</text>
+  <text x="550" y="640" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="8">TAGS</text>
+  <text x="616" y="640" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="8">SAVED</text>
+  <text x="681" y="640" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="8">ME</text>
+  <rect x="790" y="150" width="300" height="580" rx="34" fill="#2b3033"/>
+  <rect x="802" y="162" width="276" height="556" rx="25" fill="#f6f6f6"/>
+  <rect x="898" y="172" width="84" height="18" rx="9" fill="#2b3033"/>
+  <text x="826" y="226" fill="#242729" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">Notifications</text>
+  <path d="M802 242h276" stroke="#e4e6e8"/>
+  <rect x="822" y="262" width="236" height="68" rx="3" fill="#ffffff" stroke="#e4e6e8"/>
+  <circle cx="840" cy="282" r="9" fill="#3f6273"/>
+  <text x="856" y="286" fill="#242729" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700">陆星 回答了你的问题</text>
+  <text x="838" y="303" fill="#6a737c" font-family="Arial, Helvetica, sans-serif" font-size="8">关于 ref 与 reactive 的边界...</text>
+  <text x="838" y="318" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="7">8 分钟前</text>
+  <rect x="822" y="340" width="236" height="68" rx="3" fill="#ffffff" stroke="#e4e6e8"/>
+  <circle cx="840" cy="360" r="9" fill="#6b5b4d"/>
+  <text x="856" y="364" fill="#242729" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700">周其 关注了 javascript</text>
+  <text x="838" y="381" fill="#6a737c" font-family="Arial, Helvetica, sans-serif" font-size="8">这个标签下新增了 6 个问题.</text>
+  <text x="838" y="396" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="7">26 分钟前</text>
+  <rect x="822" y="418" width="236" height="88" rx="3" fill="#ffffff" stroke="#e4e6e8"/>
+  <circle cx="840" cy="438" r="9" fill="#52685b"/>
+  <text x="856" y="442" fill="#242729" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700">你的回答被采纳</text>
+  <text x="838" y="459" fill="#6a737c" font-family="Arial, Helvetica, sans-serif" font-size="8">FastAPI 依赖注入如何复用...</text>
+  <rect x="838" y="470" width="54" height="17" rx="2" fill="#edf7f1"/>
+  <text x="845" y="482" fill="#2f6f44" font-family="Arial, Helvetica, sans-serif" font-size="7" font-weight="700">+10 声望</text>
+  <text x="908" y="482" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="7">1 小时前</text>
+  <text x="826" y="542" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="7" letter-spacing="1">EARLIER</text>
+  <text x="826" y="566" fill="#4f5b62" font-family="Arial, Helvetica, sans-serif" font-size="9">你收藏的问题有新回答</text>
+  <text x="826" y="581" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="7">昨天</text>
+  <path d="M802 612h276" stroke="#e4e6e8"/>
+  <text x="830" y="640" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="8">HOME</text>
+  <text x="900" y="640" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="8">TAGS</text>
+  <text x="966" y="640" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="8">SAVED</text>
+  <text x="1031" y="640" fill="#f48024" font-family="Arial, Helvetica, sans-serif" font-size="8" font-weight="700">ME</text>
+</svg>

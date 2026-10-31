@@ -1,17 +1,15 @@
 <template>
-  <div ref="root" class="markdown-body" v-html="html" @click="handleClick" />
+  <div class="markdown-body" v-html="html" @click="handleClick" />
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import DOMPurify from 'dompurify'
 import { renderMarkdown } from '@/utils/markdown'
 
 const props = defineProps<{
   source: string
 }>()
-
-const root = ref<HTMLElement | null>(null)
 
 const html = computed(() =>
   DOMPurify.sanitize(renderMarkdown(props.source), {

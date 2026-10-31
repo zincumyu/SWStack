@@ -110,6 +110,112 @@ export interface CommunityOverview {
   topMembers: TopMember[]
 }
 
+export type ProjectStatus = 'idea' | 'building' | 'beta' | 'launched' | 'archived'
+
+export type ProjectNeed = 'feedback' | 'teammates'
+
+export type ProjectStatusFilter = 'all' | ProjectStatus
+
+export type ProjectNeedFilter = 'all' | ProjectNeed
+
+export type ProjectReviewStatus = 'pending' | 'approved' | 'rejected'
+
+export interface ProjectMember {
+  user: UserSummary
+  role: string
+  isOwner: boolean
+}
+
+export interface ProjectUpdate {
+  id: number
+  title: string
+  body: string
+  createdAt: string
+  author: UserSummary
+}
+
+export interface UploadedImage {
+  url: string
+  name: string
+  mimeType: string
+  size: number
+}
+
+export interface ProjectSummary {
+  id: number
+  slug: string
+  name: string
+  tagline: string
+  coverImage: string
+  techStack: string[]
+  status: ProjectStatus
+  needs: ProjectNeed[]
+  owner: UserSummary
+  teamName?: string
+  memberCount: number
+  updateCount: number
+  lastUpdatedAt: string
+  isFeatured: boolean
+  githubUrl?: string
+  demoUrl?: string
+}
+
+export interface ProjectDetail extends ProjectSummary {
+  readme: string
+  screenshots: string[]
+  members: ProjectMember[]
+  updates: ProjectUpdate[]
+  createdAt: string
+}
+
+export interface ProjectDraftInput {
+  name: string
+  slug: string
+  tagline: string
+  coverImage: string
+  screenshots: string[]
+  techStack: string[]
+  status: ProjectStatus
+  needs: ProjectNeed[]
+  teamName?: string
+  githubUrl?: string
+  demoUrl?: string
+  readme: string
+}
+
+export interface ProjectEditData extends ProjectDraftInput {
+  id: number
+  reviewStatus: ProjectReviewStatus
+  reviewNote?: string
+  submittedAt?: string
+  reviewedAt?: string
+  visibility: AdminProjectVisibility
+  createdAt: string
+  updatedAt: string
+}
+
+export interface MyProject extends ProjectSummary {
+  reviewStatus: ProjectReviewStatus
+  reviewNote?: string
+  submittedAt?: string
+  reviewedAt?: string
+  visibility: AdminProjectVisibility
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ProjectBoardSettings {
+  enabled: boolean
+}
+
+export interface ProjectQuery {
+  page?: number
+  pageSize?: number
+  q?: string
+  status?: ProjectStatusFilter
+  need?: ProjectNeedFilter
+}
+
 export interface UserBadge {
   label: string
   tone: 'gold' | 'silver' | 'bronze' | 'neutral'
@@ -169,6 +275,10 @@ export interface AdminStats {
   suspendedUserCount: number
   tagCount: number
   hiddenTagCount: number
+  projectCount: number
+  hiddenProjectCount: number
+  pendingProjectCount: number
+  projectBoardEnabled: boolean
   unansweredQuestionCount: number
   solvedRate: number
 }
@@ -240,6 +350,45 @@ export interface AdminTagInput {
 export interface AdminTagPatch {
   description?: string
   status?: AdminTagStatus
+}
+
+export type AdminProjectVisibility = 'published' | 'hidden'
+
+export interface AdminProject extends ProjectSummary {
+  visibility: AdminProjectVisibility
+  reviewStatus: ProjectReviewStatus
+  reviewNote?: string
+  submittedAt?: string
+  reviewedAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AdminProjectDetail extends AdminProject {
+  readme: string
+  screenshots: string[]
+  members: ProjectMember[]
+  updates: ProjectUpdate[]
+}
+
+export interface AdminProjectQuery {
+  page?: number
+  pageSize?: number
+  q?: string
+  visibility?: 'all' | AdminProjectVisibility
+  review?: 'all' | ProjectReviewStatus
+  need?: 'all' | ProjectNeed
+}
+
+export interface AdminProjectPatch {
+  visibility?: AdminProjectVisibility
+  featured?: boolean
+  reviewStatus?: 'approved' | 'rejected'
+  reviewNote?: string
+}
+
+export interface AdminProjectsResult extends PageResult<AdminProject> {
+  boardEnabled: boolean
 }
 
 export interface AdminOverview {

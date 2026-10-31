@@ -150,7 +150,10 @@
           </button>
         </div>
 
-        <p class="login-footnote">当前为演示环境, 数据仅保存在浏览器中.</p>
+        <p class="login-footnote">
+          当前为演示环境, 数据仅保存在浏览器中.
+          <RouterLink class="login-guide-link" to="/welcome">查看新手指南</RouterLink>
+        </p>
       </section>
     </div>
   </div>
@@ -644,6 +647,11 @@ async function submit(): Promise<void> {
   font-size: 10px;
   line-height: 1.55;
   text-align: center;
+}
+
+.login-guide-link {
+  margin-left: 3px;
+  font-size: inherit;
 }
 
 @media (max-width: 920px) {

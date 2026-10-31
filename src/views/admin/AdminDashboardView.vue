@@ -28,7 +28,7 @@
       aria-label="管理总览加载中"
     >
       <div class="stat-grid">
-        <div v-for="index in 4" :key="index" class="panel loading-stat">
+        <div v-for="index in 5" :key="index" class="panel loading-stat">
           <span class="skeleton loading-line short" />
           <span class="skeleton loading-number" />
           <span class="skeleton loading-line" />
@@ -88,6 +88,20 @@
           <strong class="stat-value">{{ formatNumber(stats.tagCount) }}</strong>
           <span class="stat-meta">{{ stats.hiddenTagCount }} 个已隐藏</span>
         </article>
+        <article class="stat-card panel">
+          <div class="stat-head">
+            <span>项目</span>
+            <span class="stat-icon"><FolderGit2 :size="14" /></span>
+          </div>
+          <strong class="stat-value">{{ formatNumber(stats.projectCount) }}</strong>
+          <span class="stat-meta stat-project-meta">
+            <span>
+              {{ stats.pendingProjectCount }} 个待审核 /
+              {{ stats.hiddenProjectCount }} 个已隐藏
+            </span>
+            <span>板块{{ stats.projectBoardEnabled ? '公开' : '已关闭' }}</span>
+          </span>
+        </article>
       </section>
 
       <section class="attention-panel panel" aria-labelledby="attention-title">
@@ -99,6 +113,16 @@
           </div>
         </div>
         <div class="attention-links">
+          <RouterLink
+            class="attention-link"
+            :to="{ name: 'admin-projects', query: { review: 'pending' } }"
+          >
+            <span>
+              <strong>{{ stats.pendingProjectCount }}</strong>
+              <span>待审核项目</span>
+            </span>
+            <ChevronRight :size="14" />
+          </RouterLink>
           <RouterLink
             class="attention-link"
             :to="{ name: 'admin-questions', query: { status: 'hidden' } }"
@@ -126,6 +150,16 @@
             <span>
               <strong>{{ stats.unansweredQuestionCount }}</strong>
               <span>未回答问题</span>
+            </span>
+            <ChevronRight :size="14" />
+          </RouterLink>
+          <RouterLink
+            class="attention-link"
+            :to="{ name: 'admin-projects', query: { visibility: 'hidden' } }"
+          >
+            <span>
+              <strong>{{ stats.hiddenProjectCount }}</strong>
+              <span>已隐藏项目</span>
             </span>
             <ChevronRight :size="14" />
           </RouterLink>
@@ -209,6 +243,7 @@ import {
   AlertCircle,
   ChevronRight,
   FileText,
+  FolderGit2,
   MessageSquareText,
   RefreshCw,
   ShieldAlert,
@@ -243,7 +278,7 @@ void adminStore.loadOverview()
 
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 12px;
 }
@@ -292,6 +327,13 @@ void adminStore.loadOverview()
   font-size: 10px;
 }
 
+.stat-project-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.4;
+}
+
 .attention-panel {
   display: grid;
   grid-template-columns: 206px minmax(0, 1fr);
@@ -328,7 +370,7 @@ void adminStore.loadOverview()
 
 .attention-links {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .attention-link {

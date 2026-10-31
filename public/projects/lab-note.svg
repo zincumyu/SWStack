@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750" role="img" aria-label="LabNote experiment editor screenshot">
+  <title>LabNote experiment editor</title>
+  <rect width="1200" height="750" fill="#eef0ee"/>
+  <rect x="40" y="28" width="1120" height="694" rx="7" fill="#ffffff" stroke="#d9dedb"/>
+  <path d="M40 68h1120" stroke="#d9dedb"/>
+  <circle cx="61" cy="48" r="4" fill="#d7dcd9"/>
+  <circle cx="75" cy="48" r="4" fill="#d7dcd9"/>
+  <circle cx="89" cy="48" r="4" fill="#d7dcd9"/>
+  <rect x="420" y="37" width="330" height="22" rx="4" fill="#f3f5f4" stroke="#e1e5e2"/>
+  <text x="438" y="52" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="11">labnote.local/experiments/denoise-07</text>
+  <rect x="40" y="68" width="238" height="654" fill="#f7f8f7"/>
+  <path d="M278 68v654" stroke="#e2e6e3"/>
+  <rect x="60" y="88" width="26" height="26" rx="4" fill="#52685b"/>
+  <text x="69" y="106" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700">LN</text>
+  <text x="96" y="105" fill="#2c3430" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">LabNote</text>
+  <rect x="58" y="132" width="202" height="30" rx="3" fill="#ffffff" stroke="#dfe4e0"/>
+  <text x="70" y="151" fill="#9aa39e" font-family="Arial, Helvetica, sans-serif" font-size="10">Search notes</text>
+  <text x="60" y="190" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="9" letter-spacing="1.1">RECENT</text>
+  <rect x="50" y="203" width="218" height="58" rx="3" fill="#e9efeb"/>
+  <text x="62" y="222" fill="#35453c" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">Low-light denoising</text>
+  <text x="62" y="238" fill="#75817a" font-family="Arial, Helvetica, sans-serif" font-size="9">Experiment 07 / 4 min ago</text>
+  <text x="62" y="252" fill="#75817a" font-family="Arial, Helvetica, sans-serif" font-size="9">Dataset: campus-night-v2</text>
+  <text x="62" y="286" fill="#4c5b52" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">Baseline comparison</text>
+  <text x="62" y="302" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="9">Yesterday</text>
+  <text x="62" y="331" fill="#4c5b52" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">Camera calibration</text>
+  <text x="62" y="347" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="9">Oct 12</text>
+  <text x="62" y="376" fill="#4c5b52" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">Weekly lab meeting</text>
+  <text x="62" y="392" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="9">Oct 09</text>
+  <text x="60" y="438" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="9" letter-spacing="1.1">TEMPLATES</text>
+  <text x="62" y="465" fill="#65736b" font-family="Arial, Helvetica, sans-serif" font-size="10">Training run</text>
+  <text x="62" y="489" fill="#65736b" font-family="Arial, Helvetica, sans-serif" font-size="10">Evaluation report</text>
+  <text x="62" y="513" fill="#65736b" font-family="Arial, Helvetica, sans-serif" font-size="10">Hardware setup</text>
+  <path d="M278 68v654" stroke="#e2e6e3"/>
+  <text x="310" y="106" fill="#9aa39e" font-family="Arial, Helvetica, sans-serif" font-size="10">Experiments / Computer Vision / 07</text>
+  <rect x="310" y="124" width="94" height="20" rx="2" fill="#edf4ef"/>
+  <text x="319" y="138" fill="#4e735b" font-family="Arial, Helvetica, sans-serif" font-size="8" font-weight="700">REPRODUCIBLE</text>
+  <text x="310" y="178" fill="#28322c" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700">Low-light denoising</text>
+  <text x="310" y="204" fill="#707c74" font-family="Arial, Helvetica, sans-serif" font-size="11">Comparing a U-Net baseline with the lab's temporal filter on night footage.</text>
+  <path d="M310 226h610" stroke="#edf0ed"/>
+  <text x="310" y="256" fill="#39473f" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">1. Setup</text>
+  <text x="310" y="280" fill="#5f6b64" font-family="Arial, Helvetica, sans-serif" font-size="11">Record the camera, lens and capture settings before each run. Keep the raw frame sequence.</text>
+  <rect x="310" y="300" width="610" height="104" rx="3" fill="#f8faf8" stroke="#dfe5e1"/>
+  <text x="326" y="322" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="9" letter-spacing="0.8">PARAMETERS</text>
+  <text x="326" y="346" fill="#4e5b53" font-family="Arial, Helvetica, sans-serif" font-size="10">camera</text>
+  <text x="470" y="346" fill="#2f3a33" font-family="Arial, Helvetica, sans-serif" font-size="10">Sony A7S III / 4K 30fps</text>
+  <text x="326" y="368" fill="#4e5b53" font-family="Arial, Helvetica, sans-serif" font-size="10">exposure</text>
+  <text x="470" y="368" fill="#2f3a33" font-family="Arial, Helvetica, sans-serif" font-size="10">1/60s / ISO 12800</text>
+  <text x="326" y="390" fill="#4e5b53" font-family="Arial, Helvetica, sans-serif" font-size="10">dataset</text>
+  <text x="470" y="390" fill="#2f3a33" font-family="Arial, Helvetica, sans-serif" font-size="10">campus-night-v2 / 2.4 GB</text>
+  <text x="310" y="438" fill="#39473f" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">2. Run</text>
+  <text x="310" y="462" fill="#5f6b64" font-family="Arial, Helvetica, sans-serif" font-size="11">Use the pinned environment snapshot. Do not install newer CUDA drivers during comparison runs.</text>
+  <rect x="310" y="482" width="610" height="126" rx="3" fill="#f6f8f6" stroke="#dfe5e1"/>
+  <path d="M310 508h610" stroke="#dfe5e1"/>
+  <text x="324" y="500" fill="#8b949b" font-family="monospace" font-size="9">python</text>
+  <text x="884" y="500" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="9">copy</text>
+  <text x="324" y="532" fill="#44554a" font-family="monospace" font-size="11">python train.py \</text>
+  <text x="324" y="552" fill="#44554a" font-family="monospace" font-size="11">  --config configs/denoise-07.yaml \</text>
+  <text x="324" y="572" fill="#44554a" font-family="monospace" font-size="11">  --seed 42 --device cuda:0</text>
+  <text x="324" y="592" fill="#7c8a80" font-family="monospace" font-size="10"># output: runs/2026-10-14-denoise-07</text>
+  <text x="310" y="646" fill="#39473f" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">3. Results</text>
+  <text x="310" y="670" fill="#5f6b64" font-family="Arial, Helvetica, sans-serif" font-size="11">PSNR improved from 28.4 dB to 31.1 dB. Temporal filter adds 14 ms per frame.</text>
+  <path d="M944 68v654" stroke="#e2e6e3"/>
+  <text x="976" y="104" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="9" letter-spacing="1.1">METADATA</text>
+  <text x="976" y="134" fill="#647169" font-family="Arial, Helvetica, sans-serif" font-size="10">Status</text>
+  <rect x="976" y="144" width="76" height="20" rx="2" fill="#edf4ef"/>
+  <text x="986" y="158" fill="#4e735b" font-family="Arial, Helvetica, sans-serif" font-size="8" font-weight="700">COMPLETE</text>
+  <text x="976" y="191" fill="#647169" font-family="Arial, Helvetica, sans-serif" font-size="10">Owner</text>
+  <circle cx="984" cy="208" r="10" fill="#566274"/>
+  <text x="1000" y="212" fill="#3d4744" font-family="Arial, Helvetica, sans-serif" font-size="10">Gu Yan</text>
+  <text x="976" y="247" fill="#647169" font-family="Arial, Helvetica, sans-serif" font-size="10">Environment</text>
+  <rect x="976" y="258" width="148" height="24" rx="2" fill="#f6f8f6" stroke="#e2e6e3"/>
+  <text x="985" y="274" fill="#69766d" font-family="monospace" font-size="8">python 3.12.2</text>
+  <rect x="976" y="288" width="148" height="24" rx="2" fill="#f6f8f6" stroke="#e2e6e3"/>
+  <text x="985" y="304" fill="#69766d" font-family="monospace" font-size="8">torch 2.4.1</text>
+  <rect x="976" y="318" width="148" height="24" rx="2" fill="#f6f8f6" stroke="#e2e6e3"/>
+  <text x="985" y="334" fill="#69766d" font-family="monospace" font-size="8">cuda 12.1</text>
+  <text x="976" y="372" fill="#647169" font-family="Arial, Helvetica, sans-serif" font-size="10">Files</text>
+  <text x="985" y="393" fill="#66756b" font-family="Arial, Helvetica, sans-serif" font-size="9">denoise-07.yaml</text>
+  <text x="985" y="412" fill="#66756b" font-family="Arial, Helvetica, sans-serif" font-size="9">metrics.csv</text>
+  <text x="985" y="431" fill="#66756b" font-family="Arial, Helvetica, sans-serif" font-size="9">frames-preview.mp4</text>
+  <path d="M976 456h148" stroke="#e7ebe8"/>
+  <rect x="976" y="474" width="148" height="30" rx="3" fill="#52685b"/>
+  <text x="1017" y="493" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">Export note</text>
+</svg>

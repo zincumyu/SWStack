@@ -11,8 +11,10 @@
 
       <nav class="footer-nav" aria-label="页脚导航">
         <RouterLink to="/">问答</RouterLink>
+        <RouterLink v-if="projectStore.boardEnabled" to="/projects">项目</RouterLink>
         <RouterLink to="/tags">标签</RouterLink>
         <RouterLink to="/users">开发者</RouterLink>
+        <RouterLink to="/welcome">新手指南</RouterLink>
         <RouterLink to="/ask">提问</RouterLink>
       </nav>
 
@@ -25,7 +27,10 @@
 </template>
 
 <script setup lang="ts">
+import { useProjectStore } from '@/stores/projects'
+
 const year = new Date().getFullYear()
+const projectStore = useProjectStore()
 </script>
 
 <style scoped>

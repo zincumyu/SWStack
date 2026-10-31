@@ -12,6 +12,12 @@ const router = createRouter({
       meta: { title: '登录', guestOnly: true },
     },
     {
+      path: '/welcome',
+      name: 'welcome',
+      component: () => import('@/views/WelcomeView.vue'),
+      meta: { title: '新手指南' },
+    },
+    {
       path: '/',
       name: 'questions',
       component: () => import('@/views/QuestionsView.vue'),
@@ -34,6 +40,40 @@ const router = createRouter({
       name: 'tags',
       component: () => import('@/views/TagsView.vue'),
       meta: { title: '标签' },
+    },
+    {
+      path: '/projects',
+      name: 'projects',
+      component: () => import('@/views/ProjectsView.vue'),
+      meta: { title: '项目展示' },
+    },
+    {
+      path: '/projects/board',
+      redirect: { name: 'projects' },
+    },
+    {
+      path: '/projects/:slug',
+      name: 'project-detail',
+      component: () => import('@/views/ProjectDetailView.vue'),
+      meta: { title: '项目详情' },
+    },
+    {
+      path: '/my/projects',
+      name: 'my-projects',
+      component: () => import('@/views/MyProjectsView.vue'),
+      meta: { title: '我的项目', requiresAuth: true },
+    },
+    {
+      path: '/my/projects/new',
+      name: 'project-new',
+      component: () => import('@/views/ProjectEditorView.vue'),
+      meta: { title: '发布项目', requiresAuth: true },
+    },
+    {
+      path: '/my/projects/:id(\\d+)/edit',
+      name: 'project-edit',
+      component: () => import('@/views/ProjectEditorView.vue'),
+      meta: { title: '编辑项目', requiresAuth: true },
     },
     {
       path: '/tags/:slug',
@@ -75,6 +115,18 @@ const router = createRouter({
           name: 'admin-questions',
           component: () => import('@/views/admin/AdminQuestionsView.vue'),
           meta: { title: '问题管理' },
+        },
+        {
+          path: 'projects',
+          name: 'admin-projects',
+          component: () => import('@/views/admin/AdminProjectsView.vue'),
+          meta: { title: '项目管理' },
+        },
+        {
+          path: 'projects/:id(\\d+)/review',
+          name: 'admin-project-review',
+          component: () => import('@/views/admin/AdminProjectReviewView.vue'),
+          meta: { title: '审核项目' },
         },
         {
           path: 'users',
@@ -129,6 +181,8 @@ router.beforeEach(async (to) => {
   if (to.meta.guestOnly && sessionStore.isAuthenticated) {
     return sessionStore.isAdmin ? { name: 'admin-dashboard' } : { name: 'questions' }
   }
+
+  return true
 })
 
 router.afterEach((to) => {

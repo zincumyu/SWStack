@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750" role="img" aria-label="PathFinder learning roadmap screenshot">
+  <title>PathFinder learning roadmap</title>
+  <rect width="1200" height="750" fill="#f1eff1"/>
+  <rect x="40" y="28" width="1120" height="694" rx="7" fill="#ffffff" stroke="#ddd9dd"/>
+  <path d="M40 68h1120" stroke="#ddd9dd"/>
+  <circle cx="61" cy="48" r="4" fill="#d9d5d9"/>
+  <circle cx="75" cy="48" r="4" fill="#d9d5d9"/>
+  <circle cx="89" cy="48" r="4" fill="#d9d5d9"/>
+  <rect x="420" y="37" width="310" height="22" rx="4" fill="#f5f3f5" stroke="#e4e0e4"/>
+  <text x="438" y="52" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="11">pathfinder.dev/roadmaps/systems</text>
+  <rect x="40" y="68" width="1120" height="58" fill="#faf9fa"/>
+  <path d="M40 126h1120" stroke="#e8e4e8"/>
+  <rect x="64" y="84" width="24" height="24" rx="4" fill="#6d5668"/>
+  <text x="72" y="101" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">PF</text>
+  <text x="98" y="101" fill="#322d32" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">PathFinder</text>
+  <text x="228" y="101" fill="#6f686f" font-family="Arial, Helvetica, sans-serif" font-size="11">Roadmaps</text>
+  <text x="312" y="101" fill="#6f686f" font-family="Arial, Helvetica, sans-serif" font-size="11">Courses</text>
+  <text x="390" y="101" fill="#6f686f" font-family="Arial, Helvetica, sans-serif" font-size="11">My progress</text>
+  <rect x="1010" y="79" width="108" height="30" rx="3" fill="#6d5668"/>
+  <text x="1040" y="98" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">Save roadmap</text>
+  <rect x="64" y="152" width="238" height="542" rx="4" fill="#faf9fa" stroke="#e8e4e8"/>
+  <text x="82" y="181" fill="#8b8490" font-family="Arial, Helvetica, sans-serif" font-size="9" letter-spacing="1">SYSTEMS TRACK</text>
+  <text x="82" y="209" fill="#302b30" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">Backend engineering</text>
+  <text x="82" y="229" fill="#7c757c" font-family="Arial, Helvetica, sans-serif" font-size="10">12 courses / 4 projects</text>
+  <circle cx="181" cy="285" r="48" fill="none" stroke="#e8e1e8" stroke-width="9"/>
+  <circle cx="181" cy="285" r="48" fill="none" stroke="#6d5668" stroke-width="9" stroke-dasharray="172 302" stroke-linecap="round" transform="rotate(-90 181 285)"/>
+  <text x="158" y="288" fill="#3a333a" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700">57%</text>
+  <text x="157" y="304" fill="#8b8490" font-family="Arial, Helvetica, sans-serif" font-size="9">complete</text>
+  <text x="82" y="374" fill="#494249" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700">Next up</text>
+  <rect x="80" y="388" width="206" height="58" rx="3" fill="#ffffff" stroke="#e4dfe4"/>
+  <rect x="90" y="398" width="5" height="38" rx="1" fill="#6d5668"/>
+  <text x="104" y="415" fill="#3b353b" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">Concurrency patterns</text>
+  <text x="104" y="430" fill="#8b8490" font-family="Arial, Helvetica, sans-serif" font-size="9">CS 331 / 3 lessons left</text>
+  <text x="82" y="479" fill="#494249" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700">Completed</text>
+  <circle cx="89" cy="501" r="4" fill="#5f826b"/>
+  <text x="102" y="505" fill="#6d676d" font-family="Arial, Helvetica, sans-serif" font-size="10">Data structures</text>
+  <circle cx="89" cy="525" r="4" fill="#5f826b"/>
+  <text x="102" y="529" fill="#6d676d" font-family="Arial, Helvetica, sans-serif" font-size="10">Computer networks</text>
+  <circle cx="89" cy="549" r="4" fill="#5f826b"/>
+  <text x="102" y="553" fill="#6d676d" font-family="Arial, Helvetica, sans-serif" font-size="10">Operating systems</text>
+  <circle cx="89" cy="573" r="4" fill="#5f826b"/>
+  <text x="102" y="577" fill="#6d676d" font-family="Arial, Helvetica, sans-serif" font-size="10">Database systems</text>
+  <path d="M326 152v542" stroke="#eeeaf0"/>
+  <text x="360" y="184" fill="#2f2a2f" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700">Backend engineering roadmap</text>
+  <text x="360" y="205" fill="#7c757c" font-family="Arial, Helvetica, sans-serif" font-size="11">A suggested order for students starting from programming fundamentals.</text>
+  <rect x="1020" y="168" width="100" height="28" rx="3" fill="#faf9fa" stroke="#e3dfe3"/>
+  <text x="1044" y="186" fill="#615a61" font-family="Arial, Helvetica, sans-serif" font-size="9">Filter nodes</text>
+  <path d="M690 280h40" stroke="#cfc7cf" stroke-width="2"/>
+  <path d="M902 280h38v60h-140" stroke="#cfc7cf" stroke-width="2" fill="none"/>
+  <path d="M360 348v50h80" stroke="#cfc7cf" stroke-width="2" fill="none"/>
+  <path d="M690 348v52h-90" stroke="#cfc7cf" stroke-width="2" fill="none"/>
+  <path d="M500 474v52h80" stroke="#cfc7cf" stroke-width="2" fill="none"/>
+  <path d="M790 474v52h-70" stroke="#cfc7cf" stroke-width="2" fill="none"/>
+  <rect x="360" y="244" width="330" height="104" rx="4" fill="#ffffff" stroke="#ded7de" stroke-width="1.5"/>
+  <rect x="360" y="244" width="5" height="104" rx="2" fill="#5f826b"/>
+  <text x="380" y="267" fill="#5f826b" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700">COMPLETED</text>
+  <text x="380" y="292" fill="#302b30" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700">Programming fundamentals</text>
+  <text x="380" y="311" fill="#7c757c" font-family="Arial, Helvetica, sans-serif" font-size="10">Python basics, Git and command line.</text>
+  <rect x="380" y="323" width="68" height="15" rx="2" fill="#eef5ef"/>
+  <text x="388" y="334" fill="#50705a" font-family="Arial, Helvetica, sans-serif" font-size="8">3 courses</text>
+  <rect x="730" y="244" width="260" height="104" rx="4" fill="#ffffff" stroke="#ded7de" stroke-width="1.5"/>
+  <rect x="730" y="244" width="5" height="104" rx="2" fill="#5f826b"/>
+  <text x="750" y="267" fill="#5f826b" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700">COMPLETED</text>
+  <text x="750" y="292" fill="#302b30" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700">Data structures</text>
+  <text x="750" y="311" fill="#7c757c" font-family="Arial, Helvetica, sans-serif" font-size="10">Arrays, trees, graphs and complexity.</text>
+  <rect x="360" y="398" width="330" height="104" rx="4" fill="#fbf8fb" stroke="#6d5668" stroke-width="1.5"/>
+  <rect x="360" y="398" width="5" height="104" rx="2" fill="#6d5668"/>
+  <text x="380" y="421" fill="#6d5668" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700">IN PROGRESS</text>
+  <text x="380" y="446" fill="#302b30" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700">Operating systems</text>
+  <text x="380" y="465" fill="#7c757c" font-family="Arial, Helvetica, sans-serif" font-size="10">Processes, memory and file systems.</text>
+  <rect x="380" y="477" width="120" height="4" rx="2" fill="#e4dce4"/>
+  <rect x="380" y="477" width="68" height="4" rx="2" fill="#6d5668"/>
+  <rect x="730" y="398" width="260" height="104" rx="4" fill="#ffffff" stroke="#e5dfe5"/>
+  <rect x="730" y="398" width="5" height="104" rx="2" fill="#c6bcc7"/>
+  <text x="750" y="421" fill="#8b8490" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700">UP NEXT</text>
+  <text x="750" y="446" fill="#302b30" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700">Computer networks</text>
+  <text x="750" y="465" fill="#7c757c" font-family="Arial, Helvetica, sans-serif" font-size="10">TCP, HTTP and network debugging.</text>
+  <rect x="580" y="526" width="200" height="80" rx="4" fill="#ffffff" stroke="#e5dfe5"/>
+  <rect x="580" y="526" width="5" height="80" rx="2" fill="#c6bcc7"/>
+  <text x="598" y="548" fill="#8b8490" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700">PROJECT</text>
+  <text x="598" y="571" fill="#302b30" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700">Build a tiny HTTP server</text>
+  <text x="598" y="589" fill="#7c757c" font-family="Arial, Helvetica, sans-serif" font-size="9">2-3 hours / starter repo</text>
+  <rect x="820" y="526" width="220" height="80" rx="4" fill="#ffffff" stroke="#e5dfe5"/>
+  <rect x="820" y="526" width="5" height="80" rx="2" fill="#c6bcc7"/>
+  <text x="838" y="548" fill="#8b8490" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700">ELECTIVE</text>
+  <text x="838" y="571" fill="#302b30" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700">Distributed systems</text>
+  <text x="838" y="589" fill="#7c757c" font-family="Arial, Helvetica, sans-serif" font-size="9">Recommended after networks</text>
+  <text x="360" y="654" fill="#8b8490" font-family="Arial, Helvetica, sans-serif" font-size="9">Prerequisite links are validated when the roadmap is built.</text>
+</svg>

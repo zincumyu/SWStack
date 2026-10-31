@@ -3,6 +3,10 @@ import { ref } from 'vue'
 import { adminApi } from '@/api/admin'
 import type {
   AdminOverview,
+  AdminProject,
+  AdminProjectDetail,
+  AdminProjectPatch,
+  AdminProjectQuery,
   AdminQuestion,
   AdminQuestionPatch,
   AdminQuestionQuery,
@@ -15,6 +19,7 @@ import type {
 } from '@/api/types'
 import { getErrorMessage } from '@/utils/errors'
 import { useCommunityStore } from '@/stores/community'
+import { useProjectStore } from '@/stores/projects'
 import { useUserDirectoryStore } from '@/stores/users'
 
 export const useAdminStore = defineStore('admin', () => {
@@ -44,6 +49,22 @@ export const useAdminStore = defineStore('admin', () => {
   const tagsError = ref<string | null>(null)
   const tagBusySlug = ref<string | null>(null)
   let tagsPromise: Promise<void> | null = null
+
+  const projects = ref<AdminProject[]>([])
+  const projectTotal = ref(0)
+  const projectsLoading = ref(false)
+  const projectsError = ref<string | null>(null)
+  const projectBusyId = ref<number | null>(null)
+  const projectBoardEnabled = ref(false)
+  const projectBoardLoaded = ref(false)
+  const projectBoardSaving = ref(false)
+  const lastProjectQuery = ref<AdminProjectQuery | null>(null)
+  let projectSequence = 0
+
+  const reviewTarget = ref<AdminProjectDetail | null>(null)
+  const reviewLoading = ref(false)
+  const reviewError = ref<string | null>(null)
+  let reviewSequence = 0
 
   function loadOverview(force = false): Promise<void> {
     if (overviewPromise) {
@@ -252,6 +273,147 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
+  async function loadProjects(query: AdminProjectQuery): Promise<void> {
+    const sequence = ++projectSequence
+    lastProjectQuery.value = { ...query }
+    projectsLoading.value = true
+    projectsError.value = null
+
+    try {
+      const result = await adminApi.projects(query)
+      if (sequence !== projectSequence) {
+        return
+      }
+      projects.value = result.items
+      projectTotal.value = result.total
+      projectBoardEnabled.value = result.boardEnabled
+      projectBoardLoaded.value = true
+      useProjectStore().setBoardEnabled(result.boardEnabled)
+    } catch (cause) {
+      if (sequence !== projectSequence) {
+        return
+      }
+      projects.value = []
+      projectTotal.value = 0
+      projectsError.value = getErrorMessage(cause)
+    } finally {
+      if (sequence === projectSequence) {
+        projectsLoading.value = false
+      }
+    }
+  }
+
+  function invalidateProjects(): void {
+    projectSequence += 1
+    projects.value = []
+    projectTotal.value = 0
+    projectsError.value = null
+    projectsLoading.value = false
+    overview.value = null
+    reviewSequence += 1
+    reviewTarget.value = null
+    reviewLoading.value = false
+    reviewError.value = null
+  }
+
+  async function loadReviewProject(id: number, force = false): Promise<void> {
+    if (reviewTarget.value?.id === id && !force) {
+      return
+    }
+    const sequence = ++reviewSequence
+    reviewLoading.value = true
+    reviewError.value = null
+    reviewTarget.value = null
+
+    try {
+      const result = await adminApi.project(id)
+      if (sequence !== reviewSequence) {
+        return
+      }
+      reviewTarget.value = result
+    } catch (cause) {
+      if (sequence !== reviewSequence) {
+        return
+      }
+      reviewError.value = getErrorMessage(cause)
+    } finally {
+      if (sequence === reviewSequence) {
+        reviewLoading.value = false
+      }
+    }
+  }
+
+  async function updateProject(
+    id: number,
+    patch: AdminProjectPatch,
+  ): Promise<AdminProject> {
+    projectBusyId.value = id
+    try {
+      const updated = await adminApi.updateProject(id, patch)
+      const query = lastProjectQuery.value
+      const visibilityMatches =
+        !query?.visibility ||
+        query.visibility === 'all' ||
+        query.visibility === updated.visibility
+      const reviewMatches =
+        !query?.review ||
+        query.review === 'all' ||
+        query.review === updated.reviewStatus
+      const needMatches =
+        !query?.need || query.need === 'all' || updated.needs.includes(query.need)
+
+      if (visibilityMatches && reviewMatches && needMatches) {
+        const index = projects.value.findIndex((item) => item.id === id)
+        if (index !== -1) {
+          projects.value[index] = updated
+        }
+      } else {
+        projects.value = projects.value.filter((item) => item.id !== id)
+        projectTotal.value = Math.max(0, projectTotal.value - 1)
+      }
+      if (reviewTarget.value?.id === id) {
+        reviewTarget.value = { ...reviewTarget.value, ...updated }
+      }
+      overview.value = null
+      useProjectStore().invalidateAll()
+      return updated
+    } finally {
+      projectBusyId.value = null
+    }
+  }
+
+  async function deleteProject(id: number): Promise<void> {
+    projectBusyId.value = id
+    try {
+      await adminApi.deleteProject(id)
+      projects.value = projects.value.filter((item) => item.id !== id)
+      projectTotal.value = Math.max(0, projectTotal.value - 1)
+      if (reviewTarget.value?.id === id) {
+        reviewTarget.value = null
+      }
+      overview.value = null
+      useProjectStore().invalidateAll()
+    } finally {
+      projectBusyId.value = null
+    }
+  }
+
+  async function updateProjectBoard(enabled: boolean): Promise<boolean> {
+    projectBoardSaving.value = true
+    try {
+      const result = await adminApi.updateProjectBoard(enabled)
+      projectBoardEnabled.value = result.enabled
+      projectBoardLoaded.value = true
+      overview.value = null
+      const projectStore = useProjectStore()
+      projectStore.setBoardEnabled(result.enabled)
+      projectStore.invalidateAll()
+      return result.enabled
+    } finally {
+      projectBoardSaving.value = false
+    }
+  }
+
   return {
     overview,
     overviewLoading,
@@ -270,6 +432,17 @@ export const useAdminStore = defineStore('admin', () => {
     tagsLoading,
     tagsError,
     tagBusySlug,
+    projects,
+    projectTotal,
+    projectsLoading,
+    projectsError,
+    projectBusyId,
+    projectBoardEnabled,
+    projectBoardLoaded,
+    projectBoardSaving,
+    reviewTarget,
+    reviewLoading,
+    reviewError,
     loadOverview,
     loadQuestions,
     updateQuestion,
@@ -279,5 +452,11 @@ export const useAdminStore = defineStore('admin', () => {
     loadTags,
     createTag,
     updateTag,
+    loadProjects,
+    loadReviewProject,
+    updateProject,
+    deleteProject,
+    updateProjectBoard,
+    invalidateProjects,
   }
 })

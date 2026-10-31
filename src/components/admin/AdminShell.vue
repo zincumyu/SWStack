@@ -31,6 +31,18 @@
           </RouterLink>
           <RouterLink
             class="admin-nav-link"
+            :class="{
+              active:
+                route.name === 'admin-projects' ||
+                route.name === 'admin-project-review',
+            }"
+            :to="{ name: 'admin-projects' }"
+          >
+            <FolderGit2 :size="15" />
+            项目管理
+          </RouterLink>
+          <RouterLink
+            class="admin-nav-link"
             :class="{ active: route.name === 'admin-users' }"
             :to="{ name: 'admin-users' }"
           >
@@ -68,6 +80,7 @@ import { useRoute } from 'vue-router'
 import {
   ArrowLeft,
   FileText,
+  FolderGit2,
   LayoutDashboard,
   ShieldCheck,
   Tags,

@@ -2,6 +2,11 @@ import { request } from './http'
 import type {
   AdminDeleteResult,
   AdminOverview,
+  AdminProject,
+  AdminProjectDetail,
+  AdminProjectPatch,
+  AdminProjectQuery,
+  AdminProjectsResult,
   AdminQuestion,
   AdminQuestionPatch,
   AdminQuestionQuery,
@@ -12,6 +17,7 @@ import type {
   AdminUserPatch,
   AdminUserQuery,
   PageResult,
+  ProjectBoardSettings,
 } from './types'
 
 export const adminApi = {
@@ -73,6 +79,40 @@ export const adminApi = {
       url: `/admin/tags/${encodeURIComponent(slug)}`,
       method: 'PATCH',
       data: patch,
+    })
+  },
+
+  projects(query: AdminProjectQuery) {
+    return request<AdminProjectsResult>({
+      url: '/admin/projects',
+      params: { ...query },
+    })
+  },
+
+  project(id: number) {
+    return request<AdminProjectDetail>({ url: `/admin/projects/${id}` })
+  },
+
+  updateProject(id: number, patch: AdminProjectPatch) {
+    return request<AdminProject>({
+      url: `/admin/projects/${id}`,
+      method: 'PATCH',
+      data: patch,
+    })
+  },
+
+  deleteProject(id: number) {
+    return request<AdminDeleteResult>({
+      url: `/admin/projects/${id}`,
+      method: 'DELETE',
+    })
+  },
+
+  updateProjectBoard(enabled: boolean) {
+    return request<ProjectBoardSettings>({
+      url: '/admin/projects/board',
+      method: 'PATCH',
+      data: { enabled },
     })
   },
 }

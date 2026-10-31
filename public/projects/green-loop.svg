@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750" role="img" aria-label="GreenLoop campus reuse map screenshot">
+  <title>GreenLoop campus reuse map</title>
+  <rect width="1200" height="750" fill="#edf0e9"/>
+  <rect x="40" y="28" width="1120" height="694" rx="7" fill="#ffffff" stroke="#d8ded2"/>
+  <path d="M40 68h1120" stroke="#d8ded2"/>
+  <circle cx="61" cy="48" r="4" fill="#d5dcd0"/>
+  <circle cx="75" cy="48" r="4" fill="#d5dcd0"/>
+  <circle cx="89" cy="48" r="4" fill="#d5dcd0"/>
+  <rect x="420" y="37" width="330" height="22" rx="4" fill="#f3f5f1" stroke="#e1e5dc"/>
+  <text x="438" y="52" fill="#8b949b" font-family="Arial, Helvetica, sans-serif" font-size="11">greenloop.campus/map</text>
+  <rect x="40" y="68" width="1120" height="58" fill="#fafbf8"/>
+  <path d="M40 126h1120" stroke="#e5e9e0"/>
+  <rect x="64" y="84" width="24" height="24" rx="4" fill="#60704d"/>
+  <text x="72" y="101" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">GL</text>
+  <text x="98" y="101" fill="#30352b" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">GreenLoop</text>
+  <rect x="208" y="82" width="330" height="27" rx="3" fill="#ffffff" stroke="#dfe4d9"/>
+  <text x="222" y="100" fill="#9aa295" font-family="Arial, Helvetica, sans-serif" font-size="10">Search building, item or recycling point</text>
+  <text x="1052" y="100" fill="#59664a" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">List view</text>
+  <rect x="40" y="126" width="1120" height="596" fill="#e8ece2"/>
+  <path d="M40 214h1120M40 334h1120M40 468h1120M40 602h1120" stroke="#dfe4d7" stroke-width="1"/>
+  <path d="M180 126v596M392 126v596M610 126v596M824 126v596M1018 126v596" stroke="#dfe4d7" stroke-width="1"/>
+  <path d="M40 256h1120M40 408h1120M40 538h1120" stroke="#f1f3ed" stroke-width="8"/>
+  <path d="M280 126v596M710 126v596M920 126v596" stroke="#f1f3ed" stroke-width="12"/>
+  <rect x="80" y="160" width="160" height="80" rx="3" fill="#dde4d5"/>
+  <rect x="250" y="150" width="120" height="110" rx="3" fill="#dfe5d8"/>
+  <rect x="430" y="156" width="150" height="74" rx="3" fill="#dde4d5"/>
+  <rect x="630" y="148" width="130" height="100" rx="3" fill="#dfe5d8"/>
+  <rect x="790" y="162" width="112" height="86" rx="3" fill="#dde4d5"/>
+  <rect x="960" y="152" width="160" height="104" rx="3" fill="#dfe5d8"/>
+  <rect x="66" y="292" width="190" height="104" rx="3" fill="#dfe5d8"/>
+  <rect x="300" y="282" width="120" height="112" rx="3" fill="#dde4d5"/>
+  <rect x="456" y="286" width="204" height="104" rx="3" fill="#dfe5d8"/>
+  <rect x="704" y="280" width="168" height="118" rx="3" fill="#dde4d5"/>
+  <rect x="884" y="290" width="120" height="100" rx="3" fill="#dfe5d8"/>
+  <rect x="1040" y="276" width="90" height="116" rx="3" fill="#dde4d5"/>
+  <rect x="66" y="442" width="150" height="92" rx="3" fill="#dde4d5"/>
+  <rect x="234" y="430" width="146" height="112" rx="3" fill="#dfe5d8"/>
+  <rect x="400" y="440" width="180" height="94" rx="3" fill="#dde4d5"/>
+  <rect x="614" y="428" width="170" height="112" rx="3" fill="#dfe5d8"/>
+  <rect x="804" y="446" width="104" height="86" rx="3" fill="#dde4d5"/>
+  <rect x="954" y="430" width="180" height="112" rx="3" fill="#dfe5d8"/>
+  <rect x="66" y="576" width="220" height="128" rx="3" fill="#dfe5d8"/>
+  <rect x="320" y="570" width="170" height="132" rx="3" fill="#dde4d5"/>
+  <rect x="530" y="580" width="138" height="118" rx="3" fill="#dfe5d8"/>
+  <rect x="702" y="568" width="160" height="136" rx="3" fill="#dde4d5"/>
+  <rect x="892" y="582" width="104" height="118" rx="3" fill="#dfe5d8"/>
+  <rect x="1028" y="568" width="106" height="136" rx="3" fill="#dde4d5"/>
+  <text x="106" y="196" fill="#8a9681" font-family="Arial, Helvetica, sans-serif" font-size="9">Library</text>
+  <text x="456" y="190" fill="#8a9681" font-family="Arial, Helvetica, sans-serif" font-size="9">Student center</text>
+  <text x="714" y="192" fill="#8a9681" font-family="Arial, Helvetica, sans-serif" font-size="9">Engineering hall</text>
+  <text x="426" y="326" fill="#8a9681" font-family="Arial, Helvetica, sans-serif" font-size="9">Dorm A</text>
+  <text x="742" y="328" fill="#8a9681" font-family="Arial, Helvetica, sans-serif" font-size="9">Dorm B</text>
+  <text x="96" y="484" fill="#8a9681" font-family="Arial, Helvetica, sans-serif" font-size="9">Sports field</text>
+  <text x="644" y="474" fill="#8a9681" font-family="Arial, Helvetica, sans-serif" font-size="9">Arts building</text>
+  <path d="M280 214c0-40 40-40 40-80s-40-40" stroke="#f8f9f5" stroke-width="7" fill="none"/>
+  <path d="M610 408c40 0 40 40 80 40s40-40 80-40" stroke="#f8f9f5" stroke-width="7" fill="none"/>
+  <circle cx="352" cy="192" r="17" fill="#60704d" stroke="#ffffff" stroke-width="4"/>
+  <circle cx="352" cy="192" r="5" fill="#ffffff"/>
+  <circle cx="474" cy="470" r="17" fill="#60704d" stroke="#ffffff" stroke-width="4"/>
+  <circle cx="474" cy="470" r="5" fill="#ffffff"/>
+  <circle cx="758" cy="322" r="17" fill="#8c9a72" stroke="#ffffff" stroke-width="4"/>
+  <circle cx="758" cy="322" r="5" fill="#ffffff"/>
+  <circle cx="1052" cy="500" r="17" fill="#60704d" stroke="#ffffff" stroke-width="4"/>
+  <circle cx="1052" cy="500" r="5" fill="#ffffff"/>
+  <circle cx="886" cy="636" r="17" fill="#8c9a72" stroke="#ffffff" stroke-width="4"/>
+  <circle cx="886" cy="636" r="5" fill="#ffffff"/>
+  <rect x="64" y="146" width="268" height="530" rx="4" fill="#ffffff" stroke="#dfe4d9"/>
+  <text x="82" y="176" fill="#31382c" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">Find a reuse point</text>
+  <text x="82" y="195" fill="#7f8977" font-family="Arial, Helvetica, sans-serif" font-size="10">24 points across campus</text>
+  <rect x="80" y="212" width="236" height="30" rx="3" fill="#f7f9f4" stroke="#e1e6da"/>
+  <text x="92" y="231" fill="#99a18f" font-family="Arial, Helvetica, sans-serif" font-size="10">Search location</text>
+  <text x="82" y="272" fill="#4c5841" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">Item type</text>
+  <rect x="80" y="284" width="74" height="25" rx="12" fill="#eef2e9" stroke="#d7e0ce"/>
+  <text x="98" y="300" fill="#5d6c4c" font-family="Arial, Helvetica, sans-serif" font-size="9">Books</text>
+  <rect x="162" y="284" width="86" height="25" rx="12" fill="#ffffff" stroke="#dfe4d9"/>
+  <text x="176" y="300" fill="#778272" font-family="Arial, Helvetica, sans-serif" font-size="9">Electronics</text>
+  <rect x="256" y="284" width="58" height="25" rx="12" fill="#ffffff" stroke="#dfe4d9"/>
+  <text x="269" y="300" fill="#778272" font-family="Arial, Helvetica, sans-serif" font-size="9">Bags</text>
+  <text x="82" y="341" fill="#4c5841" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">Nearby points</text>
+  <rect x="80" y="354" width="236" height="66" rx="3" fill="#f7f9f4" stroke="#e1e6da"/>
+  <circle cx="98" cy="376" r="8" fill="#60704d"/>
+  <text x="114" y="379" fill="#3e4835" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">Library reuse shelf</text>
+  <text x="114" y="394" fill="#7f8977" font-family="Arial, Helvetica, sans-serif" font-size="9">Books and chargers / 180 m</text>
+  <text x="114" y="407" fill="#6d7c5a" font-family="Arial, Helvetica, sans-serif" font-size="9">Open until 21:00</text>
+  <rect x="80" y="428" width="236" height="66" rx="3" fill="#ffffff" stroke="#e1e6da"/>
+  <circle cx="98" cy="450" r="8" fill="#8c9a72"/>
+  <text x="114" y="453" fill="#3e4835" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">Dorm B swap cabinet</text>
+  <text x="114" y="468" fill="#7f8977" font-family="Arial, Helvetica, sans-serif" font-size="9">Daily goods / 420 m</text>
+  <text x="114" y="481" fill="#6d7c5a" font-family="Arial, Helvetica, sans-serif" font-size="9">Open 24 hours</text>
+  <rect x="80" y="502" width="236" height="66" rx="3" fill="#ffffff" stroke="#e1e6da"/>
+  <circle cx="98" cy="524" r="8" fill="#60704d"/>
+  <text x="114" y="527" fill="#3e4835" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">Engineering lobby</text>
+  <text x="114" y="542" fill="#7f8977" font-family="Arial, Helvetica, sans-serif" font-size="9">Tools / 560 m</text>
+  <text x="114" y="555" fill="#6d7c5a" font-family="Arial, Helvetica, sans-serif" font-size="9">Open until 22:00</text>
+  <rect x="80" y="590" width="236" height="30" rx="3" fill="#60704d"/>
+  <text x="144" y="609" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">Post an item</text>
+  <rect x="780" y="480" width="330" height="188" rx="4" fill="#ffffff" stroke="#dfe4d9"/>
+  <rect x="780" y="480" width="330" height="86" rx="4" fill="#e6ebdf"/>
+  <rect x="798" y="500" width="82" height="50" rx="3" fill="#ffffff" stroke="#d8dfd0"/>
+  <circle cx="816" cy="518" r="8" fill="#c7d2b9"/>
+  <path d="M805 542h64l-14-16-12 10-10-8z" fill="#aeba9d"/>
+  <text x="898" y="510" fill="#30372a" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">Adjustable desk lamp</text>
+  <text x="898" y="528" fill="#7f8977" font-family="Arial, Helvetica, sans-serif" font-size="9">Working condition / Dorm B</text>
+  <rect x="898" y="538" width="56" height="17" rx="2" fill="#edf3e7"/>
+  <text x="905" y="550" fill="#5a6b48" font-family="Arial, Helvetica, sans-serif" font-size="8">FREE</text>
+  <text x="798" y="594" fill="#4c5841" font-family="Arial, Helvetica, sans-serif" font-size="10">Posted by Lin Yi / 2 hours ago</text>
+  <text x="798" y="612" fill="#7f8977" font-family="Arial, Helvetica, sans-serif" font-size="9">Pickup at Dorm B lobby before Friday.</text>
+  <rect x="798" y="627" width="104" height="28" rx="3" fill="#60704d"/>
+  <text x="824" y="645" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="700">Request item</text>
+  <rect x="912" y="627" width="76" height="28" rx="3" fill="#ffffff" stroke="#dfe4d9"/>
+  <text x="930" y="645" fill="#59664a" font-family="Arial, Helvetica, sans-serif" font-size="9">Save</text>
+</svg>
