@@ -110,6 +110,44 @@ export interface CommunityOverview {
   topMembers: TopMember[]
 }
 
+export type SearchType = 'all' | 'questions' | 'projects' | 'columns' | 'tags' | 'users'
+
+export interface SearchCounts {
+  questions: number
+  projects: number
+  columns: number
+  tags: number
+  users: number
+}
+
+export interface SearchQuery {
+  q: string
+  type?: SearchType
+  page?: number
+  pageSize?: number
+}
+
+export interface SearchUserResult extends UserSummary {
+  bio: string
+  school: string
+  questionCount: number
+  answerCount: number
+}
+
+export interface SearchResults {
+  keyword: string
+  type: SearchType
+  page: number
+  pageSize: number
+  total: number
+  counts: SearchCounts
+  questions: QuestionSummary[]
+  projects: ProjectSummary[]
+  columns: ColumnSummary[]
+  tags: Tag[]
+  users: SearchUserResult[]
+}
+
 export type ProjectStatus = 'idea' | 'building' | 'beta' | 'launched' | 'archived'
 
 export type ProjectNeed = 'feedback' | 'teammates'
@@ -131,7 +169,28 @@ export interface ProjectUpdate {
   title: string
   body: string
   createdAt: string
+  updatedAt?: string
   author: UserSummary
+}
+
+export interface ProjectUpdateInput {
+  title: string
+  body: string
+}
+
+export interface ProjectUpdatesWorkspace {
+  project: MyProject
+  updates: ProjectUpdate[]
+}
+
+export interface AdminProjectUpdatesWorkspace {
+  project: AdminProject
+  updates: ProjectUpdate[]
+}
+
+export interface ProjectUpdateDeleteResult {
+  id: number
+  deleted: boolean
 }
 
 export interface UploadedImage {
@@ -216,6 +275,86 @@ export interface ProjectQuery {
   need?: ProjectNeedFilter
 }
 
+export type ColumnLevel = 'beginner' | 'intermediate' | 'advanced'
+
+export type ColumnLevelFilter = 'all' | ColumnLevel
+
+export type ColumnStatus = 'draft' | 'published'
+
+export interface ColumnResource {
+  title: string
+  url: string
+  description?: string
+}
+
+export interface ColumnSummary {
+  id: number
+  slug: string
+  title: string
+  summary: string
+  level: ColumnLevel
+  tags: QuestionTag[]
+  author: UserSummary
+  resourceCount: number
+  readingMinutes: number
+  featured: boolean
+  publishedAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ColumnDetail extends ColumnSummary {
+  body: string
+  resources: ColumnResource[]
+}
+
+export interface ColumnQuery {
+  page?: number
+  pageSize?: number
+  q?: string
+  level?: ColumnLevelFilter
+  tag?: string
+}
+
+export interface AdminColumn extends ColumnSummary {
+  status: ColumnStatus
+  moderationLocked: boolean
+}
+
+export interface AdminColumnDetail extends AdminColumn {
+  body: string
+  resources: ColumnResource[]
+}
+
+export interface AdminColumnQuery {
+  page?: number
+  pageSize?: number
+  q?: string
+  level?: ColumnLevelFilter
+  status?: 'all' | ColumnStatus
+}
+
+export interface MyColumnQuery {
+  page?: number
+  pageSize?: number
+}
+
+export type ColumnWorkspaceItem = AdminColumn
+
+export type ColumnWorkspaceDetail = AdminColumnDetail
+
+export interface ColumnInput {
+  title: string
+  slug: string
+  summary: string
+  level: ColumnLevel
+  tags: string[]
+  body: string
+  resources: ColumnResource[]
+  status: ColumnStatus
+  featured: boolean
+}
+
 export interface UserBadge {
   label: string
   tone: 'gold' | 'silver' | 'bronze' | 'neutral'
@@ -249,6 +388,7 @@ export type AccountStatus = 'active' | 'suspended'
 
 export interface AuthUser extends UserSummary {
   role: UserRole
+  canWriteColumns: boolean
 }
 
 export interface LoginInput {
@@ -259,6 +399,40 @@ export interface LoginInput {
 
 export interface AuthResult {
   user: AuthUser
+}
+
+export type NotificationType =
+  | 'project_approved'
+  | 'project_rejected'
+  | 'column_access_granted'
+  | 'column_access_revoked'
+  | 'column_unpublished'
+  | 'question_answered'
+
+export interface NotificationItem {
+  id: number
+  type: NotificationType
+  title: string
+  body: string
+  read: boolean
+  createdAt: string
+  link: string
+}
+
+export type NotificationFilter = 'all' | 'unread'
+
+export interface NotificationQuery {
+  page?: number
+  pageSize?: number
+  filter?: NotificationFilter
+}
+
+export interface NotificationUnreadCount {
+  unread: number
+}
+
+export interface NotificationReadAllResult {
+  updated: number
 }
 
 export type AdminQuestionStatus = 'published' | 'hidden'
@@ -319,6 +493,7 @@ export interface AdminUser {
   title: string
   role: UserRole
   status: AccountStatus
+  canWriteColumns: boolean
   questionCount: number
   answerCount: number
   joinedAt: string
@@ -335,6 +510,7 @@ export interface AdminUserQuery {
 export interface AdminUserPatch {
   role?: UserRole
   status?: AccountStatus
+  canWriteColumns?: boolean
 }
 
 export interface AdminTag extends Tag {

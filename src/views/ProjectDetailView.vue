@@ -235,6 +235,9 @@
                     <UserAvatar :user="update.author" :size="18" />
                     <span>{{ update.author.name }}</span>
                     <span class="author-time">{{ formatRelativeTime(update.createdAt) }}</span>
+                    <span v-if="update.updatedAt" class="author-edited">
+                      已编辑 {{ formatRelativeTime(update.updatedAt) }}
+                    </span>
                   </div>
                 </div>
               </li>
@@ -749,6 +752,11 @@ watch(
 
 .author-time {
   margin-left: 2px;
+}
+
+.author-edited {
+  color: var(--text-faint);
+  font-style: italic;
 }
 
 .timeline-empty {

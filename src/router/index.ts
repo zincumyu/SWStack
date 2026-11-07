@@ -9,13 +9,13 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('@/views/LoginView.vue'),
-      meta: { title: '登录', guestOnly: true },
+      meta: { title: '登录', guestOnly: true, guestAccess: true },
     },
     {
       path: '/welcome',
       name: 'welcome',
       component: () => import('@/views/WelcomeView.vue'),
-      meta: { title: '新手指南' },
+      meta: { title: '新手指南', guestAccess: true },
     },
     {
       path: '/',
@@ -26,8 +26,8 @@ const router = createRouter({
     {
       path: '/search',
       name: 'search',
-      component: () => import('@/views/QuestionsView.vue'),
-      meta: { title: '搜索问题' },
+      component: () => import('@/views/SearchView.vue'),
+      meta: { title: '全站搜索', requiresAuth: true },
     },
     {
       path: '/questions/:id(\\d+)',
@@ -58,6 +58,18 @@ const router = createRouter({
       meta: { title: '项目详情' },
     },
     {
+      path: '/columns',
+      name: 'columns',
+      component: () => import('@/views/ColumnsView.vue'),
+      meta: { title: '专栏' },
+    },
+    {
+      path: '/columns/:slug',
+      name: 'column-detail',
+      component: () => import('@/views/ColumnDetailView.vue'),
+      meta: { title: '专栏详情' },
+    },
+    {
       path: '/my/projects',
       name: 'my-projects',
       component: () => import('@/views/MyProjectsView.vue'),
@@ -74,6 +86,30 @@ const router = createRouter({
       name: 'project-edit',
       component: () => import('@/views/ProjectEditorView.vue'),
       meta: { title: '编辑项目', requiresAuth: true },
+    },
+    {
+      path: '/my/projects/:id(\\d+)/updates',
+      name: 'my-project-updates',
+      component: () => import('@/views/MyProjectUpdatesView.vue'),
+      meta: { title: '开发日志', requiresAuth: true },
+    },
+    {
+      path: '/my/columns',
+      name: 'my-columns',
+      component: () => import('@/views/MyColumnsView.vue'),
+      meta: { title: '我的专栏', requiresAuth: true, requiresColumnAccess: true },
+    },
+    {
+      path: '/my/columns/new',
+      name: 'my-column-new',
+      component: () => import('@/views/MyColumnEditorView.vue'),
+      meta: { title: '新建专栏', requiresAuth: true, requiresColumnAccess: true },
+    },
+    {
+      path: '/my/columns/:id(\\d+)/edit',
+      name: 'my-column-edit',
+      component: () => import('@/views/MyColumnEditorView.vue'),
+      meta: { title: '编辑专栏', requiresAuth: true, requiresColumnAccess: true },
     },
     {
       path: '/tags/:slug',
@@ -98,6 +134,12 @@ const router = createRouter({
       name: 'ask',
       component: () => import('@/views/AskQuestionView.vue'),
       meta: { title: '提问', requiresAuth: true },
+    },
+    {
+      path: '/notifications',
+      name: 'notifications',
+      component: () => import('@/views/NotificationsView.vue'),
+      meta: { title: '通知', requiresAuth: true },
     },
     {
       path: '/admin',
@@ -127,6 +169,30 @@ const router = createRouter({
           name: 'admin-project-review',
           component: () => import('@/views/admin/AdminProjectReviewView.vue'),
           meta: { title: '审核项目' },
+        },
+        {
+          path: 'projects/:id(\\d+)/updates',
+          name: 'admin-project-updates',
+          component: () => import('@/views/admin/AdminProjectUpdatesView.vue'),
+          meta: { title: '开发日志管理' },
+        },
+        {
+          path: 'columns',
+          name: 'admin-columns',
+          component: () => import('@/views/admin/AdminColumnsView.vue'),
+          meta: { title: '专栏管理' },
+        },
+        {
+          path: 'columns/new',
+          name: 'admin-column-new',
+          component: () => import('@/views/admin/AdminColumnEditorView.vue'),
+          meta: { title: '新建专栏' },
+        },
+        {
+          path: 'columns/:id(\\d+)/edit',
+          name: 'admin-column-edit',
+          component: () => import('@/views/admin/AdminColumnEditorView.vue'),
+          meta: { title: '编辑专栏' },
         },
         {
           path: 'users',
@@ -164,6 +230,14 @@ router.beforeEach(async (to) => {
   const sessionStore = useSessionStore()
   await sessionStore.load()
 
+  if (!sessionStore.isAuthenticated && !to.meta.guestAccess) {
+    const keepRedirect = to.name !== 'not-found' && to.fullPath !== '/'
+    return {
+      name: 'welcome',
+      query: keepRedirect ? { redirect: to.fullPath } : {},
+    }
+  }
+
   if (to.meta.requiresAdmin) {
     if (!sessionStore.isAuthenticated) {
       return { name: 'login', query: { redirect: to.fullPath } }
@@ -176,6 +250,11 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresAuth && !sessionStore.isAuthenticated) {
     return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
+  if (to.meta.requiresColumnAccess && !sessionStore.canWriteColumns) {
+    useToastStore().error('需要专栏写作权限, 请联系管理员开通')
+    return { name: 'columns' }
   }
 
   if (to.meta.guestOnly && sessionStore.isAuthenticated) {

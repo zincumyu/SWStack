@@ -34,12 +34,26 @@
             :class="{
               active:
                 route.name === 'admin-projects' ||
-                route.name === 'admin-project-review',
+                route.name === 'admin-project-review' ||
+                route.name === 'admin-project-updates',
             }"
             :to="{ name: 'admin-projects' }"
           >
             <FolderGit2 :size="15" />
             项目管理
+          </RouterLink>
+          <RouterLink
+            class="admin-nav-link"
+            :class="{
+              active:
+                route.name === 'admin-columns' ||
+                route.name === 'admin-column-new' ||
+                route.name === 'admin-column-edit',
+            }"
+            :to="{ name: 'admin-columns' }"
+          >
+            <BookOpen :size="15" />
+            专栏管理
           </RouterLink>
           <RouterLink
             class="admin-nav-link"
@@ -79,6 +93,7 @@
 import { useRoute } from 'vue-router'
 import {
   ArrowLeft,
+  BookOpen,
   FileText,
   FolderGit2,
   LayoutDashboard,
@@ -229,6 +244,11 @@ const route = useRoute()
     overflow-x: auto;
     flex-direction: row;
     padding: 4px;
+    scrollbar-width: none;
+  }
+
+  .admin-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .admin-nav-link {

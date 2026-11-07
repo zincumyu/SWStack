@@ -1,6 +1,6 @@
 # SWStack Web
 
-面向高校开发者的技术问答前端. 视觉参考 Stack Overflow, 采用浅色密排布局. 当前版本包含问答, 开发者目录, 项目投稿, 图片上传与审核, 项目展示与管理后台, 使用 Mock 数据, API 层已按 FastAPI 后端对接方式隔离.
+面向高校开发者的技术问答前端. 视觉参考 Stack Overflow, 采用浅色密排布局. 当前版本包含问答, 全站搜索, 开发者目录, 项目投稿与开发日志, 图片上传与审核, 管理员与授权作者共同维护的专栏, 站内通知, 项目展示与管理后台, 使用 Mock 数据, API 层已按 FastAPI 后端对接方式隔离.
 
 ## 技术栈
 
@@ -43,7 +43,7 @@ npm run dev
 | 路由 | 页面 |
 | --- | --- |
 | `/` | 问题列表与排序 |
-| `/search?q=` | 搜索结果 |
+| `/search?q=&type=&page=` | 全站搜索, 覆盖问题, 项目, 专栏, 标签与开发者 |
 | `/questions/:id` | 问题详情, Markdown 正文, 回答与投票 |
 | `/tags` | 标签目录 |
 | `/tags/:slug` | 标签下的问题 |
@@ -52,17 +52,30 @@ npm run dev
 | `/my/projects` | 我的项目工作台, 需要登录 |
 | `/my/projects/new` | 发布项目, 上传封面与截图并提交审核, 需要登录 |
 | `/my/projects/:id/edit` | 编辑自己的项目并重新提交审核, 需要登录 |
+| `/my/projects/:id/updates` | 管理自己项目的开发日志, 需要登录 |
+| `/columns` | 专栏列表, 支持关键词, 难度与标签筛选 |
+| `/columns/:slug` | 专栏详情, Markdown 正文与资源清单 |
+| `/my/columns` | 我的专栏工作台, 需要专栏写作权限 |
+| `/my/columns/new` | 新建自己的专栏, 需要专栏写作权限 |
+| `/my/columns/:id/edit` | 编辑自己的专栏, 需要专栏写作权限 |
 | `/users` | 开发者目录 |
 | `/users/:handle` | 开发者主页 |
 | `/ask` | 提问表单, 需要登录 |
+| `/notifications` | 站内通知, 需要登录 |
 | `/login` | 登录页 |
 | `/welcome` | 新手指南 |
 | `/admin` | 管理总览, 需要管理员 |
 | `/admin/questions` | 问题管理 |
 | `/admin/projects` | 项目管理, 审核队列与板块可见性 |
 | `/admin/projects/:id/review` | 审核单个项目, 通过或驳回 |
+| `/admin/projects/:id/updates` | 删除项目中的违规开发日志 |
+| `/admin/columns` | 专栏管理 |
+| `/admin/columns/new` | 新建专栏 |
+| `/admin/columns/:id/edit` | 编辑专栏 |
 | `/admin/users` | 用户管理 |
 | `/admin/tags` | 标签管理 |
+
+游客仅可访问 `/welcome` 与 `/login`. 访问其他路由会跳转到 `/welcome`, 并保留登录后返回的目标页面.
 
 ## 目录结构
 
@@ -75,14 +88,16 @@ src/
     layout/     Header, Footer
     common/     Avatar, Tag, Toast, EmptyState
     questions/  问题列表, 详情, 回答, 投票
-    projects/   项目卡片, 截图画廊, 状态, 审核徽标, 板块关闭提示
+    projects/   项目卡片, 截图画廊, 状态, 审核徽标, 开发日志管理, 板块关闭提示
+    columns/    共享专栏编辑器, 支持管理员与作者两种模式
+    search/     分组结果, 关键词高亮与各范围结果行
     sidebar/    右侧统计与推荐面板
     markdown/   Markdown 渲染器
     admin/      管理后台外壳与分页
   views/        路由页面
-    admin/      管理总览, 问题, 项目, 用户, 标签
+    admin/      管理总览, 问题, 项目, 开发日志, 专栏, 用户, 标签
   assets/       全局样式与主题变量
-  utils/        格式化, 剪贴板, Markdown, 错误
+  utils/        格式化, 剪贴板, Markdown, 错误, 专栏元信息
 ```
 
 ## 登录与演示账号
@@ -98,10 +113,13 @@ Mock 环境提供两个演示账号.
 
 权限规则:
 
+- 游客只能访问 `/welcome` 与 `/login`. 其他路由统一跳转到 `/welcome`, 登录后按 `redirect` 返回目标页面.
+- `/search` 与搜索接口需要登录, 只返回当前账号可见的公开内容.
 - `/ask` 需要登录.
 - `/my/projects` 及其子路由需要登录, 成员只能编辑自己负责的项目.
+- `/my/columns` 及其子路由需要登录, 并且需要专栏写作权限. 无权限时跳转回专栏列表.
+- `/notifications` 需要登录, 只能读取当前账号的通知.
 - `/admin` 及其子路由需要管理员角色.
-- 游客投票, 收藏, 关注或回答时跳转登录页, 登录后回到原页面.
 - 管理员可以精选, 隐藏, 删除问题, 调整用户角色与状态, 创建标签, 编辑标签描述与公开状态.
 - 隐藏的问题会立即从公共列表和详情中移除.
 - 停用账号不能登录, 同时从公开用户目录隐藏.
@@ -110,6 +128,18 @@ Mock 环境提供两个演示账号.
 - 管理员审核通过项目会立即上线, 驳回时必须填写审核备注.
 - 管理员可以精选, 隐藏或删除已上线项目, 也可以关闭整个项目板块.
 - 项目板块关闭后, 公共导航与页脚入口隐藏, 项目列表和详情显示暂未开放, 成员仍可在工作台维护项目, 管理员入口保持可用.
+- 项目负责人可以新增, 编辑和删除自己项目的开发日志. 日志操作不会重置项目审核状态, 编辑已上线项目资料仍会重新审核.
+- 未上线项目的日志会先保存在工作台, 项目通过审核后随项目一起公开. 已上线项目的新日志会直接进入公开详情页时间线.
+- 管理员可以从项目管理进入开发日志管理页删除违规日志. 项目审核页保持只读.
+- 管理员可以在用户管理中授予或撤销成员的专栏写作权限. 管理员默认拥有该权限.
+- 获得权限的成员可以在我的专栏工作台创建, 编辑, 发布, 下线与删除自己的专栏. 草稿仅作者本人与管理员可见.
+- 管理员可以管理全部专栏, 设置精选, 下线或删除. 成员不能修改精选标记.
+- 管理员下线专栏后会锁定为草稿, 作者可以继续修改, 但需要管理员重新发布后才会公开.
+- 项目审核通过或驳回时, 系统会向项目负责人发送通知. 驳回通知包含审核备注.
+- 管理员开通或撤销专栏写作权限, 下线专栏时, 系统会向对应用户发送通知.
+- 自己的问题收到新回答时, 系统会向提问者发送通知. 自己回答自己的问题不会触发通知.
+- 顶部铃铛与个人菜单显示未读数. 通知页支持全部与未读筛选, 单条已读与全部已读.
+- 全站搜索覆盖问题, 项目, 专栏, 标签与开发者. 全部范围先展示分组预览, 单独范围支持分页, 标题, 简介与标签中的关键词会高亮.
 
 前端路由守卫只负责界面导航. 真实后端必须在每个管理接口上再次校验角色与账号状态.
 
@@ -121,10 +151,13 @@ Mock 环境提供两个演示账号.
 - 问题管理: 按关键词与状态筛选, 精选, 隐藏, 恢复, 删除.
 - 项目管理: 按关键词, 审核状态, 可见性与需求筛选, 精选, 隐藏, 恢复, 删除, 关闭或开启整个项目板块.
 - 项目审核: 核验封面, 详情截图, README, 成员与链接, 通过并上线或填写备注后驳回. 已通过项目只读展示审核记录.
+- 开发日志管理: 查看项目全部日志并删除违规内容, 不改变项目审核状态.
+- 专栏管理: 管理全部作者的专栏, 按关键词, 状态与难度筛选, 新建, 编辑, 发布, 下线, 精选与删除. 编辑器提供 Markdown 实时预览.
 - 待审核项目优先排在项目管理列表前部, 总览治理队列提供待审核入口.
-- 用户管理: 搜索, 按角色与状态筛选, 调整角色, 停用或恢复账号.
+- 用户管理: 搜索, 按角色与状态筛选, 调整角色, 授予或撤销专栏写作权限, 停用或恢复账号.
 - 标签管理: 搜索, 按状态筛选, 新建标签, 编辑描述, 隐藏或公开标签.
-- 当前登录管理员不能修改自己的角色或停用自己.
+- 当前登录管理员不能修改自己的角色, 状态或专栏权限.
+- 审核项目, 调整专栏权限或下线专栏时, 系统会向对应用户发送站内通知.
 - 删除问题或项目需要二次确认, 删除不可撤销.
 
 ## Mock 与 FastAPI 切换
@@ -168,23 +201,48 @@ VITE_API_BASE_URL=/api
 | GET | `/api/tags` | `Tag[]` |
 | GET | `/api/users` | `UserProfile[]` |
 | GET | `/api/users/:handle` | `UserProfile` |
+| GET | `/api/search` | `SearchResults` |
 | GET | `/api/community/overview` | `CommunityOverview` |
 | GET | `/api/projects/board` | `ProjectBoardSettings` |
 | GET | `/api/projects` | `PageResult<ProjectSummary>` |
 | GET | `/api/projects/:slug` | `ProjectDetail` |
 | GET | `/api/projects/mine` | `MyProject[]` |
 | GET | `/api/projects/mine/:id` | `ProjectEditData` |
+| GET | `/api/projects/mine/:id/updates` | `ProjectUpdatesWorkspace` |
+| POST | `/api/projects/mine/:id/updates` | `ProjectUpdate` |
+| PATCH | `/api/project-updates/mine/:updateId` | `ProjectUpdate` |
+| DELETE | `/api/project-updates/mine/:updateId` | `ProjectUpdateDeleteResult` |
 | POST | `/api/projects` | `MyProject` |
 | PATCH | `/api/projects/:id` | `MyProject` |
+| GET | `/api/columns` | `PageResult<ColumnSummary>` |
+| GET | `/api/columns/:slug` | `ColumnDetail` |
+| GET | `/api/my/columns` | `PageResult<ColumnWorkspaceItem>` |
+| GET | `/api/my/columns/:id` | `ColumnWorkspaceDetail` |
+| POST | `/api/my/columns` | `ColumnWorkspaceDetail` |
+| PUT | `/api/my/columns/:id` | `ColumnWorkspaceDetail` |
+| PATCH | `/api/my/columns/:id` | `ColumnWorkspaceItem` |
+| DELETE | `/api/my/columns/:id` | `AdminDeleteResult` |
+| GET | `/api/notifications` | `PageResult<NotificationItem>` |
+| GET | `/api/notifications/unread-count` | `NotificationUnreadCount` |
+| PATCH | `/api/notifications/:id` | `NotificationItem` |
+| POST | `/api/notifications/read-all` | `NotificationReadAllResult` |
 | GET | `/api/admin/overview` | `AdminOverview` |
 | GET | `/api/admin/questions` | `PageResult<AdminQuestion>` |
 | PATCH | `/api/admin/questions/:id` | `AdminQuestion` |
 | DELETE | `/api/admin/questions/:id` | `AdminDeleteResult` |
 | GET | `/api/admin/projects` | `AdminProjectsResult` |
 | GET | `/api/admin/projects/:id` | `AdminProjectDetail` |
+| GET | `/api/admin/projects/:id/updates` | `AdminProjectUpdatesWorkspace` |
+| DELETE | `/api/admin/project-updates/:updateId` | `ProjectUpdateDeleteResult` |
 | PATCH | `/api/admin/projects/board` | `ProjectBoardSettings` |
 | PATCH | `/api/admin/projects/:id` | `AdminProject` |
 | DELETE | `/api/admin/projects/:id` | `AdminDeleteResult` |
+| GET | `/api/admin/columns` | `PageResult<AdminColumn>` |
+| GET | `/api/admin/columns/:id` | `AdminColumnDetail` |
+| POST | `/api/admin/columns` | `AdminColumnDetail` |
+| PUT | `/api/admin/columns/:id` | `AdminColumnDetail` |
+| PATCH | `/api/admin/columns/:id` | `AdminColumn` |
+| DELETE | `/api/admin/columns/:id` | `AdminDeleteResult` |
 | GET | `/api/admin/users` | `PageResult<AdminUser>` |
 | PATCH | `/api/admin/users/:id` | `AdminUser` |
 | GET | `/api/admin/tags` | `AdminTag[]` |
@@ -199,6 +257,11 @@ VITE_API_BASE_URL=/api
 
 问题列表查询参数: `page`, `pageSize`, `sort`, `tag`, `q`.
 排序值: `newest`, `active`, `unanswered`, `votes`.
+
+全站搜索查询参数: `q`, `type`, `page`, `pageSize`.
+`type` 取值: `all`, `questions`, `projects`, `columns`, `tags`, `users`.
+`type=all` 时每个范围最多返回 4 条预览, 并保留各范围的完整计数; 指定 `type` 时按 `page` 与 `pageSize` 分页, 默认 8 条, 最大 20 条.
+搜索只包含公开内容: 隐藏问题, 未发布专栏, 隐藏标签, 停用账号以及项目板块关闭时的项目不会返回. 当前 Mock 会匹配标题, 简介, 正文, 标签, 作者信息与项目技术栈等字段.
 
 管理问题查询参数: `page`, `pageSize`, `q`, `status`.
 `status` 取值: `all`, `published`, `hidden`, `unanswered`.
@@ -228,6 +291,46 @@ VITE_API_BASE_URL=/api
 ```
 
 驳回时 `reviewNote` 至少 5 个字符. 通过时备注可选, 且默认将项目可见性设为 `published`.
+
+开发日志请求:
+
+```json
+{ "title": "完成课程表冲突检测", "body": "本周补上了跨周课程的处理, 并修复了 ..." }
+```
+
+日志标题为 4-80 个字符, 正文为 20-3000 个字符. 只有项目负责人可以调用成员端口的日志接口. 日志增删改不会调用项目审核流程, 也不会改变项目的 `reviewStatus` 或 `visibility`.
+
+专栏查询参数: `page`, `pageSize`, `q`, `level`, `tag`.
+`level` 取值: `all`, `beginner`, `intermediate`, `advanced`.
+公开接口只返回 `published` 专栏. 管理专栏查询还支持 `status`: `all`, `draft`, `published`.
+
+我的专栏接口需要登录且账号拥有专栏写作权限. 列表只返回当前账号创建的专栏. 成员创建专栏时 `featured` 会被忽略, 更新时保留管理员设置的精选状态. 成员只能通过 `PATCH` 修改 `status`. 管理员下线专栏后, 成员更新或发布时会保持草稿状态, 重新发布需要管理员操作. `AuthUser` 与 `AdminUser` 通过 `canWriteColumns` 表示专栏写作权限, 管理员恒为 `true`. 工作台专栏额外返回 `moderationLocked`, 表示专栏是否被管理员下线.
+
+通知接口需要登录, 只返回当前账号的通知. 查询参数为 `page`, `pageSize`, `filter`. `filter` 取值: `all`, `unread`. 单条已读请求为 `{ "read": true }`. 项目审核通过或驳回, 专栏权限开通或撤销, 专栏被管理员下线, 自己的问题收到新回答时会产生通知. 通知返回 `type`, `title`, `body`, `read`, `createdAt` 与 `link`.
+
+新建或更新专栏请求:
+
+```json
+{
+  "title": "Vue 3 工程化入门路径",
+  "slug": "vue3-engineering-path",
+  "summary": "按阶段梳理 Vue 3 与 TypeScript 的学习顺序.",
+  "level": "beginner",
+  "tags": ["vue3", "typescript"],
+  "body": "# Vue 3 工程化入门路径\n\n...",
+  "resources": [
+    {
+      "title": "Vue 3 官方文档",
+      "url": "https://cn.vuejs.org/guide/",
+      "description": "组合式 API 与组件通信的权威入口."
+    }
+  ],
+  "status": "published",
+  "featured": true
+}
+```
+
+专栏标题为 4-80 个字符, 摘要为 20-200 个字符, 正文为 100-20000 个字符. 标签从现有社区标签中选择 1-5 个, 资源最多 8 条, 链接必须为 http(s) 地址. 更新已发布专栏会立即生效, 转为草稿后会立即从公开列表和详情下线.
 
 成员项目提交请求:
 
@@ -297,7 +400,7 @@ curl -X POST http://127.0.0.1:8000/api/uploads/images \
 `value` 取值为 `-1`, `0`, `1`. 收藏请求为 `{ "bookmarked": true }`.
 
 管理问题更新请求支持 `{ "status": "hidden" }` 与 `{ "featured": true }`.
-管理用户更新请求支持 `{ "role": "admin" }` 与 `{ "status": "suspended" }`.
+管理用户更新请求支持 `{ "role": "admin" }`, `{ "status": "suspended" }` 与 `{ "canWriteColumns": true }`. 管理员不能修改自己的角色, 状态或专栏权限.
 新建标签请求:
 
 ```json
@@ -323,9 +426,9 @@ curl -X POST http://127.0.0.1:8000/api/uploads/images \
 
 ## 说明
 
-Mock 数据仅用于演示. 刷新页面后投票, 收藏, 新增内容与管理操作会重置. 登录状态根据 `保持登录` 设置保留在浏览器存储中.
+Mock 数据仅用于演示. 刷新页面后投票, 收藏, 新增内容, 开发日志, 专栏, 专栏权限, 通知与管理操作会重置. 登录状态根据 `保持登录` 设置保留在浏览器存储中.
 
-内置演示项目的封面位于 `public/projects/`, 使用本地 SVG, 不依赖外部图片. 默认项目封面为 `public/projects/project-default.svg`. 项目中的 GitHub 与 Demo 地址是演示占位链接. 成员上传的封面与详情截图在 Mock 中保存为 data URL, 刷新页面后恢复默认. 项目板块开关, 单个项目的隐藏状态与审核状态也只保存在当前页面内存中, 刷新后恢复默认.
+内置演示项目的封面位于 `public/projects/`, 使用本地 SVG, 不依赖外部图片. 默认项目封面为 `public/projects/project-default.svg`. 项目中的 GitHub 与 Demo 地址是演示占位链接. 成员上传的封面与详情截图在 Mock 中保存为 data URL, 刷新页面后恢复默认. 项目板块开关, 单个项目的隐藏状态, 审核状态和开发日志也只保存在当前页面内存中, 刷新后恢复默认. 专栏草稿与发布状态同样只保存在当前页面内存中.
 
 演示账号和密码仅用于 Mock 环境. 接入真实后端时请删除演示账号提示并改为服务端认证.
 

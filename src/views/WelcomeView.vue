@@ -15,13 +15,18 @@
           把具体的问题讲清楚, 把有用的答案留下来.
         </p>
         <div class="hero-actions">
-          <RouterLink class="btn btn-primary" :to="{ name: 'questions' }">
-            浏览问题
+          <RouterLink class="btn btn-primary" :to="enterTarget">
+            {{ sessionStore.isAuthenticated ? '浏览问题' : '登录进入社区' }}
             <ArrowRight :size="14" aria-hidden="true" />
           </RouterLink>
-          <RouterLink class="btn btn-secondary" :to="joinTarget">
-            {{ sessionStore.isAuthenticated ? '提出一个问题' : '登录加入' }}
+          <RouterLink
+            v-if="sessionStore.isAuthenticated"
+            class="btn btn-secondary"
+            :to="askTarget"
+          >
+            提出一个问题
           </RouterLink>
+          <a v-else class="btn btn-secondary" href="#start-title">三步开始</a>
         </div>
       </div>
 
@@ -47,7 +52,7 @@
       </div>
 
       <div class="step-grid">
-        <RouterLink class="step-card panel" :to="{ name: 'questions' }">
+        <RouterLink class="step-card panel" :to="browseTarget">
           <div class="step-top">
             <span class="step-index">01</span>
             <Search :size="16" aria-hidden="true" />
@@ -55,12 +60,12 @@
           <h3>先搜索</h3>
           <p>很多问题已经有人遇到. 先读现有讨论, 再补充新的上下文.</p>
           <span class="step-link">
-            浏览问题
+            {{ sessionStore.isAuthenticated ? '浏览问题' : '登录后浏览问题' }}
             <ArrowRight :size="12" aria-hidden="true" />
           </span>
         </RouterLink>
 
-        <RouterLink class="step-card panel" :to="joinTarget">
+        <RouterLink class="step-card panel" :to="askTarget">
           <div class="step-top">
             <span class="step-index">02</span>
             <PenLine :size="16" aria-hidden="true" />
@@ -73,7 +78,7 @@
           </span>
         </RouterLink>
 
-        <RouterLink class="step-card panel" :to="{ name: 'tags' }">
+        <RouterLink class="step-card panel" :to="tagsTarget">
           <div class="step-top">
             <span class="step-index">03</span>
             <MessageSquare :size="16" aria-hidden="true" />
@@ -81,7 +86,7 @@
           <h3>留下你的经验</h3>
           <p>不只贴最终代码. 说明为什么这样改, 以及边界在哪里.</p>
           <span class="step-link">
-            浏览标签
+            {{ sessionStore.isAuthenticated ? '浏览标签' : '登录后浏览标签' }}
             <ArrowRight :size="12" aria-hidden="true" />
           </span>
         </RouterLink>
@@ -97,7 +102,7 @@
         <RouterLink class="btn btn-primary" :to="joinTarget">
           {{ sessionStore.isAuthenticated ? '去提问' : '登录加入' }}
         </RouterLink>
-        <RouterLink class="btn btn-secondary" :to="{ name: 'users' }">
+        <RouterLink class="btn btn-secondary" :to="usersTarget">
           认识开发者
         </RouterLink>
       </div>
@@ -107,19 +112,48 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import type { RouteLocationRaw } from 'vue-router'
 import { ArrowRight, MessageSquare, PenLine, Search } from 'lucide-vue-next'
 import { useCommunityStore } from '@/stores/community'
 import { useSessionStore } from '@/stores/session'
 import { formatCompact } from '@/utils/format'
+import { resolveRedirect } from '@/utils/navigation'
 
+const route = useRoute()
 const communityStore = useCommunityStore()
 const sessionStore = useSessionStore()
 
-const joinTarget = computed<RouteLocationRaw>(() =>
+const returnTarget = computed(() => resolveRedirect(route.query.redirect))
+const loginTarget = computed<RouteLocationRaw>(() => ({
+  name: 'login',
+  query: { redirect: returnTarget.value },
+}))
+const enterTarget = computed<RouteLocationRaw>(() =>
+  sessionStore.isAuthenticated ? { name: 'questions' } : loginTarget.value,
+)
+const browseTarget = computed<RouteLocationRaw>(() =>
+  sessionStore.isAuthenticated
+    ? { name: 'questions' }
+    : { name: 'login', query: { redirect: '/' } },
+)
+const askTarget = computed<RouteLocationRaw>(() =>
   sessionStore.isAuthenticated
     ? { name: 'ask' }
     : { name: 'login', query: { redirect: '/ask' } },
+)
+const tagsTarget = computed<RouteLocationRaw>(() =>
+  sessionStore.isAuthenticated
+    ? { name: 'tags' }
+    : { name: 'login', query: { redirect: '/tags' } },
+)
+const usersTarget = computed<RouteLocationRaw>(() =>
+  sessionStore.isAuthenticated
+    ? { name: 'users' }
+    : { name: 'login', query: { redirect: '/users' } },
+)
+const joinTarget = computed<RouteLocationRaw>(() =>
+  sessionStore.isAuthenticated ? { name: 'ask' } : loginTarget.value,
 )
 
 const stats = computed(() => {

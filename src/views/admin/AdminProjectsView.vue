@@ -286,6 +286,13 @@
                   </template>
                   <template v-else>
                     <RouterLink
+                      class="admin-action log-action"
+                      :to="{ name: 'admin-project-updates', params: { id: project.id } }"
+                    >
+                      <History :size="11" />
+                      日志
+                    </RouterLink>
+                    <RouterLink
                       v-if="project.reviewStatus !== 'approved'"
                       class="admin-action review-action"
                       :to="{ name: 'admin-project-review', params: { id: project.id } }"
@@ -354,6 +361,7 @@ import {
   Eye,
   EyeOff,
   FolderGit2,
+  History,
   RefreshCw,
   Search,
   Star,
@@ -650,11 +658,15 @@ load()
 }
 
 .project-admin-table {
-  min-width: 960px;
+  min-width: 1000px;
 }
 
 .project-admin-table .admin-row-actions {
   gap: 7px;
+}
+
+.log-action {
+  font-weight: 600;
 }
 
 .project-cell {

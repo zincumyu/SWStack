@@ -133,8 +133,15 @@
             编辑
           </RouterLink>
           <RouterLink
-            v-if="canView(project)"
             class="btn btn-secondary btn-sm"
+            :to="{ name: 'my-project-updates', params: { id: project.id } }"
+          >
+            <History :size="12" />
+            开发日志
+          </RouterLink>
+          <RouterLink
+            v-if="canView(project)"
+            class="btn btn-ghost btn-sm"
             :to="{ name: 'project-detail', params: { slug: project.slug } }"
           >
             <Eye :size="12" />
@@ -148,7 +155,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { AlertTriangle, ArrowLeft, Eye, EyeOff, Pencil, Plus } from 'lucide-vue-next'
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  History,
+  Pencil,
+  Plus,
+} from 'lucide-vue-next'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ProjectReviewBadge from '@/components/projects/ProjectReviewBadge.vue'
 import ProjectStatusBadge from '@/components/projects/ProjectStatusBadge.vue'
@@ -515,6 +530,7 @@ void myStore.loadMine(true)
   .project-actions {
     width: 100%;
     flex-direction: row;
+    flex-wrap: wrap;
   }
 
   .project-actions .btn {

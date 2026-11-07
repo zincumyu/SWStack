@@ -1,7 +1,7 @@
 <template>
   <header class="site-header">
     <div class="header-inner page-container">
-      <RouterLink class="brand" to="/" aria-label="SWStack 首页">
+      <RouterLink class="brand" :to="brandTarget" aria-label="SWStack 首页">
         <span class="brand-mark" aria-hidden="true">
           <Code2 :size="19" :stroke-width="2.2" />
         </span>
@@ -9,39 +9,69 @@
       </RouterLink>
 
       <nav class="primary-nav" aria-label="主导航">
-        <RouterLink class="nav-link" :class="{ active: questionsActive }" to="/">问答</RouterLink>
+        <template v-if="sessionStore.isAuthenticated">
+          <RouterLink class="nav-link" :class="{ active: questionsActive }" to="/">问答</RouterLink>
+          <RouterLink
+            v-if="projectStore.boardEnabled"
+            class="nav-link"
+            :class="{ active: projectsActive }"
+            to="/projects"
+          >
+            项目
+          </RouterLink>
+          <RouterLink class="nav-link" :class="{ active: columnsActive }" to="/columns">
+            专栏
+          </RouterLink>
+          <RouterLink class="nav-link" :class="{ active: tagsActive }" to="/tags">标签</RouterLink>
+          <RouterLink class="nav-link" :class="{ active: usersActive }" to="/users">开发者</RouterLink>
+        </template>
         <RouterLink
-          v-if="projectStore.boardEnabled"
+          v-else
           class="nav-link"
-          :class="{ active: projectsActive }"
-          to="/projects"
+          :class="{ active: route.name === 'welcome' }"
+          to="/welcome"
         >
-          项目
+          新手指南
         </RouterLink>
-        <RouterLink class="nav-link" :class="{ active: tagsActive }" to="/tags">标签</RouterLink>
-        <RouterLink class="nav-link" :class="{ active: usersActive }" to="/users">开发者</RouterLink>
       </nav>
 
-      <form class="global-search" role="search" @submit.prevent="submitSearch">
+      <form
+        v-if="sessionStore.isAuthenticated"
+        class="global-search"
+        role="search"
+        @submit.prevent="submitSearch"
+      >
         <Search :size="15" class="search-icon" aria-hidden="true" />
         <input
           ref="searchInput"
           v-model="searchDraft"
           type="search"
-          placeholder="搜索问题"
-          aria-label="搜索问题"
+          placeholder="搜索问题, 项目, 开发者"
+          aria-label="全站搜索"
         />
         <kbd>/</kbd>
       </form>
 
       <div class="header-actions">
-        <button class="icon-button notification-button" type="button" aria-label="通知" @click="notify">
+        <RouterLink
+          v-if="sessionStore.isAuthenticated"
+          class="icon-button notification-button"
+          :to="{ name: 'notifications' }"
+          :aria-label="notificationAria"
+          :title="notificationAria"
+        >
           <Bell :size="18" />
-          <span class="notification-dot" aria-hidden="true" />
-        </button>
+          <span
+            v-if="notificationStore.unread > 0"
+            class="notification-count"
+            aria-hidden="true"
+          >
+            {{ notificationBadge }}
+          </span>
+        </RouterLink>
 
         <RouterLink
-          v-if="projectStore.boardEnabled"
+          v-if="sessionStore.isAuthenticated && projectStore.boardEnabled"
           class="icon-button mobile-project-link"
           to="/projects"
           aria-label="项目展示"
@@ -50,7 +80,22 @@
           <FolderGit2 :size="18" />
         </RouterLink>
 
-        <RouterLink class="btn btn-primary ask-button" :to="askTarget" aria-label="提问">
+        <RouterLink
+          v-if="sessionStore.isAuthenticated"
+          class="icon-button mobile-column-link"
+          to="/columns"
+          aria-label="专栏"
+          title="专栏"
+        >
+          <BookOpen :size="18" />
+        </RouterLink>
+
+        <RouterLink
+          v-if="sessionStore.isAuthenticated"
+          class="btn btn-primary ask-button"
+          :to="askTarget"
+          aria-label="提问"
+        >
           <PenLine :size="15" />
           <span class="ask-label">提问</span>
         </RouterLink>
@@ -104,6 +149,16 @@
               我的项目
             </RouterLink>
             <RouterLink
+              v-if="sessionStore.canWriteColumns && !sessionStore.isAdmin"
+              class="profile-menu-item"
+              role="menuitem"
+              :to="{ name: 'my-columns' }"
+              @click="closeProfileMenu"
+            >
+              <BookOpen :size="14" />
+              我的专栏
+            </RouterLink>
+            <RouterLink
               v-if="sessionStore.isAdmin"
               class="profile-menu-item"
               role="menuitem"
@@ -112,6 +167,22 @@
             >
               <ShieldCheck :size="14" />
               管理后台
+            </RouterLink>
+            <RouterLink
+              class="profile-menu-item"
+              role="menuitem"
+              :to="{ name: 'notifications' }"
+              @click="closeProfileMenu"
+            >
+              <Bell :size="14" />
+              通知
+              <span
+                v-if="notificationStore.unread > 0"
+                class="menu-unread"
+                aria-hidden="true"
+              >
+                {{ notificationBadge }}
+              </span>
             </RouterLink>
             <div class="profile-menu-divider" role="separator" />
             <button
@@ -149,6 +220,7 @@ import { useRoute, useRouter } from 'vue-router'
 import type { RouteLocationRaw } from 'vue-router'
 import {
   Bell,
+  BookOpen,
   ChevronDown,
   Code2,
   FolderGit2,
@@ -160,20 +232,27 @@ import {
   UserRound,
 } from 'lucide-vue-next'
 import UserAvatar from '@/components/common/UserAvatar.vue'
+import { useNotificationStore } from '@/stores/notifications'
 import { useProjectStore } from '@/stores/projects'
 import { useSessionStore } from '@/stores/session'
 import { useToastStore } from '@/stores/toast'
 import { formatCompact } from '@/utils/format'
+import { resolveRedirect } from '@/utils/navigation'
 
 const route = useRoute()
 const router = useRouter()
 const sessionStore = useSessionStore()
 const projectStore = useProjectStore()
+const notificationStore = useNotificationStore()
 const toastStore = useToastStore()
 const searchDraft = ref('')
 const searchInput = ref<HTMLInputElement | null>(null)
 const profileMenuRef = ref<HTMLElement | null>(null)
 const profileMenuOpen = ref(false)
+
+const brandTarget = computed<RouteLocationRaw>(() =>
+  sessionStore.isAuthenticated ? { name: 'questions' } : { name: 'welcome' },
+)
 
 const askTarget = computed<RouteLocationRaw>(() =>
   sessionStore.isAuthenticated
@@ -183,17 +262,38 @@ const askTarget = computed<RouteLocationRaw>(() =>
 
 const loginTarget = computed<RouteLocationRaw>(() => ({
   name: 'login',
-  query: { redirect: route.fullPath },
+  query: { redirect: resolveRedirect(route.query.redirect) },
 }))
 
 const questionsActive = computed(() =>
-  ['questions', 'search', 'question-detail'].includes(String(route.name)),
+  ['questions', 'question-detail'].includes(String(route.name)),
 )
 const projectsActive = computed(() =>
   ['projects', 'project-detail'].includes(String(route.name)),
 )
+const columnsActive = computed(() =>
+  ['columns', 'column-detail'].includes(String(route.name)),
+)
 const tagsActive = computed(() => ['tags', 'tag-detail'].includes(String(route.name)))
 const usersActive = computed(() => ['users', 'user-profile'].includes(String(route.name)))
+const notificationBadge = computed(() =>
+  notificationStore.unread > 99 ? '99+' : String(notificationStore.unread),
+)
+const notificationAria = computed(() =>
+  notificationStore.unread > 0 ? `通知, ${notificationStore.unread} 条未读` : '通知',
+)
+
+watch(
+  () => sessionStore.user?.id ?? null,
+  (userId) => {
+    if (userId) {
+      void notificationStore.refreshUnread()
+    } else {
+      notificationStore.clear()
+    }
+  },
+  { immediate: true },
+)
 
 watch(
   () => route.query.q,
@@ -207,14 +307,10 @@ function submitSearch(): void {
   const keyword = searchDraft.value.trim()
   searchInput.value?.blur()
   if (!keyword) {
-    void router.push({ name: 'questions' })
+    void router.push({ name: 'search' })
     return
   }
   void router.push({ name: 'search', query: { q: keyword } })
-}
-
-function notify(): void {
-  toastStore.info('暂时没有新的通知')
 }
 
 function closeProfileMenu(): void {
@@ -225,7 +321,7 @@ async function signOut(): Promise<void> {
   closeProfileMenu()
   await sessionStore.logout().catch(() => undefined)
   toastStore.info('已退出登录')
-  await router.push({ name: 'questions' })
+  await router.push({ name: 'welcome' })
 }
 
 function handleDocumentClick(event: MouseEvent): void {
@@ -420,15 +516,37 @@ onBeforeUnmount(() => {
   display: none;
 }
 
-.notification-dot {
+.mobile-column-link {
+  display: none;
+}
+
+.notification-count {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 6px;
-  height: 6px;
+  top: 1px;
+  right: 0;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
   border: 1px solid var(--surface);
-  border-radius: 50%;
+  border-radius: 7px;
   background: var(--brand);
+  color: #ffffff;
+  font-size: 8.5px;
+  font-weight: 600;
+  line-height: 12px;
+  text-align: center;
+}
+
+.menu-unread {
+  min-width: 16px;
+  margin-left: auto;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: var(--brand-soft);
+  color: var(--brand-hover);
+  font-size: 9px;
+  line-height: 15px;
+  text-align: center;
 }
 
 .ask-button {
@@ -609,6 +727,10 @@ onBeforeUnmount(() => {
   }
 
   .mobile-project-link {
+    display: inline-flex;
+  }
+
+  .mobile-column-link {
     display: inline-flex;
   }
 

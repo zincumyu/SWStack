@@ -24,6 +24,13 @@ const accounts: MockAccount[] = [
 
 const roleByUserId = new Map<number, UserRole>([[1, 'admin']])
 const userStatusById = new Map<number, AccountStatus>()
+const columnAccessByUserId = new Map<number, boolean>([
+  [3, true],
+  [7, true],
+  [8, true],
+  [11, true],
+  [12, true],
+])
 const questionStatusById = new Map<number, AdminQuestionStatus>()
 const tagStatusBySlug = new Map<string, AdminTagStatus>()
 
@@ -41,6 +48,14 @@ export function setUserRole(userId: number, role: UserRole): void {
 
 export function setUserStatus(userId: number, status: AccountStatus): void {
   userStatusById.set(userId, status)
+}
+
+export function getUserColumnAccess(userId: number): boolean {
+  return getUserRole(userId) === 'admin' || (columnAccessByUserId.get(userId) ?? false)
+}
+
+export function setUserColumnAccess(userId: number, allowed: boolean): void {
+  columnAccessByUserId.set(userId, allowed)
 }
 
 export function getQuestionStatus(id: number): AdminQuestionStatus {
@@ -137,7 +152,11 @@ export function clearSession(): void {
 }
 
 export function toAuthUser(user: UserSummary): AuthUser {
-  return { ...user, role: getUserRole(user.id) }
+  return {
+    ...user,
+    role: getUserRole(user.id),
+    canWriteColumns: getUserColumnAccess(user.id),
+  }
 }
 
 export function requireSessionUser(): UserSummary {
@@ -152,6 +171,14 @@ export function requireAdmin(): UserSummary {
   const user = requireSessionUser()
   if (getUserRole(user.id) !== 'admin') {
     throw new ApiError('需要管理员权限', 403)
+  }
+  return user
+}
+
+export function requireColumnWriter(): UserSummary {
+  const user = requireSessionUser()
+  if (!getUserColumnAccess(user.id)) {
+    throw new ApiError('需要专栏写作权限', 403)
   }
   return user
 }

@@ -10,12 +10,19 @@
       </div>
 
       <nav class="footer-nav" aria-label="页脚导航">
-        <RouterLink to="/">问答</RouterLink>
-        <RouterLink v-if="projectStore.boardEnabled" to="/projects">项目</RouterLink>
-        <RouterLink to="/tags">标签</RouterLink>
-        <RouterLink to="/users">开发者</RouterLink>
-        <RouterLink to="/welcome">新手指南</RouterLink>
-        <RouterLink to="/ask">提问</RouterLink>
+        <template v-if="sessionStore.isAuthenticated">
+          <RouterLink to="/">问答</RouterLink>
+          <RouterLink v-if="projectStore.boardEnabled" to="/projects">项目</RouterLink>
+          <RouterLink to="/columns">专栏</RouterLink>
+          <RouterLink to="/tags">标签</RouterLink>
+          <RouterLink to="/users">开发者</RouterLink>
+          <RouterLink to="/welcome">新手指南</RouterLink>
+          <RouterLink to="/ask">提问</RouterLink>
+        </template>
+        <template v-else>
+          <RouterLink to="/welcome">新手指南</RouterLink>
+          <RouterLink to="/login">登录</RouterLink>
+        </template>
       </nav>
 
       <div class="footer-meta">
@@ -28,9 +35,11 @@
 
 <script setup lang="ts">
 import { useProjectStore } from '@/stores/projects'
+import { useSessionStore } from '@/stores/session'
 
 const year = new Date().getFullYear()
 const projectStore = useProjectStore()
+const sessionStore = useSessionStore()
 </script>
 
 <style scoped>

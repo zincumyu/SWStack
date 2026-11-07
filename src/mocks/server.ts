@@ -1,5 +1,8 @@
 import type {
   AccountStatus,
+  AdminColumn,
+  AdminColumnDetail,
+  AdminColumnQuery,
   AdminDeleteResult,
   AdminOverview,
   AdminProject,
@@ -7,6 +10,7 @@ import type {
   AdminProjectPatch,
   AdminProjectQuery,
   AdminProjectsResult,
+  AdminProjectUpdatesWorkspace,
   AdminQuestion,
   AdminQuestionFilter,
   AdminQuestionPatch,
@@ -19,11 +23,23 @@ import type {
   Answer,
   AuthResult,
   BookmarkResult,
+  ColumnDetail,
+  ColumnInput,
+  ColumnLevel,
+  ColumnLevelFilter,
+  ColumnQuery,
+  ColumnResource,
+  ColumnStatus,
+  ColumnSummary,
   CommunityOverview,
   CreateAnswerInput,
   CreateQuestionInput,
   LoginInput,
   MyProject,
+  NotificationItem,
+  NotificationQuery,
+  NotificationReadAllResult,
+  NotificationUnreadCount,
   PageResult,
   ProjectBoardSettings,
   ProjectDetail,
@@ -35,9 +51,16 @@ import type {
   ProjectStatus,
   ProjectStatusFilter,
   ProjectSummary,
+  ProjectUpdate,
+  ProjectUpdateDeleteResult,
+  ProjectUpdateInput,
+  ProjectUpdatesWorkspace,
   QuestionDetail,
   QuestionSort,
   QuestionSummary,
+  SearchResults,
+  SearchType,
+  SearchUserResult,
   Tag,
   UploadedImage,
   UserProfile,
@@ -69,21 +92,29 @@ import {
   clearSession,
   getQuestionStatus,
   getTagStatus,
+  getUserColumnAccess,
   getUserRole,
   getUserStatus,
   persistSession,
   requireAdmin,
+  requireColumnWriter,
   requireSessionUser,
   setQuestionStatus,
   setTagStatus,
+  setUserColumnAccess,
   setUserRole,
   setUserStatus,
   toAuthUser,
 } from './admin-state'
 import {
   applyProjectInput,
+  applyProjectUpdate,
   createProjectSeed,
+  createProjectUpdate,
+  deleteProjectUpdate,
+  findProjectUpdate,
   getProjectBoardEnabled,
+  getProjectReviewStatus,
   getProjectStats,
   isProjectPublic,
   projectSeeds,
@@ -96,7 +127,32 @@ import {
   toProjectDetail,
   toProjectEditData,
   toProjectSummary,
+  toProjectUpdates,
 } from './projects'
+import {
+  createAdminColumn,
+  createMyColumn,
+  deleteAdminColumn,
+  getAdminColumn,
+  getPublicColumn,
+  isColumnSlugTaken,
+  listAdminColumns,
+  listMyColumns,
+  listPublicColumns,
+  patchAdminColumn,
+  searchPublicColumns,
+  setMyColumnStatus,
+  updateAdminColumn,
+  updateMyColumn,
+} from './columns'
+import {
+  countUnreadNotifications,
+  listNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+  notifyUser,
+  notifyUserByHandle,
+} from './notifications'
 
 const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms))
 const clone = <T>(value: T): T => structuredClone(value)
@@ -193,6 +249,18 @@ function requireProjectBoard(): void {
   }
 }
 
+function notifyColumnUnpublished(column: AdminColumn, actorId: number): void {
+  if (column.author.id === actorId) {
+    return
+  }
+  notifyUser(column.author.id, {
+    type: 'column_unpublished',
+    title: '专栏已被管理员下线',
+    body: `你的专栏 ${column.title} 已被管理员下线. 内容已保留为草稿, 需要管理员重新发布后才会公开.`,
+    link: `/my/columns/${column.id}/edit`,
+  })
+}
+
 function matchesProjectSearch(seed: ProjectRecord, keyword: string): boolean {
   if (!keyword) {
     return true
@@ -222,6 +290,9 @@ const PROJECT_STATUSES: ProjectStatus[] = [
 ]
 const PROJECT_NEEDS: ProjectNeed[] = ['feedback', 'teammates']
 const RESERVED_PROJECT_SLUGS = new Set(['board'])
+const COLUMN_LEVELS: ColumnLevel[] = ['beginner', 'intermediate', 'advanced']
+const COLUMN_STATUSES: ColumnStatus[] = ['draft', 'published']
+const COLUMN_RESOURCE_LIMIT = 8
 
 function isHttpUrl(value: string): boolean {
   try {
@@ -334,8 +405,152 @@ function readProjectInput(
   }
 }
 
+function readProjectUpdateInput(value: unknown): ProjectUpdateInput {
+  const input = (value ?? {}) as Partial<ProjectUpdateInput>
+  const title = readString(input.title)
+  const body = readString(input.body)
+  if (title.length < 4 || title.length > 80) {
+    throw new ApiError('开发日志标题需要 4-80 个字符', 422)
+  }
+  if (body.length < 20 || body.length > 3000) {
+    throw new ApiError('开发日志内容需要 20-3000 个字符', 422)
+  }
+  return { title, body }
+}
+
+function readColumnInput(value: unknown, currentId?: number): ColumnInput {
+  const input = (value ?? {}) as Partial<ColumnInput>
+  const title = readString(input.title)
+  const slug = readString(input.slug).toLowerCase()
+  const summary = readString(input.summary)
+  const body = readString(input.body)
+  const level = input.level as ColumnLevel
+  const status = input.status as ColumnStatus
+
+  if (title.length < 4 || title.length > 80) {
+    throw new ApiError('专栏标题需要 4-80 个字符', 422)
+  }
+  if (
+    !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) ||
+    slug.length < 2 ||
+    slug.length > 64
+  ) {
+    throw new ApiError('专栏地址标识只能包含小写字母, 数字和连字符', 422)
+  }
+  if (isColumnSlugTaken(slug, currentId)) {
+    throw new ApiError('这个专栏地址标识已被使用', 409)
+  }
+  if (summary.length < 20 || summary.length > 200) {
+    throw new ApiError('专栏摘要需要 20-200 个字符', 422)
+  }
+  if (body.length < 100 || body.length > 20000) {
+    throw new ApiError('专栏正文需要 100-20000 个字符', 422)
+  }
+  if (!COLUMN_LEVELS.includes(level)) {
+    throw new ApiError('无效的专栏难度', 422)
+  }
+  if (!COLUMN_STATUSES.includes(status)) {
+    throw new ApiError('无效的专栏状态', 422)
+  }
+
+  const tagSlugs = Array.from(
+    new Set(
+      Array.isArray(input.tags)
+        ? input.tags.map((item) => readString(item).toLowerCase()).filter(Boolean)
+        : [],
+    ),
+  )
+  if (tagSlugs.length < 1 || tagSlugs.length > 5) {
+    throw new ApiError('请选择 1-5 个专栏标签', 422)
+  }
+  for (const slugValue of tagSlugs) {
+    const tag = tags.find((item) => item.slug === slugValue)
+    if (!tag || getTagStatus(tag.slug) !== 'active') {
+      throw new ApiError('专栏标签不可用', 422)
+    }
+  }
+
+  const rawResources = Array.isArray(input.resources) ? input.resources : []
+  if (rawResources.length > COLUMN_RESOURCE_LIMIT) {
+    throw new ApiError(`资源链接最多 ${COLUMN_RESOURCE_LIMIT} 条`, 422)
+  }
+  const resources: ColumnResource[] = rawResources.map((item) => {
+    const resource = (item ?? {}) as Partial<ColumnResource>
+    const resourceTitle = readString(resource.title)
+    const url = readString(resource.url)
+    const description = readString(resource.description)
+    if (resourceTitle.length < 2 || resourceTitle.length > 60) {
+      throw new ApiError('资源名称需要 2-60 个字符', 422)
+    }
+    if (!isHttpUrl(url) || url.length > 400) {
+      throw new ApiError('资源链接需要是有效的 http(s) 地址', 422)
+    }
+    if (description.length > 160) {
+      throw new ApiError('资源说明不能超过 160 个字符', 422)
+    }
+    return { title: resourceTitle, url, description }
+  })
+
+  return {
+    title,
+    slug,
+    summary,
+    level,
+    tags: tagSlugs,
+    body,
+    resources,
+    status,
+    featured: input.featured === true,
+  }
+}
+
+function readColumnLevel(value: unknown): ColumnLevelFilter {
+  const level = readString(value) as ColumnLevel
+  return COLUMN_LEVELS.includes(level) ? level : 'all'
+}
+
+function requireOwnColumn(id: number, handle: string): AdminColumnDetail {
+  const column = getAdminColumn(id)
+  if (!column) {
+    throw new ApiError('没有找到这篇专栏', 404)
+  }
+  if (column.author.handle !== handle) {
+    throw new ApiError('只能管理自己的专栏', 403)
+  }
+  return column
+}
+
 function visibleTags(): Tag[] {
   return tags.filter((tag) => getTagStatus(tag.slug) === 'active')
+}
+
+const SEARCH_TYPES: SearchType[] = [
+  'all',
+  'questions',
+  'projects',
+  'columns',
+  'tags',
+  'users',
+]
+
+function readSearchType(value: unknown): SearchType {
+  const type = readString(value) as SearchType
+  return SEARCH_TYPES.includes(type) ? type : 'all'
+}
+
+function toSearchUserResult(profile: UserProfile): SearchUserResult {
+  return {
+    id: profile.id,
+    name: profile.name,
+    handle: profile.handle,
+    reputation: profile.reputation,
+    avatarColor: profile.avatarColor,
+    title: profile.title,
+    bio: profile.bio,
+    school: profile.school,
+    questionCount: profile.questionCount,
+    answerCount: profile.answerCount,
+  }
 }
 
 function toAdminQuestion(record: QuestionRecord): AdminQuestion {
@@ -365,6 +580,7 @@ function toAdminUser(profile: UserProfileSeed): AdminUser {
     title: profile.title,
     role: getUserRole(profile.id),
     status: getUserStatus(profile.id),
+    canWriteColumns: getUserColumnAccess(profile.id),
     questionCount: profile.questionCount,
     answerCount: profile.answerCount,
     joinedAt: profile.joinedAt,
@@ -580,6 +796,14 @@ const handlers = {
     }
     record.answersList.push(answer)
     record.lastActivityAt = answer.createdAt
+    if (record.author.id !== author.id) {
+      notifyUser(record.author.id, {
+        type: 'question_answered',
+        title: '你的问题收到新回答',
+        body: `${author.name} 回答了你的问题: ${record.title}.`,
+        link: `/questions/${record.id}`,
+      })
+    }
     return clone(answer)
   },
 
@@ -614,6 +838,136 @@ const handlers = {
     )
   },
 
+  async 'GET /search'(config: ApiRequestConfig): Promise<SearchResults> {
+    requireSessionUser()
+    const keyword = readString(config.params?.q)
+    const normalized = keyword.toLowerCase()
+    const type = readSearchType(config.params?.type)
+    const requestedPage = Math.max(1, Math.trunc(readNumber(config.params?.page, 1)))
+    const requestedPageSize = Math.min(
+      20,
+      Math.max(1, Math.trunc(readNumber(config.params?.pageSize, 8))),
+    )
+    const previewSize = 4
+
+    const matchedQuestions = normalized
+      ? questions
+          .filter(
+            (record) =>
+              getQuestionStatus(record.id) === 'published' &&
+              matchesSearch(record, keyword),
+          )
+          .sort((a, b) => {
+            const aTitle = a.title.toLowerCase().includes(normalized) ? 1 : 0
+            const bTitle = b.title.toLowerCase().includes(normalized) ? 1 : 0
+            return (
+              bTitle - aTitle ||
+              b.score - a.score ||
+              new Date(b.lastActivityAt).getTime() -
+                new Date(a.lastActivityAt).getTime()
+            )
+          })
+          .map(toQuestionSummary)
+      : []
+
+    const matchedProjects = normalized && getProjectBoardEnabled()
+      ? projectSeeds
+          .filter(
+            (seed) => isProjectPublic(seed) && matchesProjectSearch(seed, keyword),
+          )
+          .map(toProjectSummary)
+          .sort(
+            (a, b) =>
+              Number(b.isFeatured) - Number(a.isFeatured) ||
+              new Date(b.lastUpdatedAt).getTime() -
+                new Date(a.lastUpdatedAt).getTime(),
+          )
+      : []
+
+    const matchedColumns = normalized ? searchPublicColumns(keyword) : []
+
+    const matchedTags = normalized
+      ? visibleTags()
+          .filter((tag) =>
+            `${tag.name} ${tag.description}`.toLowerCase().includes(normalized),
+          )
+          .sort((a, b) => b.questionCount - a.questionCount)
+      : []
+
+    const matchedUsers = normalized
+      ? userProfiles
+          .filter((profile) => getUserStatus(profile.id) === 'active')
+          .map((profile) => buildUserProfile(profile.handle))
+          .filter((profile): profile is UserProfile => Boolean(profile))
+          .filter((profile) =>
+            [
+              profile.name,
+              profile.handle,
+              profile.title,
+              profile.bio,
+              profile.school,
+              ...profile.topTags.map((tag) => tag.name),
+            ]
+              .join(' ')
+              .toLowerCase()
+              .includes(normalized),
+          )
+          .sort((a, b) => b.reputation - a.reputation)
+          .map(toSearchUserResult)
+      : []
+
+    const counts = {
+      questions: matchedQuestions.length,
+      projects: matchedProjects.length,
+      columns: matchedColumns.length,
+      tags: matchedTags.length,
+      users: matchedUsers.length,
+    }
+    const allTotal = Object.values(counts).reduce((sum, value) => sum + value, 0)
+    const scopeTotal = type === 'all' ? allTotal : counts[type]
+    const pageSize = type === 'all' ? previewSize : requestedPageSize
+    const page =
+      type === 'all'
+        ? 1
+        : Math.min(requestedPage, Math.max(1, Math.ceil(scopeTotal / pageSize)))
+    const output: SearchResults = {
+      keyword,
+      type,
+      page,
+      pageSize,
+      total: scopeTotal,
+      counts,
+      questions: [],
+      projects: [],
+      columns: [],
+      tags: [],
+      users: [],
+    }
+
+    if (type === 'all') {
+      output.questions = matchedQuestions.slice(0, previewSize)
+      output.projects = matchedProjects.slice(0, previewSize)
+      output.columns = matchedColumns.slice(0, previewSize)
+      output.tags = matchedTags.slice(0, previewSize)
+      output.users = matchedUsers.slice(0, previewSize)
+    } else {
+      const start = (page - 1) * pageSize
+      if (type === 'questions') {
+        output.questions = matchedQuestions.slice(start, start + pageSize)
+      } else if (type === 'projects') {
+        output.projects = matchedProjects.slice(start, start + pageSize)
+      } else if (type === 'columns') {
+        output.columns = matchedColumns.slice(start, start + pageSize)
+      } else if (type === 'tags') {
+        output.tags = matchedTags.slice(start, start + pageSize)
+      } else {
+        output.users = matchedUsers.slice(start, start + pageSize)
+      }
+    }
+
+    return clone(output)
+  },
+
   async 'GET /users/:handle'(_config: ApiRequestConfig, handle: string): Promise<UserProfile> {
     const profile = buildUserProfile(handle)
     if (!profile || getUserStatus(profile.id) === 'suspended') {
@@ -630,6 +984,43 @@ const handlers = {
         .slice(0, 6),
       topMembers: topMembers.filter((member) => getUserStatus(member.user.id) === 'active'),
     })
+  },
+
+  async 'GET /notifications'(
+    config: ApiRequestConfig,
+  ): Promise<PageResult<NotificationItem>> {
+    const user = requireSessionUser()
+    const rawFilter = readString(config.params?.filter)
+    const query: NotificationQuery = {
+      page: readNumber(config.params?.page, 1),
+      pageSize: readNumber(config.params?.pageSize, 10),
+      filter: rawFilter === 'unread' ? 'unread' : 'all',
+    }
+    return clone(listNotifications(user.id, query))
+  },
+
+  async 'GET /notifications/unread-count'(): Promise<NotificationUnreadCount> {
+    const user = requireSessionUser()
+    return { unread: countUnreadNotifications(user.id) }
+  },
+
+  async 'PATCH /notifications/:id'(
+    config: ApiRequestConfig,
+    id: number,
+  ): Promise<NotificationItem> {
+    const user = requireSessionUser()
+    const input = (config.data ?? {}) as { read?: unknown }
+    const read = typeof input.read === 'boolean' ? input.read : true
+    const updated = markNotificationRead(user.id, id, read)
+    if (!updated) {
+      throw new ApiError('没有找到这条通知', 404)
+    }
+    return clone(updated)
+  },
+
+  async 'POST /notifications/read-all'(): Promise<NotificationReadAllResult> {
+    const user = requireSessionUser()
+    return { updated: markAllNotificationsRead(user.id) }
   },
 
   async 'GET /projects/board'(): Promise<ProjectBoardSettings> {
@@ -768,6 +1159,299 @@ const handlers = {
     return clone(toMyProject(seed))
   },
 
+  async 'GET /projects/mine/:id/updates'(
+    _config: ApiRequestConfig,
+    id: number,
+  ): Promise<ProjectUpdatesWorkspace> {
+    const user = requireSessionUser()
+    const seed = projectSeeds.find((item) => item.id === id)
+    if (!seed) {
+      throw new ApiError('没有找到这个项目', 404)
+    }
+    if (seed.ownerHandle !== user.handle) {
+      throw new ApiError('只能管理自己项目的开发日志', 403)
+    }
+    return clone({
+      project: toMyProject(seed),
+      updates: toProjectUpdates(seed),
+    })
+  },
+
+  async 'POST /projects/mine/:id/updates'(
+    config: ApiRequestConfig,
+    id: number,
+  ): Promise<ProjectUpdate> {
+    const user = requireSessionUser()
+    const seed = projectSeeds.find((item) => item.id === id)
+    if (!seed) {
+      throw new ApiError('没有找到这个项目', 404)
+    }
+    if (seed.ownerHandle !== user.handle) {
+      throw new ApiError('只能管理自己项目的开发日志', 403)
+    }
+    const input = readProjectUpdateInput(config.data)
+    return clone(createProjectUpdate(seed, input, user.handle))
+  },
+
+  async 'PATCH /project-updates/mine/:id'(
+    config: ApiRequestConfig,
+    id: number,
+  ): Promise<ProjectUpdate> {
+    const user = requireSessionUser()
+    const found = findProjectUpdate(id)
+    if (!found) {
+      throw new ApiError('没有找到这条开发日志', 404)
+    }
+    if (found.seed.ownerHandle !== user.handle) {
+      throw new ApiError('只能管理自己项目的开发日志', 403)
+    }
+    const input = readProjectUpdateInput(config.data)
+    return clone(applyProjectUpdate(found.update, input))
+  },
+
+  async 'DELETE /project-updates/mine/:id'(
+    _config: ApiRequestConfig,
+    id: number,
+  ): Promise<ProjectUpdateDeleteResult> {
+    const user = requireSessionUser()
+    const found = findProjectUpdate(id)
+    if (!found) {
+      throw new ApiError('没有找到这条开发日志', 404)
+    }
+    if (found.seed.ownerHandle !== user.handle) {
+      throw new ApiError('只能管理自己项目的开发日志', 403)
+    }
+    deleteProjectUpdate(found.seed, id)
+    return { id, deleted: true }
+  },
+
+  async 'GET /admin/projects/:id/updates'(
+    _config: ApiRequestConfig,
+    id: number,
+  ): Promise<AdminProjectUpdatesWorkspace> {
+    const seed = projectSeeds.find((item) => item.id === id)
+    if (!seed) {
+      throw new ApiError('没有找到这个项目', 404)
+    }
+    return clone({
+      project: toAdminProject(seed),
+      updates: toProjectUpdates(seed),
+    })
+  },
+
+  async 'DELETE /admin/project-updates/:id'(
+    _config: ApiRequestConfig,
+    id: number,
+  ): Promise<ProjectUpdateDeleteResult> {
+    const found = findProjectUpdate(id)
+    if (!found) {
+      throw new ApiError('没有找到这条开发日志', 404)
+    }
+    deleteProjectUpdate(found.seed, id)
+    return { id, deleted: true }
+  },
+
+  async 'GET /columns'(config: ApiRequestConfig): Promise<PageResult<ColumnSummary>> {
+    const query: ColumnQuery = {
+      page: readNumber(config.params?.page, 1),
+      pageSize: readNumber(config.params?.pageSize, 6),
+      q: readString(config.params?.q),
+      level: readColumnLevel(config.params?.level),
+      tag: readString(config.params?.tag),
+    }
+    return clone(listPublicColumns(query))
+  },
+
+  async 'GET /columns/:slug'(
+    _config: ApiRequestConfig,
+    slug: string,
+  ): Promise<ColumnDetail> {
+    const column = getPublicColumn(slug)
+    if (!column) {
+      throw new ApiError('没有找到这篇专栏', 404)
+    }
+    return clone(column)
+  },
+
+  async 'GET /my/columns'(config: ApiRequestConfig): Promise<PageResult<AdminColumn>> {
+    const user = requireColumnWriter()
+    return clone(
+      listMyColumns(user.handle, {
+        page: readNumber(config.params?.page, 1),
+        pageSize: readNumber(config.params?.pageSize, 8),
+      }),
+    )
+  },
+
+  async 'GET /my/columns/:id'(
+    _config: ApiRequestConfig,
+    id: number,
+  ): Promise<AdminColumnDetail> {
+    const user = requireColumnWriter()
+    return clone(requireOwnColumn(id, user.handle))
+  },
+
+  async 'POST /my/columns'(config: ApiRequestConfig): Promise<AdminColumnDetail> {
+    const user = requireColumnWriter()
+    const input = readColumnInput(config.data)
+    return clone(createMyColumn(input, user.handle))
+  },
+
+  async 'PUT /my/columns/:id'(
+    config: ApiRequestConfig,
+    id: number,
+  ): Promise<AdminColumnDetail> {
+    const user = requireColumnWriter()
+    const existing = requireOwnColumn(id, user.handle)
+    const input = readColumnInput(config.data, id)
+    if (existing.moderationLocked && input.status === 'published') {
+      throw new ApiError('这篇专栏已被管理员下线, 请联系管理员重新发布', 422)
+    }
+    const updated = updateMyColumn(id, input)
+    if (!updated) {
+      throw new ApiError('没有找到这篇专栏', 404)
+    }
+    return clone(updated)
+  },
+
+  async 'PATCH /my/columns/:id'(
+    config: ApiRequestConfig,
+    id: number,
+  ): Promise<AdminColumn> {
+    const user = requireColumnWriter()
+    const existing = requireOwnColumn(id, user.handle)
+    const input = (config.data ?? {}) as { status?: unknown; featured?: unknown }
+    if (input.featured !== undefined) {
+      throw new ApiError('编辑精选由管理员设置', 422)
+    }
+    const status = readString(input.status) as ColumnStatus
+    if (!COLUMN_STATUSES.includes(status)) {
+      throw new ApiError('无效的专栏状态', 422)
+    }
+    if (existing.moderationLocked && status === 'published') {
+      throw new ApiError('这篇专栏已被管理员下线, 请联系管理员重新发布', 422)
+    }
+    const updated = setMyColumnStatus(id, status)
+    if (!updated) {
+      throw new ApiError('没有找到这篇专栏', 404)
+    }
+    return clone(updated)
+  },
+
+  async 'DELETE /my/columns/:id'(
+    _config: ApiRequestConfig,
+    id: number,
+  ): Promise<AdminDeleteResult> {
+    const user = requireColumnWriter()
+    requireOwnColumn(id, user.handle)
+    if (!deleteAdminColumn(id)) {
+      throw new ApiError('没有找到这篇专栏', 404)
+    }
+    return { id, deleted: true }
+  },
+
+  async 'GET /admin/columns'(
+    config: ApiRequestConfig,
+  ): Promise<PageResult<AdminColumn>> {
+    const statusValue = readString(config.params?.status)
+    const status: 'all' | ColumnStatus =
+      statusValue === 'draft' || statusValue === 'published' ? statusValue : 'all'
+    const query: AdminColumnQuery = {
+      page: readNumber(config.params?.page, 1),
+      pageSize: readNumber(config.params?.pageSize, 10),
+      q: readString(config.params?.q),
+      level: readColumnLevel(config.params?.level),
+      status,
+    }
+    return clone(listAdminColumns(query))
+  },
+
+  async 'GET /admin/columns/:id'(
+    _config: ApiRequestConfig,
+    id: number,
+  ): Promise<AdminColumnDetail> {
+    const column = getAdminColumn(id)
+    if (!column) {
+      throw new ApiError('没有找到这篇专栏', 404)
+    }
+    return clone(column)
+  },
+
+  async 'POST /admin/columns'(
+    config: ApiRequestConfig,
+  ): Promise<AdminColumnDetail> {
+    const user = requireSessionUser()
+    const input = readColumnInput(config.data)
+    return clone(createAdminColumn(input, user.handle))
+  },
+
+  async 'PUT /admin/columns/:id'(
+    config: ApiRequestConfig,
+    id: number,
+  ): Promise<AdminColumnDetail> {
+    const admin = requireAdmin()
+    const before = getAdminColumn(id)
+    if (!before) {
+      throw new ApiError('没有找到这篇专栏', 404)
+    }
+    const input = readColumnInput(config.data, id)
+    const updated = updateAdminColumn(id, input)
+    if (!updated) {
+      throw new ApiError('没有找到这篇专栏', 404)
+    }
+    if (before.status === 'published' && updated.status === 'draft') {
+      notifyColumnUnpublished(updated, admin.id)
+    }
+    return clone(updated)
+  },
+
+  async 'PATCH /admin/columns/:id'(
+    config: ApiRequestConfig,
+    id: number,
+  ): Promise<AdminColumn> {
+    const admin = requireAdmin()
+    const before = getAdminColumn(id)
+    if (!before) {
+      throw new ApiError('没有找到这篇专栏', 404)
+    }
+    const input = (config.data ?? {}) as {
+      status?: unknown
+      featured?: unknown
+    }
+    const patch: { status?: ColumnStatus; featured?: boolean } = {}
+    if (input.status !== undefined) {
+      const status = readString(input.status) as ColumnStatus
+      if (!COLUMN_STATUSES.includes(status)) {
+        throw new ApiError('无效的专栏状态', 422)
+      }
+      patch.status = status
+    }
+    if (typeof input.featured === 'boolean') {
+      patch.featured = input.featured
+    }
+    if (patch.status === undefined && patch.featured === undefined) {
+      throw new ApiError('没有需要更新的字段', 422)
+    }
+    const updated = patchAdminColumn(id, patch)
+    if (!updated) {
+      throw new ApiError('没有找到这篇专栏', 404)
+    }
+    if (before.status === 'published' && updated.status === 'draft') {
+      notifyColumnUnpublished(updated, admin.id)
+    }
+    return clone(updated)
+  },
+
+  async 'DELETE /admin/columns/:id'(
+    _config: ApiRequestConfig,
+    id: number,
+  ): Promise<AdminDeleteResult> {
+    if (!deleteAdminColumn(id)) {
+      throw new ApiError('没有找到这篇专栏', 404)
+    }
+    return { id, deleted: true }
+  },
+
   async 'GET /admin/overview'(): Promise<AdminOverview> {
     return clone(buildAdminOverview())
   },
@@ -892,6 +1576,7 @@ const handlers = {
     const input = (config.data ?? {}) as AdminUserPatch
     const currentRole = getUserRole(id)
     const currentStatus = getUserStatus(id)
+    const previousColumnAccess = getUserColumnAccess(id)
 
     if (
       admin.id === id &&
@@ -899,6 +1584,9 @@ const handlers = {
         (input.status !== undefined && input.status !== currentStatus))
     ) {
       throw new ApiError('不能修改当前登录账号的角色或状态', 422)
+    }
+    if (admin.id === id && input.canWriteColumns !== undefined) {
+      throw new ApiError('不能修改当前登录账号的专栏权限', 422)
     }
     if (input.role !== undefined) {
       if (input.role !== 'admin' && input.role !== 'member') {
@@ -911,6 +1599,24 @@ const handlers = {
         throw new ApiError('无效的账号状态', 422)
       }
       setUserStatus(id, input.status)
+    }
+    if (input.canWriteColumns !== undefined) {
+      if (typeof input.canWriteColumns !== 'boolean') {
+        throw new ApiError('专栏权限必须为布尔值', 422)
+      }
+      setUserColumnAccess(id, input.canWriteColumns)
+    }
+
+    const nextColumnAccess = getUserColumnAccess(id)
+    if (input.canWriteColumns !== undefined && previousColumnAccess !== nextColumnAccess) {
+      notifyUser(id, {
+        type: nextColumnAccess ? 'column_access_granted' : 'column_access_revoked',
+        title: nextColumnAccess ? '专栏写作权限已开通' : '专栏写作权限已撤销',
+        body: nextColumnAccess
+          ? '管理员已为你开通专栏写作权限. 现在可以创建和维护自己的专栏.'
+          : '管理员已撤销你的专栏写作权限. 已发布的专栏仍然公开, 但暂时无法继续编辑或新建专栏.',
+        link: nextColumnAccess ? '/my/columns' : '/columns',
+      })
     }
 
     return clone(toAdminUser(profile))
@@ -1070,6 +1776,7 @@ const handlers = {
       throw new ApiError('没有找到这个项目', 404)
     }
     const input = (config.data ?? {}) as AdminProjectPatch
+    const previousReview = getProjectReviewStatus(id)
 
     if (input.visibility !== undefined) {
       if (input.visibility !== 'published' && input.visibility !== 'hidden') {
@@ -1091,6 +1798,23 @@ const handlers = {
       setProjectReview(id, input.reviewStatus, note || undefined)
       if (input.reviewStatus === 'approved' && input.visibility === undefined) {
         setProjectVisibility(id, 'published')
+      }
+      if (previousReview !== input.reviewStatus) {
+        if (input.reviewStatus === 'approved') {
+          notifyUserByHandle(seed.ownerHandle, {
+            type: 'project_approved',
+            title: '项目已通过审核',
+            body: `你的项目 ${seed.name} 已通过审核并上线.`,
+            link: `/projects/${seed.slug}`,
+          })
+        } else {
+          notifyUserByHandle(seed.ownerHandle, {
+            type: 'project_rejected',
+            title: '项目未通过审核',
+            body: `你的项目 ${seed.name} 未通过审核. 审核备注: ${note}`,
+            link: '/my/projects',
+          })
+        }
       }
     }
 
@@ -1135,6 +1859,7 @@ export async function mockRequest<T>(config: ApiRequestConfig): Promise<T> {
     key: keyof typeof handlers
     extract: (match: RegExpMatchArray) => number | string
   }> = [
+    { pattern: /^\/notifications\/(\d+)$/, key: 'PATCH /notifications/:id', extract: (m) => Number(m[1]) },
     { pattern: /^\/questions\/(\d+)\/vote$/, key: 'POST /questions/:id/vote', extract: (m) => Number(m[1]) },
     { pattern: /^\/questions\/(\d+)\/bookmark$/, key: 'POST /questions/:id/bookmark', extract: (m) => Number(m[1]) },
     { pattern: /^\/questions\/(\d+)\/answers$/, key: 'POST /questions/:id/answers', extract: (m) => Number(m[1]) },
@@ -1142,13 +1867,28 @@ export async function mockRequest<T>(config: ApiRequestConfig): Promise<T> {
     { pattern: /^\/answers\/(\d+)\/vote$/, key: 'POST /answers/:id/vote', extract: (m) => Number(m[1]) },
     { pattern: /^\/users\/([^/]+)$/, key: 'GET /users/:handle', extract: (m) => decodeURIComponent(m[1]) },
     { pattern: /^\/projects\/mine\/(\d+)$/, key: 'GET /projects/mine/:id', extract: (m) => Number(m[1]) },
+    { pattern: /^\/projects\/mine\/(\d+)\/updates$/, key: 'GET /projects/mine/:id/updates', extract: (m) => Number(m[1]) },
+    { pattern: /^\/projects\/mine\/(\d+)\/updates$/, key: 'POST /projects/mine/:id/updates', extract: (m) => Number(m[1]) },
+    { pattern: /^\/project-updates\/mine\/(\d+)$/, key: 'PATCH /project-updates/mine/:id', extract: (m) => Number(m[1]) },
+    { pattern: /^\/project-updates\/mine\/(\d+)$/, key: 'DELETE /project-updates/mine/:id', extract: (m) => Number(m[1]) },
     { pattern: /^\/projects\/(\d+)$/, key: 'PATCH /projects/:id', extract: (m) => Number(m[1]) },
     { pattern: /^\/projects\/([^/]+)$/, key: 'GET /projects/:slug', extract: (m) => decodeURIComponent(m[1]) },
+    { pattern: /^\/my\/columns\/(\d+)$/, key: 'GET /my/columns/:id', extract: (m) => Number(m[1]) },
+    { pattern: /^\/my\/columns\/(\d+)$/, key: 'PUT /my/columns/:id', extract: (m) => Number(m[1]) },
+    { pattern: /^\/my\/columns\/(\d+)$/, key: 'PATCH /my/columns/:id', extract: (m) => Number(m[1]) },
+    { pattern: /^\/my\/columns\/(\d+)$/, key: 'DELETE /my/columns/:id', extract: (m) => Number(m[1]) },
+    { pattern: /^\/columns\/([^/]+)$/, key: 'GET /columns/:slug', extract: (m) => decodeURIComponent(m[1]) },
     { pattern: /^\/admin\/questions\/(\d+)$/, key: 'PATCH /admin/questions/:id', extract: (m) => Number(m[1]) },
     { pattern: /^\/admin\/questions\/(\d+)$/, key: 'DELETE /admin/questions/:id', extract: (m) => Number(m[1]) },
+    { pattern: /^\/admin\/projects\/(\d+)\/updates$/, key: 'GET /admin/projects/:id/updates', extract: (m) => Number(m[1]) },
+    { pattern: /^\/admin\/project-updates\/(\d+)$/, key: 'DELETE /admin/project-updates/:id', extract: (m) => Number(m[1]) },
     { pattern: /^\/admin\/projects\/(\d+)$/, key: 'GET /admin/projects/:id', extract: (m) => Number(m[1]) },
     { pattern: /^\/admin\/projects\/(\d+)$/, key: 'PATCH /admin/projects/:id', extract: (m) => Number(m[1]) },
     { pattern: /^\/admin\/projects\/(\d+)$/, key: 'DELETE /admin/projects/:id', extract: (m) => Number(m[1]) },
+    { pattern: /^\/admin\/columns\/(\d+)$/, key: 'GET /admin/columns/:id', extract: (m) => Number(m[1]) },
+    { pattern: /^\/admin\/columns\/(\d+)$/, key: 'PUT /admin/columns/:id', extract: (m) => Number(m[1]) },
+    { pattern: /^\/admin\/columns\/(\d+)$/, key: 'PATCH /admin/columns/:id', extract: (m) => Number(m[1]) },
+    { pattern: /^\/admin\/columns\/(\d+)$/, key: 'DELETE /admin/columns/:id', extract: (m) => Number(m[1]) },
     { pattern: /^\/admin\/users\/(\d+)$/, key: 'PATCH /admin/users/:id', extract: (m) => Number(m[1]) },
     { pattern: /^\/admin\/tags\/([^/]+)$/, key: 'PATCH /admin/tags/:slug', extract: (m) => decodeURIComponent(m[1]) },
   ]

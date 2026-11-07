@@ -25,10 +25,12 @@
           class="question-title"
           :to="{ name: 'question-detail', params: { id: question.id } }"
         >
-          {{ question.title }}
+          <SearchHighlight :text="question.title" :keyword="keyword" />
         </RouterLink>
       </div>
-      <p class="question-excerpt">{{ question.excerpt }}</p>
+      <p class="question-excerpt">
+        <SearchHighlight :text="question.excerpt" :keyword="keyword" />
+      </p>
 
       <div class="question-meta">
         <div class="question-tags">
@@ -59,11 +61,16 @@ import { Check } from 'lucide-vue-next'
 import type { QuestionSummary } from '@/api/types'
 import TagChip from '@/components/common/TagChip.vue'
 import UserAvatar from '@/components/common/UserAvatar.vue'
+import SearchHighlight from '@/components/search/SearchHighlight.vue'
 import { formatCompact, formatRelativeTime } from '@/utils/format'
 
-defineProps<{
-  question: QuestionSummary
-}>()
+withDefaults(
+  defineProps<{
+    question: QuestionSummary
+    keyword?: string
+  }>(),
+  { keyword: '' },
+)
 </script>
 
 <style scoped>

@@ -7,6 +7,7 @@ import type {
   AdminProjectPatch,
   AdminProjectQuery,
   AdminProjectsResult,
+  AdminProjectUpdatesWorkspace,
   AdminQuestion,
   AdminQuestionPatch,
   AdminQuestionQuery,
@@ -18,6 +19,7 @@ import type {
   AdminUserQuery,
   PageResult,
   ProjectBoardSettings,
+  ProjectUpdateDeleteResult,
 } from './types'
 
 export const adminApi = {
@@ -113,6 +115,19 @@ export const adminApi = {
       url: '/admin/projects/board',
       method: 'PATCH',
       data: { enabled },
+    })
+  },
+
+  projectUpdates(id: number) {
+    return request<AdminProjectUpdatesWorkspace>({
+      url: `/admin/projects/${id}/updates`,
+    })
+  },
+
+  deleteProjectUpdate(updateId: number) {
+    return request<ProjectUpdateDeleteResult>({
+      url: `/admin/project-updates/${updateId}`,
+      method: 'DELETE',
     })
   },
 }

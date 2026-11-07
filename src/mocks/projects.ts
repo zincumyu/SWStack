@@ -12,6 +12,7 @@ import type {
   ProjectStatus,
   ProjectSummary,
   ProjectUpdate,
+  ProjectUpdateInput,
   UserSummary,
 } from '@/api/types'
 import { users } from './data'
@@ -471,6 +472,35 @@ npm run dev
   },
 ]
 
+interface ProjectUpdateRecord {
+  id: number
+  projectId: number
+  title: string
+  body: string
+  createdAt: string
+  updatedAt?: string
+  authorHandle: string
+}
+
+const updatesByProject = new Map<number, ProjectUpdateRecord[]>()
+let nextUpdateId = 1
+
+for (const seed of projectSeeds) {
+  const records = [...seed.updates]
+    .map((update) => ({
+      id: nextUpdateId++,
+      projectId: seed.id,
+      title: update.title,
+      body: update.body,
+      createdAt: daysAgo(update.daysAgo),
+      authorHandle: update.author,
+    }))
+    .sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+  updatesByProject.set(seed.id, records)
+}
+
 const visibility = new Map<number, AdminProjectVisibility>()
 const reviewStatusById = new Map<number, ProjectReviewStatus>()
 const reviewNoteById = new Map<number, string>()
@@ -560,14 +590,88 @@ export function getProjectStats(): {
 }
 
 function updateTimestamp(seed: ProjectSeed): string {
-  const latest = seed.updates.reduce(
-    (current, update) => Math.max(current, now - update.daysAgo * 86_400_000),
-    0,
-  )
+  const latest = projectUpdates(seed).reduce((current, update) => {
+    const created = new Date(update.createdAt).getTime()
+    const edited = update.updatedAt ? new Date(update.updatedAt).getTime() : 0
+    return Math.max(current, created, edited)
+  }, 0)
   const editedAt = editedAtById.get(seed.id)
   const editedTime = editedAt ? new Date(editedAt).getTime() : 0
   const latestTime = Math.max(latest, editedTime)
   return latestTime > 0 ? new Date(latestTime).toISOString() : daysAgo(seed.createdDaysAgo)
+}
+
+function projectUpdates(seed: ProjectSeed): ProjectUpdateRecord[] {
+  return updatesByProject.get(seed.id) ?? []
+}
+
+function toProjectUpdate(record: ProjectUpdateRecord): ProjectUpdate {
+  return {
+    id: record.id,
+    title: record.title,
+    body: record.body,
+    createdAt: record.createdAt,
+    updatedAt: record.updatedAt,
+    author: userByHandle(record.authorHandle),
+  }
+}
+
+export function toProjectUpdates(seed: ProjectSeed): ProjectUpdate[] {
+  return [...projectUpdates(seed)]
+    .sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+    .map(toProjectUpdate)
+}
+
+export function findProjectUpdate(updateId: number): {
+  seed: ProjectSeed
+  update: ProjectUpdateRecord
+} | null {
+  for (const seed of projectSeeds) {
+    const update = projectUpdates(seed).find((item) => item.id === updateId)
+    if (update) {
+      return { seed, update }
+    }
+  }
+  return null
+}
+
+export function createProjectUpdate(
+  seed: ProjectSeed,
+  input: ProjectUpdateInput,
+  authorHandle: string,
+): ProjectUpdate {
+  const record: ProjectUpdateRecord = {
+    id: nextUpdateId++,
+    projectId: seed.id,
+    title: input.title,
+    body: input.body,
+    createdAt: new Date().toISOString(),
+    authorHandle,
+  }
+  updatesByProject.set(seed.id, [record, ...projectUpdates(seed)])
+  return toProjectUpdate(record)
+}
+
+export function applyProjectUpdate(
+  update: ProjectUpdateRecord,
+  input: ProjectUpdateInput,
+): ProjectUpdate {
+  update.title = input.title
+  update.body = input.body
+  update.updatedAt = new Date().toISOString()
+  return toProjectUpdate(update)
+}
+
+export function deleteProjectUpdate(seed: ProjectSeed, updateId: number): boolean {
+  const records = projectUpdates(seed)
+  const next = records.filter((item) => item.id !== updateId)
+  if (next.length === records.length) {
+    return false
+  }
+  updatesByProject.set(seed.id, next)
+  return true
 }
 
 function toMembers(seed: ProjectSeed): ProjectMember[] {
@@ -576,18 +680,6 @@ function toMembers(seed: ProjectSeed): ProjectMember[] {
     role: member.role,
     isOwner: member.handle === seed.ownerHandle,
   }))
-}
-
-function toUpdates(seed: ProjectSeed): ProjectUpdate[] {
-  return [...seed.updates]
-    .sort((a, b) => a.daysAgo - b.daysAgo)
-    .map((update, index) => ({
-      id: seed.id * 100 + index + 1,
-      title: update.title,
-      body: update.body,
-      createdAt: daysAgo(update.daysAgo),
-      author: userByHandle(update.author),
-    }))
 }
 
 export function toProjectSummary(seed: ProjectSeed): ProjectSummary {
@@ -603,7 +695,7 @@ export function toProjectSummary(seed: ProjectSeed): ProjectSummary {
     owner: userByHandle(seed.ownerHandle),
     teamName: seed.teamName,
     memberCount: seed.members.length,
-    updateCount: seed.updates.length,
+    updateCount: projectUpdates(seed).length,
     lastUpdatedAt: updateTimestamp(seed),
     isFeatured: seed.isFeatured,
     githubUrl: seed.githubUrl,
@@ -617,7 +709,7 @@ export function toProjectDetail(seed: ProjectSeed): ProjectDetail {
     readme: seed.readme,
     screenshots: [...(seed.screenshots ?? [])],
     members: toMembers(seed),
-    updates: toUpdates(seed),
+    updates: toProjectUpdates(seed),
     createdAt: daysAgo(seed.createdDaysAgo),
   }
 }
@@ -711,6 +803,7 @@ export function createProjectSeed(
     updates: [],
   }
   projectSeeds.push(seed)
+  updatesByProject.set(id, [])
   markProjectSubmitted(id)
   return seed
 }

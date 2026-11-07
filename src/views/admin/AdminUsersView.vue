@@ -3,7 +3,7 @@
     <AdminPageHeader
       eyebrow="PEOPLE"
       title="用户管理"
-      description="调整社区角色与账号状态. 不能修改当前登录账号自己的权限."
+      description="调整社区角色, 账号状态与专栏写作权限. 不能修改当前登录账号自己的权限."
     >
       <template #actions>
         <button
@@ -89,11 +89,12 @@
       </div>
 
       <div v-else class="admin-table-wrap">
-        <table class="admin-table">
+        <table class="admin-table user-admin-table">
           <thead>
             <tr>
               <th>用户</th>
               <th>角色</th>
+              <th>专栏权限</th>
               <th>状态</th>
               <th>社区数据</th>
               <th>加入时间</th>
@@ -127,6 +128,30 @@
                   <option value="member">成员</option>
                   <option value="admin">管理员</option>
                 </select>
+              </td>
+              <td>
+                <span v-if="member.role === 'admin'" class="permission-state admin">
+                  管理员
+                </span>
+                <button
+                  v-else
+                  class="permission-button"
+                  :class="{ granted: member.canWriteColumns }"
+                  type="button"
+                  :disabled="member.id === currentUserId || adminStore.userBusyId === member.id"
+                  :title="
+                    member.id === currentUserId
+                      ? '不能修改当前登录账号'
+                      : member.canWriteColumns
+                        ? '撤销专栏写作权限'
+                        : '授予专栏写作权限'
+                  "
+                  @click="toggleColumnAccess(member)"
+                >
+                  <ShieldCheck v-if="member.canWriteColumns" :size="11" />
+                  <ShieldOff v-else :size="11" />
+                  {{ member.canWriteColumns ? '可写' : '只读' }}
+                </button>
               </td>
               <td>
                 <span class="admin-badge" :class="member.status">
@@ -201,7 +226,14 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { Ban, RefreshCw, RotateCcw, Search } from 'lucide-vue-next'
+import {
+  Ban,
+  RefreshCw,
+  RotateCcw,
+  Search,
+  ShieldCheck,
+  ShieldOff,
+} from 'lucide-vue-next'
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue'
 import AdminPagination from '@/components/admin/AdminPagination.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
@@ -304,6 +336,22 @@ async function changeRole(member: AdminUser, event: Event): Promise<void> {
   }
 }
 
+async function toggleColumnAccess(member: AdminUser): Promise<void> {
+  const nextAccess = !member.canWriteColumns
+  try {
+    const updated = await adminStore.updateUser(member.id, {
+      canWriteColumns: nextAccess,
+    })
+    toastStore.success(
+      updated.canWriteColumns
+        ? `${member.name} 已获得专栏写作权限`
+        : `${member.name} 的专栏写作权限已撤销`,
+    )
+  } catch (cause) {
+    toastStore.error(getErrorMessage(cause))
+  }
+}
+
 async function suspendUser(member: AdminUser): Promise<void> {
   try {
     await adminStore.updateUser(member.id, { status: 'suspended' })
@@ -389,6 +437,53 @@ void load()
 .role-select:disabled {
   background: var(--surface-subtle);
   color: var(--text-faint);
+}
+
+.user-admin-table {
+  min-width: 980px;
+}
+
+.permission-button {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 9.5px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.permission-button:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-subtle);
+}
+
+.permission-button.granted {
+  border-color: var(--brand-border);
+  background: var(--brand-soft);
+  color: var(--brand-hover);
+}
+
+.permission-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.permission-state {
+  display: inline-flex;
+  padding: 1px 5px;
+  border: 1px solid var(--brand-border);
+  border-radius: 2px;
+  background: var(--brand-soft);
+  color: var(--brand-hover);
+  font-size: 9px;
+  line-height: 1.5;
+  white-space: nowrap;
 }
 
 .user-stats {

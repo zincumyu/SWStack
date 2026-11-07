@@ -8,6 +8,10 @@ import type {
   ProjectEditData,
   ProjectQuery,
   ProjectSummary,
+  ProjectUpdate,
+  ProjectUpdateDeleteResult,
+  ProjectUpdateInput,
+  ProjectUpdatesWorkspace,
 } from './types'
 
 export const projectApi = {
@@ -49,6 +53,35 @@ export const projectApi = {
       url: `/projects/${id}`,
       method: 'PATCH',
       data: input,
+    })
+  },
+
+  updates(id: number) {
+    return request<ProjectUpdatesWorkspace>({
+      url: `/projects/mine/${id}/updates`,
+    })
+  },
+
+  createUpdate(id: number, input: ProjectUpdateInput) {
+    return request<ProjectUpdate>({
+      url: `/projects/mine/${id}/updates`,
+      method: 'POST',
+      data: input,
+    })
+  },
+
+  updateUpdate(updateId: number, input: ProjectUpdateInput) {
+    return request<ProjectUpdate>({
+      url: `/project-updates/mine/${updateId}`,
+      method: 'PATCH',
+      data: input,
+    })
+  },
+
+  deleteUpdate(updateId: number) {
+    return request<ProjectUpdateDeleteResult>({
+      url: `/project-updates/mine/${updateId}`,
+      method: 'DELETE',
     })
   },
 }

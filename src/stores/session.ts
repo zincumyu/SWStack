@@ -14,6 +14,9 @@ export const useSessionStore = defineStore('session', () => {
 
   const isAuthenticated = computed(() => Boolean(user.value))
   const isAdmin = computed(() => user.value?.role === 'admin')
+  const canWriteColumns = computed(
+    () => Boolean(user.value && (user.value.role === 'admin' || user.value.canWriteColumns)),
+  )
 
   function load(): Promise<void> {
     if (initialized.value) {
@@ -85,6 +88,7 @@ export const useSessionStore = defineStore('session', () => {
     error,
     isAuthenticated,
     isAdmin,
+    canWriteColumns,
     load,
     login,
     logout,
