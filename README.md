@@ -29,12 +29,20 @@ npm run dev
 
 ## 常用脚本
 
-| 命令                | 说明                           |
-| ------------------- | ------------------------------ |
-| `npm run dev`       | 启动开发服务器                 |
-| `npm run build`     | 类型检查并构建到 `dist/`       |
-| `npm run preview`   | 预览生产构建                   |
-| `npm run typecheck` | 只运行 Vue/TypeScript 类型检查 |
+| 命令                   | 说明                                  |
+| ---------------------- | ------------------------------------- |
+| `npm run dev`          | 启动开发服务器                        |
+| `npm run build`        | 类型检查并构建到 `dist/`              |
+| `npm run preview`      | 预览生产构建                          |
+| `npm run typecheck`    | 只运行 Vue/TypeScript 类型检查        |
+| `npm run lint`         | ESLint 检查 `src`, `tests` 与配置文件 |
+| `npm run format`       | 用 Prettier 格式化整个仓库            |
+| `npm run format:check` | 只检查格式, 不写入文件                |
+| `npm test`             | Vitest 运行 `tests/` 下的单元测试     |
+| `npm run test:watch`   | 以监听模式运行测试                    |
+
+测试基于 Vitest + jsdom, 覆盖 Pinia stores (会话初始化, 404 判定, 请求竞态),
+路由守卫, Markdown 渲染与图片校验等纯逻辑, 不依赖真实后端.
 
 构建产物位于 `dist/`. 部署到静态托管时需要将未知路径回退到 `index.html`.
 
@@ -434,14 +442,19 @@ Mock 数据仅用于演示. 刷新页面后投票, 收藏, 新增内容, 开发�
 
 ## 持续集成
 
-`.github/workflows/ci.yml` 在 push 到 `main` 和 pull request 时执行 `npm ci`, 类型检查与生产构建.
+`.github/workflows/ci.yml` 在 push 到 `main` 和 pull request 时执行 `npm ci`,
+格式检查, ESLint, 类型检查, 单元测试, 生产依赖审计与生产构建, 并在 Node 20 / 22 两个版本上跑同一组检查.
+Node 22 的构建产物会作为 `dist` artifact 上传.
 
 ## 参与贡献
 
 见 `CONTRIBUTING.md`. 提交前至少运行:
 
 ```bash
+npm run lint
+npm run format:check
 npm run typecheck
+npm test
 npm run build
 ```
 
