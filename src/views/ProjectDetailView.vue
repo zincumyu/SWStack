@@ -86,7 +86,12 @@
     <template v-else-if="project">
       <section class="project-hero panel" aria-labelledby="project-title">
         <div class="hero-cover">
-          <img :src="project.coverImage" :alt="`${project.name} 界面截图`" />
+          <img
+            :src="project.coverImage"
+            :alt="`${project.name} 界面截图`"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
 
         <div class="hero-copy">

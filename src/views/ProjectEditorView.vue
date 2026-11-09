@@ -250,7 +250,12 @@
                   :key="index"
                   class="screenshot-item"
                 >
-                  <img :src="image" :alt="`详情截图 ${index + 1}`" loading="lazy" />
+                  <img
+                    :src="image"
+                    :alt="`详情截图 ${index + 1}`"
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <button
                     class="screenshot-remove"
                     type="button"

@@ -9,7 +9,7 @@
         :aria-label="`放大第 ${index + 1} 张${label}`"
         @click="open(index)"
       >
-        <img :src="image" :alt="`${label} ${index + 1}`" loading="lazy" />
+        <img :src="image" :alt="`${label} ${index + 1}`" loading="lazy" decoding="async" />
         <span class="thumb-index">{{ String(index + 1).padStart(2, '0') }}</span>
         <span class="thumb-zoom" aria-hidden="true">
           <ZoomIn :size="12" />

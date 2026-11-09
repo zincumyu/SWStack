@@ -92,7 +92,12 @@
         <main class="review-main">
           <section class="panel project-hero" aria-labelledby="review-project-title">
             <div class="hero-cover">
-              <img :src="reviewTarget.coverImage" :alt="`${reviewTarget.name} 项目截图`" />
+              <img
+                :src="reviewTarget.coverImage"
+                :alt="`${reviewTarget.name} 项目截图`"
+                loading="lazy"
+                decoding="async"
+              />
             </div>
             <div class="hero-copy">
               <div class="hero-badges">

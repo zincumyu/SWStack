@@ -193,6 +193,7 @@
                   :src="project.coverImage"
                   :alt="`${project.name} 截图`"
                   loading="lazy"
+                  decoding="async"
                 />
                 <div class="project-cell-copy">
                   <RouterLink

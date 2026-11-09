@@ -78,7 +78,12 @@
             :to="{ name: 'project-detail', params: { slug: project.slug } }"
             :aria-label="`查看 ${project.name} 的公开页`"
           >
-            <img :src="project.coverImage" :alt="`${project.name} 项目截图`" loading="lazy" />
+            <img
+              :src="project.coverImage"
+              :alt="`${project.name} 项目截图`"
+              loading="lazy"
+              decoding="async"
+            />
           </RouterLink>
           <img v-else :src="project.coverImage" :alt="`${project.name} 项目截图`" loading="lazy" />
           <ProjectReviewBadge class="cover-review" :status="project.reviewStatus" />

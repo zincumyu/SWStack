@@ -82,7 +82,12 @@
     <template v-else>
       <section class="panel project-bar" aria-labelledby="admin-updates-project-title">
         <div class="project-cover">
-          <img :src="project.coverImage" :alt="`${project.name} 项目封面`" />
+          <img
+            :src="project.coverImage"
+            :alt="`${project.name} 项目封面`"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
         <div class="project-copy">
           <div class="project-badges">

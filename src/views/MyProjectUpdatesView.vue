@@ -88,7 +88,12 @@
     <template v-else>
       <section class="panel project-context" aria-labelledby="workspace-project-title">
         <div class="context-cover">
-          <img :src="project!.coverImage" :alt="`${project!.name} 项目封面`" />
+          <img
+            :src="project!.coverImage"
+            :alt="`${project!.name} 项目封面`"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
         <div class="context-copy">
           <div class="context-badges">
