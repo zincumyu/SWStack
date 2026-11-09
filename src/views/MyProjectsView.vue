@@ -16,9 +16,7 @@
         <h1>我的项目</h1>
         <p>维护自己的项目资料与招募需求. 每次提交后都会进入管理员审核, 通过后才会公开展示.</p>
         <span v-if="myStore.items.length" class="head-count">
-          共 {{ myStore.items.length }} 个项目{{
-            pendingCount ? `, ${pendingCount} 个待审核` : ''
-          }}
+          共 {{ myStore.items.length }} 个项目{{ pendingCount ? `, ${pendingCount} 个待审核` : '' }}
         </span>
       </div>
       <div class="head-actions">
@@ -73,11 +71,7 @@
     </div>
 
     <div v-else class="project-list">
-      <article
-        v-for="project in myStore.items"
-        :key="project.id"
-        class="my-project panel"
-      >
+      <article v-for="project in myStore.items" :key="project.id" class="my-project panel">
         <div class="project-cover">
           <RouterLink
             v-if="canView(project)"
@@ -86,12 +80,7 @@
           >
             <img :src="project.coverImage" :alt="`${project.name} 项目截图`" loading="lazy" />
           </RouterLink>
-          <img
-            v-else
-            :src="project.coverImage"
-            :alt="`${project.name} 项目截图`"
-            loading="lazy"
-          />
+          <img v-else :src="project.coverImage" :alt="`${project.name} 项目截图`" loading="lazy" />
           <ProjectReviewBadge class="cover-review" :status="project.reviewStatus" />
         </div>
 
@@ -111,10 +100,7 @@
             <span>更新于 {{ formatRelativeTime(project.updatedAt) }}</span>
           </div>
 
-          <div
-            v-if="project.reviewStatus === 'rejected' && project.reviewNote"
-            class="review-note"
-          >
+          <div v-if="project.reviewStatus === 'rejected' && project.reviewNote" class="review-note">
             <AlertTriangle :size="12" aria-hidden="true" />
             <div>
               <strong>审核备注</strong>
@@ -155,15 +141,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import {
-  AlertTriangle,
-  ArrowLeft,
-  Eye,
-  EyeOff,
-  History,
-  Pencil,
-  Plus,
-} from 'lucide-vue-next'
+import { AlertTriangle, ArrowLeft, Eye, EyeOff, History, Pencil, Plus } from 'lucide-vue-next'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ProjectReviewBadge from '@/components/projects/ProjectReviewBadge.vue'
 import ProjectStatusBadge from '@/components/projects/ProjectStatusBadge.vue'

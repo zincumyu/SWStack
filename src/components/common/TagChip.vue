@@ -31,7 +31,9 @@ withDefaults(
   color: var(--tag-text);
   font-size: 11.5px;
   line-height: 1.35;
-  transition: background-color 120ms ease, color 120ms ease;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
 }
 
 .tag-chip:hover {

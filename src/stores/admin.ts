@@ -119,10 +119,7 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
-  async function updateQuestion(
-    id: number,
-    patch: AdminQuestionPatch,
-  ): Promise<AdminQuestion> {
+  async function updateQuestion(id: number, patch: AdminQuestionPatch): Promise<AdminQuestion> {
     questionBusyId.value = id
     try {
       const updated = await adminApi.updateQuestion(id, patch)
@@ -194,8 +191,7 @@ export const useAdminStore = defineStore('admin', () => {
     try {
       const updated = await adminApi.updateUser(id, patch)
       const query = lastUserQuery.value
-      const roleMatches =
-        !query?.role || query.role === 'all' || query.role === updated.role
+      const roleMatches = !query?.role || query.role === 'all' || query.role === updated.role
       const statusMatches =
         !query?.status || query.status === 'all' || query.status === updated.status
 
@@ -343,24 +339,16 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
-  async function updateProject(
-    id: number,
-    patch: AdminProjectPatch,
-  ): Promise<AdminProject> {
+  async function updateProject(id: number, patch: AdminProjectPatch): Promise<AdminProject> {
     projectBusyId.value = id
     try {
       const updated = await adminApi.updateProject(id, patch)
       const query = lastProjectQuery.value
       const visibilityMatches =
-        !query?.visibility ||
-        query.visibility === 'all' ||
-        query.visibility === updated.visibility
+        !query?.visibility || query.visibility === 'all' || query.visibility === updated.visibility
       const reviewMatches =
-        !query?.review ||
-        query.review === 'all' ||
-        query.review === updated.reviewStatus
-      const needMatches =
-        !query?.need || query.need === 'all' || updated.needs.includes(query.need)
+        !query?.review || query.review === 'all' || query.review === updated.reviewStatus
+      const needMatches = !query?.need || query.need === 'all' || updated.needs.includes(query.need)
 
       if (visibilityMatches && reviewMatches && needMatches) {
         const index = projects.value.findIndex((item) => item.id === id)

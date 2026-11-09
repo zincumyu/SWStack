@@ -8,7 +8,8 @@
         </div>
         <h1 id="login-story-title">把问题问清楚,<br />把答案留下来.</h1>
         <p class="story-intro">
-          SWStack 连接正在写代码的校园开发者. 从一段报错开始, 找到可复现的步骤, 可验证的答案, 和愿意继续讨论的人.
+          SWStack 连接正在写代码的校园开发者. 从一段报错开始, 找到可复现的步骤, 可验证的答案,
+          和愿意继续讨论的人.
         </p>
 
         <div class="story-stats" aria-label="社区数据">

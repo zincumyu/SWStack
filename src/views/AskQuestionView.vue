@@ -37,7 +37,9 @@
               aria-describedby="title-error"
             />
             <div class="field-footer">
-              <span v-if="errors.title" id="title-error" class="field-error">{{ errors.title }}</span>
+              <span v-if="errors.title" id="title-error" class="field-error">{{
+                errors.title
+              }}</span>
               <span v-else class="field-counter">8-150 个字符</span>
               <span class="field-counter">{{ title.length }}/150</span>
             </div>

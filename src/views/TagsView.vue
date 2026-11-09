@@ -14,7 +14,12 @@
         <div class="tags-toolbar">
           <form class="tags-search" role="search" @submit.prevent>
             <Search :size="15" aria-hidden="true" />
-            <input v-model="keyword" type="search" placeholder="按名称筛选标签" aria-label="按名称筛选标签" />
+            <input
+              v-model="keyword"
+              type="search"
+              placeholder="按名称筛选标签"
+              aria-label="按名称筛选标签"
+            />
             <button
               v-if="keyword"
               class="search-clear"
@@ -28,7 +33,12 @@
           <span class="tags-total">{{ filteredTags.length }} 个标签</span>
         </div>
 
-        <div v-if="communityStore.tagsLoading" class="tags-grid" aria-busy="true" aria-label="标签加载中">
+        <div
+          v-if="communityStore.tagsLoading"
+          class="tags-grid"
+          aria-busy="true"
+          aria-label="标签加载中"
+        >
           <div v-for="index in 6" :key="index" class="tag-card tag-skeleton-wrap">
             <span class="skeleton skeleton-title" />
             <span class="skeleton skeleton-text" />
@@ -38,7 +48,11 @@
 
         <div v-else-if="communityStore.tagsError" class="panel">
           <EmptyState title="加载标签失败" :description="communityStore.tagsError">
-            <button class="btn btn-secondary btn-sm" type="button" @click="communityStore.loadTags(true)">
+            <button
+              class="btn btn-secondary btn-sm"
+              type="button"
+              @click="communityStore.loadTags(true)"
+            >
               重试
             </button>
           </EmptyState>

@@ -57,6 +57,6 @@ import { ShieldCheck } from 'lucide-vue-next'
   width: 3px;
   height: 3px;
   background: var(--brand);
-  content: "";
+  content: '';
 }
 </style>

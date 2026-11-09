@@ -42,9 +42,7 @@
           <strong>{{ formatNumber(feedStore.total) }}</strong>
           个问题
         </span>
-        <span v-if="activeFilter" class="filter-token">
-          筛选: {{ activeFilter }}
-        </span>
+        <span v-if="activeFilter" class="filter-token"> 筛选: {{ activeFilter }} </span>
         <span class="sort-hint">{{ activeSortHint }}</span>
       </div>
 
@@ -73,7 +71,9 @@
 
       <div v-else-if="feedStore.items.length === 0" class="feed-empty">
         <EmptyState :title="emptyTitle" :description="emptyDescription">
-          <RouterLink v-if="!props.tag" class="btn btn-primary btn-sm" to="/ask">提出第一个问题</RouterLink>
+          <RouterLink v-if="!props.tag" class="btn btn-primary btn-sm" to="/ask"
+            >提出第一个问题</RouterLink
+          >
         </EmptyState>
       </div>
 

@@ -12,7 +12,12 @@
         <AlertCircle v-else-if="item.tone === 'error'" :size="17" />
         <Info v-else :size="17" />
         <span class="toast-message">{{ item.message }}</span>
-        <button class="toast-close" type="button" aria-label="关闭提示" @click="toastStore.dismiss(item.id)">
+        <button
+          class="toast-close"
+          type="button"
+          aria-label="关闭提示"
+          @click="toastStore.dismiss(item.id)"
+        >
           <X :size="14" />
         </button>
       </div>
@@ -100,7 +105,9 @@ const toastStore = useToastStore()
 
 .toast-enter-active,
 .toast-leave-active {
-  transition: opacity 160ms ease, transform 160ms ease;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
 }
 
 .toast-enter-from,

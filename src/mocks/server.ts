@@ -281,13 +281,7 @@ function matchesProjectSearch(seed: ProjectRecord, keyword: string): boolean {
   return haystack.includes(keyword.toLowerCase())
 }
 
-const PROJECT_STATUSES: ProjectStatus[] = [
-  'idea',
-  'building',
-  'beta',
-  'launched',
-  'archived',
-]
+const PROJECT_STATUSES: ProjectStatus[] = ['idea', 'building', 'beta', 'launched', 'archived']
 const PROJECT_NEEDS: ProjectNeed[] = ['feedback', 'teammates']
 const RESERVED_PROJECT_SLUGS = new Set(['board'])
 const COLUMN_LEVELS: ColumnLevel[] = ['beginner', 'intermediate', 'advanced']
@@ -314,10 +308,7 @@ function readOptionalUrl(value: unknown, label: string): string | undefined {
   return url
 }
 
-function readProjectInput(
-  value: unknown,
-  currentId?: number,
-): ProjectDraftInput {
+function readProjectInput(value: unknown, currentId?: number): ProjectDraftInput {
   const input = (value ?? {}) as Partial<ProjectDraftInput>
   const name = readString(input.name)
   const slug = readString(input.slug).toLowerCase()
@@ -430,11 +421,7 @@ function readColumnInput(value: unknown, currentId?: number): ColumnInput {
   if (title.length < 4 || title.length > 80) {
     throw new ApiError('专栏标题需要 4-80 个字符', 422)
   }
-  if (
-    !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) ||
-    slug.length < 2 ||
-    slug.length > 64
-  ) {
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length < 2 || slug.length > 64) {
     throw new ApiError('专栏地址标识只能包含小写字母, 数字和连字符', 422)
   }
   if (isColumnSlugTaken(slug, currentId)) {
@@ -524,14 +511,7 @@ function visibleTags(): Tag[] {
   return tags.filter((tag) => getTagStatus(tag.slug) === 'active')
 }
 
-const SEARCH_TYPES: SearchType[] = [
-  'all',
-  'questions',
-  'projects',
-  'columns',
-  'tags',
-  'users',
-]
+const SEARCH_TYPES: SearchType[] = ['all', 'questions', 'projects', 'columns', 'tags', 'users']
 
 function readSearchType(value: unknown): SearchType {
   const type = readString(value) as SearchType
@@ -600,8 +580,7 @@ function buildAdminStats(): AdminStats {
     record.answersList.some((answer) => answer.accepted),
   ).length
   const unansweredQuestionCount = questions.filter(
-    (record) =>
-      getQuestionStatus(record.id) === 'published' && record.answersList.length === 0,
+    (record) => getQuestionStatus(record.id) === 'published' && record.answersList.length === 0,
   ).length
   const projectStats = getProjectStats()
 
@@ -610,9 +589,8 @@ function buildAdminStats(): AdminStats {
     hiddenQuestionCount,
     answerCount,
     userCount: userProfiles.length,
-    suspendedUserCount: userProfiles.filter(
-      (profile) => getUserStatus(profile.id) === 'suspended',
-    ).length,
+    suspendedUserCount: userProfiles.filter((profile) => getUserStatus(profile.id) === 'suspended')
+      .length,
     tagCount: tags.length,
     hiddenTagCount: tags.filter((tag) => getTagStatus(tag.slug) === 'hidden').length,
     ...projectStats,
@@ -625,10 +603,7 @@ function buildAdminOverview(): AdminOverview {
   return {
     stats: buildAdminStats(),
     recentQuestions: [...questions]
-      .sort(
-        (a, b) =>
-          new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime(),
-      )
+      .sort((a, b) => new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime())
       .slice(0, 5)
       .map(toAdminQuestion),
     recentUsers: [...userProfiles]
@@ -705,7 +680,9 @@ const handlers = {
     const input = (config.data ?? {}) as CreateQuestionInput
     const title = readString(input.title)
     const body = readString(input.body)
-    const requestedTags = Array.isArray(input.tags) ? input.tags.map(readString).filter(Boolean) : []
+    const requestedTags = Array.isArray(input.tags)
+      ? input.tags.map(readString).filter(Boolean)
+      : []
 
     if (title.length < 8) {
       throw new ApiError('标题至少需要 8 个字符', 422)
@@ -750,9 +727,7 @@ const handlers = {
     const record = findPublicQuestion(id)
     record.viewCount += 1
     const detail = toQuestionDetail(record)
-    detail.related = detail.related.filter(
-      (item) => getQuestionStatus(item.id) !== 'hidden',
-    )
+    detail.related = detail.related.filter((item) => getQuestionStatus(item.id) !== 'hidden')
     return clone(detail)
   },
 
@@ -765,7 +740,10 @@ const handlers = {
     return { score: record.score, viewerVote: record.viewerVote }
   },
 
-  async 'POST /questions/:id/bookmark'(config: ApiRequestConfig, id: number): Promise<BookmarkResult> {
+  async 'POST /questions/:id/bookmark'(
+    config: ApiRequestConfig,
+    id: number,
+  ): Promise<BookmarkResult> {
     requireSessionUser()
     const record = findPublicQuestion(id)
     const value = (config.data as { bookmarked?: unknown } | undefined)?.bookmarked
@@ -854,8 +832,7 @@ const handlers = {
       ? questions
           .filter(
             (record) =>
-              getQuestionStatus(record.id) === 'published' &&
-              matchesSearch(record, keyword),
+              getQuestionStatus(record.id) === 'published' && matchesSearch(record, keyword),
           )
           .sort((a, b) => {
             const aTitle = a.title.toLowerCase().includes(normalized) ? 1 : 0
@@ -863,34 +840,29 @@ const handlers = {
             return (
               bTitle - aTitle ||
               b.score - a.score ||
-              new Date(b.lastActivityAt).getTime() -
-                new Date(a.lastActivityAt).getTime()
+              new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime()
             )
           })
           .map(toQuestionSummary)
       : []
 
-    const matchedProjects = normalized && getProjectBoardEnabled()
-      ? projectSeeds
-          .filter(
-            (seed) => isProjectPublic(seed) && matchesProjectSearch(seed, keyword),
-          )
-          .map(toProjectSummary)
-          .sort(
-            (a, b) =>
-              Number(b.isFeatured) - Number(a.isFeatured) ||
-              new Date(b.lastUpdatedAt).getTime() -
-                new Date(a.lastUpdatedAt).getTime(),
-          )
-      : []
+    const matchedProjects =
+      normalized && getProjectBoardEnabled()
+        ? projectSeeds
+            .filter((seed) => isProjectPublic(seed) && matchesProjectSearch(seed, keyword))
+            .map(toProjectSummary)
+            .sort(
+              (a, b) =>
+                Number(b.isFeatured) - Number(a.isFeatured) ||
+                new Date(b.lastUpdatedAt).getTime() - new Date(a.lastUpdatedAt).getTime(),
+            )
+        : []
 
     const matchedColumns = normalized ? searchPublicColumns(keyword) : []
 
     const matchedTags = normalized
       ? visibleTags()
-          .filter((tag) =>
-            `${tag.name} ${tag.description}`.toLowerCase().includes(normalized),
-          )
+          .filter((tag) => `${tag.name} ${tag.description}`.toLowerCase().includes(normalized))
           .sort((a, b) => b.questionCount - a.questionCount)
       : []
 
@@ -927,9 +899,7 @@ const handlers = {
     const scopeTotal = type === 'all' ? allTotal : counts[type]
     const pageSize = type === 'all' ? previewSize : requestedPageSize
     const page =
-      type === 'all'
-        ? 1
-        : Math.min(requestedPage, Math.max(1, Math.ceil(scopeTotal / pageSize)))
+      type === 'all' ? 1 : Math.min(requestedPage, Math.max(1, Math.ceil(scopeTotal / pageSize)))
     const output: SearchResults = {
       keyword,
       type,
@@ -979,16 +949,12 @@ const handlers = {
   async 'GET /community/overview'(): Promise<CommunityOverview> {
     return clone({
       stats: communityStats,
-      popularTags: [...visibleTags()]
-        .sort((a, b) => b.weeklyCount - a.weeklyCount)
-        .slice(0, 6),
+      popularTags: [...visibleTags()].sort((a, b) => b.weeklyCount - a.weeklyCount).slice(0, 6),
       topMembers: topMembers.filter((member) => getUserStatus(member.user.id) === 'active'),
     })
   },
 
-  async 'GET /notifications'(
-    config: ApiRequestConfig,
-  ): Promise<PageResult<NotificationItem>> {
+  async 'GET /notifications'(config: ApiRequestConfig): Promise<PageResult<NotificationItem>> {
     const user = requireSessionUser()
     const rawFilter = readString(config.params?.filter)
     const query: NotificationQuery = {
@@ -1070,10 +1036,7 @@ const handlers = {
     }
   },
 
-  async 'GET /projects/:slug'(
-    _config: ApiRequestConfig,
-    slug: string,
-  ): Promise<ProjectDetail> {
+  async 'GET /projects/:slug'(_config: ApiRequestConfig, slug: string): Promise<ProjectDetail> {
     requireProjectBoard()
     const seed = projectSeeds.find((item) => item.slug === slug)
     if (!seed || !isProjectPublic(seed)) {
@@ -1088,17 +1051,11 @@ const handlers = {
       projectSeeds
         .filter((seed) => seed.ownerHandle === user.handle)
         .map(toMyProject)
-        .sort(
-          (a, b) =>
-            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-        ),
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
     )
   },
 
-  async 'GET /projects/mine/:id'(
-    _config: ApiRequestConfig,
-    id: number,
-  ): Promise<ProjectEditData> {
+  async 'GET /projects/mine/:id'(_config: ApiRequestConfig, id: number): Promise<ProjectEditData> {
     const user = requireSessionUser()
     const seed = projectSeeds.find((item) => item.id === id)
     if (!seed) {
@@ -1117,9 +1074,7 @@ const handlers = {
     return clone(toMyProject(seed))
   },
 
-  async 'POST /uploads/images'(
-    config: ApiRequestConfig,
-  ): Promise<UploadedImage> {
+  async 'POST /uploads/images'(config: ApiRequestConfig): Promise<UploadedImage> {
     requireSessionUser()
     const form = config.data
     if (!(form instanceof FormData)) {
@@ -1142,10 +1097,7 @@ const handlers = {
     }
   },
 
-  async 'PATCH /projects/:id'(
-    config: ApiRequestConfig,
-    id: number,
-  ): Promise<MyProject> {
+  async 'PATCH /projects/:id'(config: ApiRequestConfig, id: number): Promise<MyProject> {
     const user = requireSessionUser()
     const seed = projectSeeds.find((item) => item.id === id)
     if (!seed) {
@@ -1262,10 +1214,7 @@ const handlers = {
     return clone(listPublicColumns(query))
   },
 
-  async 'GET /columns/:slug'(
-    _config: ApiRequestConfig,
-    slug: string,
-  ): Promise<ColumnDetail> {
+  async 'GET /columns/:slug'(_config: ApiRequestConfig, slug: string): Promise<ColumnDetail> {
     const column = getPublicColumn(slug)
     if (!column) {
       throw new ApiError('没有找到这篇专栏', 404)
@@ -1283,10 +1232,7 @@ const handlers = {
     )
   },
 
-  async 'GET /my/columns/:id'(
-    _config: ApiRequestConfig,
-    id: number,
-  ): Promise<AdminColumnDetail> {
+  async 'GET /my/columns/:id'(_config: ApiRequestConfig, id: number): Promise<AdminColumnDetail> {
     const user = requireColumnWriter()
     return clone(requireOwnColumn(id, user.handle))
   },
@@ -1297,10 +1243,7 @@ const handlers = {
     return clone(createMyColumn(input, user.handle))
   },
 
-  async 'PUT /my/columns/:id'(
-    config: ApiRequestConfig,
-    id: number,
-  ): Promise<AdminColumnDetail> {
+  async 'PUT /my/columns/:id'(config: ApiRequestConfig, id: number): Promise<AdminColumnDetail> {
     const user = requireColumnWriter()
     const existing = requireOwnColumn(id, user.handle)
     const input = readColumnInput(config.data, id)
@@ -1314,10 +1257,7 @@ const handlers = {
     return clone(updated)
   },
 
-  async 'PATCH /my/columns/:id'(
-    config: ApiRequestConfig,
-    id: number,
-  ): Promise<AdminColumn> {
+  async 'PATCH /my/columns/:id'(config: ApiRequestConfig, id: number): Promise<AdminColumn> {
     const user = requireColumnWriter()
     const existing = requireOwnColumn(id, user.handle)
     const input = (config.data ?? {}) as { status?: unknown; featured?: unknown }
@@ -1350,9 +1290,7 @@ const handlers = {
     return { id, deleted: true }
   },
 
-  async 'GET /admin/columns'(
-    config: ApiRequestConfig,
-  ): Promise<PageResult<AdminColumn>> {
+  async 'GET /admin/columns'(config: ApiRequestConfig): Promise<PageResult<AdminColumn>> {
     const statusValue = readString(config.params?.status)
     const status: 'all' | ColumnStatus =
       statusValue === 'draft' || statusValue === 'published' ? statusValue : 'all'
@@ -1377,18 +1315,13 @@ const handlers = {
     return clone(column)
   },
 
-  async 'POST /admin/columns'(
-    config: ApiRequestConfig,
-  ): Promise<AdminColumnDetail> {
+  async 'POST /admin/columns'(config: ApiRequestConfig): Promise<AdminColumnDetail> {
     const user = requireSessionUser()
     const input = readColumnInput(config.data)
     return clone(createAdminColumn(input, user.handle))
   },
 
-  async 'PUT /admin/columns/:id'(
-    config: ApiRequestConfig,
-    id: number,
-  ): Promise<AdminColumnDetail> {
+  async 'PUT /admin/columns/:id'(config: ApiRequestConfig, id: number): Promise<AdminColumnDetail> {
     const admin = requireAdmin()
     const before = getAdminColumn(id)
     if (!before) {
@@ -1405,10 +1338,7 @@ const handlers = {
     return clone(updated)
   },
 
-  async 'PATCH /admin/columns/:id'(
-    config: ApiRequestConfig,
-    id: number,
-  ): Promise<AdminColumn> {
+  async 'PATCH /admin/columns/:id'(config: ApiRequestConfig, id: number): Promise<AdminColumn> {
     const admin = requireAdmin()
     const before = getAdminColumn(id)
     if (!before) {
@@ -1462,9 +1392,7 @@ const handlers = {
     const keyword = readString(config.params?.q).toLowerCase()
     const rawStatus = readString(config.params?.status)
     const status: AdminQuestionFilter =
-      rawStatus === 'hidden' ||
-      rawStatus === 'published' ||
-      rawStatus === 'unanswered'
+      rawStatus === 'hidden' || rawStatus === 'published' || rawStatus === 'unanswered'
         ? rawStatus
         : 'all'
 
@@ -1487,8 +1415,7 @@ const handlers = {
     })
 
     const sorted = [...filtered].sort(
-      (a, b) =>
-        new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime(),
+      (a, b) => new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime(),
     )
     const total = sorted.length
     const start = (page - 1) * pageSize
@@ -1500,10 +1427,7 @@ const handlers = {
     }
   },
 
-  async 'PATCH /admin/questions/:id'(
-    config: ApiRequestConfig,
-    id: number,
-  ): Promise<AdminQuestion> {
+  async 'PATCH /admin/questions/:id'(config: ApiRequestConfig, id: number): Promise<AdminQuestion> {
     const record = findQuestion(id)
     const input = (config.data ?? {}) as AdminQuestionPatch
 
@@ -1538,17 +1462,14 @@ const handlers = {
     const keyword = readString(config.params?.q).toLowerCase()
     const rawRole = readString(config.params?.role)
     const rawStatus = readString(config.params?.status)
-    const role: 'all' | UserRole =
-      rawRole === 'admin' || rawRole === 'member' ? rawRole : 'all'
+    const role: 'all' | UserRole = rawRole === 'admin' || rawRole === 'member' ? rawRole : 'all'
     const status: 'all' | AccountStatus =
       rawStatus === 'active' || rawStatus === 'suspended' ? rawStatus : 'all'
 
     const filtered = userProfiles
       .map(toAdminUser)
       .filter((user) => {
-        const haystack = [user.name, user.handle, user.email, user.title]
-          .join(' ')
-          .toLowerCase()
+        const haystack = [user.name, user.handle, user.email, user.title].join(' ').toLowerCase()
         return (
           (role === 'all' || user.role === role) &&
           (status === 'all' || user.status === status) &&
@@ -1567,10 +1488,7 @@ const handlers = {
     }
   },
 
-  async 'PATCH /admin/users/:id'(
-    config: ApiRequestConfig,
-    id: number,
-  ): Promise<AdminUser> {
+  async 'PATCH /admin/users/:id'(config: ApiRequestConfig, id: number): Promise<AdminUser> {
     const admin = requireAdmin()
     const profile = findUserProfile(id)
     const input = (config.data ?? {}) as AdminUserPatch
@@ -1662,10 +1580,7 @@ const handlers = {
     return clone(toAdminTag(tag))
   },
 
-  async 'PATCH /admin/tags/:slug'(
-    config: ApiRequestConfig,
-    slug: string,
-  ): Promise<AdminTag> {
+  async 'PATCH /admin/tags/:slug'(config: ApiRequestConfig, slug: string): Promise<AdminTag> {
     const tag = tags.find((item) => item.slug === slug)
     if (!tag) {
       throw new ApiError('没有找到这个标签', 404)
@@ -1695,13 +1610,9 @@ const handlers = {
     const pageSize = Math.min(50, Math.max(1, readNumber(query.pageSize, 10)))
     const keyword = readString(query.q).toLowerCase()
     const visibility: 'all' | 'published' | 'hidden' =
-      query.visibility === 'published' || query.visibility === 'hidden'
-        ? query.visibility
-        : 'all'
+      query.visibility === 'published' || query.visibility === 'hidden' ? query.visibility : 'all'
     const review: 'all' | ProjectReviewStatus =
-      query.review === 'pending' ||
-      query.review === 'approved' ||
-      query.review === 'rejected'
+      query.review === 'pending' || query.review === 'approved' || query.review === 'rejected'
         ? query.review
         : 'all'
     const need: 'all' | 'feedback' | 'teammates' =
@@ -1756,9 +1667,7 @@ const handlers = {
     return clone(toAdminProjectDetail(seed))
   },
 
-  async 'PATCH /admin/projects/board'(
-    config: ApiRequestConfig,
-  ): Promise<ProjectBoardSettings> {
+  async 'PATCH /admin/projects/board'(config: ApiRequestConfig): Promise<ProjectBoardSettings> {
     const input = (config.data ?? {}) as { enabled?: unknown }
     if (typeof input.enabled !== 'boolean') {
       throw new ApiError('无效的板块状态', 422)
@@ -1767,10 +1676,7 @@ const handlers = {
     return { enabled: input.enabled }
   },
 
-  async 'PATCH /admin/projects/:id'(
-    config: ApiRequestConfig,
-    id: number,
-  ): Promise<AdminProject> {
+  async 'PATCH /admin/projects/:id'(config: ApiRequestConfig, id: number): Promise<AdminProject> {
     const seed = projectSeeds.find((item) => item.id === id)
     if (!seed) {
       throw new ApiError('没有找到这个项目', 404)
@@ -1859,38 +1765,150 @@ export async function mockRequest<T>(config: ApiRequestConfig): Promise<T> {
     key: keyof typeof handlers
     extract: (match: RegExpMatchArray) => number | string
   }> = [
-    { pattern: /^\/notifications\/(\d+)$/, key: 'PATCH /notifications/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/questions\/(\d+)\/vote$/, key: 'POST /questions/:id/vote', extract: (m) => Number(m[1]) },
-    { pattern: /^\/questions\/(\d+)\/bookmark$/, key: 'POST /questions/:id/bookmark', extract: (m) => Number(m[1]) },
-    { pattern: /^\/questions\/(\d+)\/answers$/, key: 'POST /questions/:id/answers', extract: (m) => Number(m[1]) },
+    {
+      pattern: /^\/notifications\/(\d+)$/,
+      key: 'PATCH /notifications/:id',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/questions\/(\d+)\/vote$/,
+      key: 'POST /questions/:id/vote',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/questions\/(\d+)\/bookmark$/,
+      key: 'POST /questions/:id/bookmark',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/questions\/(\d+)\/answers$/,
+      key: 'POST /questions/:id/answers',
+      extract: (m) => Number(m[1]),
+    },
     { pattern: /^\/questions\/(\d+)$/, key: 'GET /questions/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/answers\/(\d+)\/vote$/, key: 'POST /answers/:id/vote', extract: (m) => Number(m[1]) },
-    { pattern: /^\/users\/([^/]+)$/, key: 'GET /users/:handle', extract: (m) => decodeURIComponent(m[1]) },
-    { pattern: /^\/projects\/mine\/(\d+)$/, key: 'GET /projects/mine/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/projects\/mine\/(\d+)\/updates$/, key: 'GET /projects/mine/:id/updates', extract: (m) => Number(m[1]) },
-    { pattern: /^\/projects\/mine\/(\d+)\/updates$/, key: 'POST /projects/mine/:id/updates', extract: (m) => Number(m[1]) },
-    { pattern: /^\/project-updates\/mine\/(\d+)$/, key: 'PATCH /project-updates/mine/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/project-updates\/mine\/(\d+)$/, key: 'DELETE /project-updates/mine/:id', extract: (m) => Number(m[1]) },
+    {
+      pattern: /^\/answers\/(\d+)\/vote$/,
+      key: 'POST /answers/:id/vote',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/users\/([^/]+)$/,
+      key: 'GET /users/:handle',
+      extract: (m) => decodeURIComponent(m[1]),
+    },
+    {
+      pattern: /^\/projects\/mine\/(\d+)$/,
+      key: 'GET /projects/mine/:id',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/projects\/mine\/(\d+)\/updates$/,
+      key: 'GET /projects/mine/:id/updates',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/projects\/mine\/(\d+)\/updates$/,
+      key: 'POST /projects/mine/:id/updates',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/project-updates\/mine\/(\d+)$/,
+      key: 'PATCH /project-updates/mine/:id',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/project-updates\/mine\/(\d+)$/,
+      key: 'DELETE /project-updates/mine/:id',
+      extract: (m) => Number(m[1]),
+    },
     { pattern: /^\/projects\/(\d+)$/, key: 'PATCH /projects/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/projects\/([^/]+)$/, key: 'GET /projects/:slug', extract: (m) => decodeURIComponent(m[1]) },
+    {
+      pattern: /^\/projects\/([^/]+)$/,
+      key: 'GET /projects/:slug',
+      extract: (m) => decodeURIComponent(m[1]),
+    },
     { pattern: /^\/my\/columns\/(\d+)$/, key: 'GET /my/columns/:id', extract: (m) => Number(m[1]) },
     { pattern: /^\/my\/columns\/(\d+)$/, key: 'PUT /my/columns/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/my\/columns\/(\d+)$/, key: 'PATCH /my/columns/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/my\/columns\/(\d+)$/, key: 'DELETE /my/columns/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/columns\/([^/]+)$/, key: 'GET /columns/:slug', extract: (m) => decodeURIComponent(m[1]) },
-    { pattern: /^\/admin\/questions\/(\d+)$/, key: 'PATCH /admin/questions/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/admin\/questions\/(\d+)$/, key: 'DELETE /admin/questions/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/admin\/projects\/(\d+)\/updates$/, key: 'GET /admin/projects/:id/updates', extract: (m) => Number(m[1]) },
-    { pattern: /^\/admin\/project-updates\/(\d+)$/, key: 'DELETE /admin/project-updates/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/admin\/projects\/(\d+)$/, key: 'GET /admin/projects/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/admin\/projects\/(\d+)$/, key: 'PATCH /admin/projects/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/admin\/projects\/(\d+)$/, key: 'DELETE /admin/projects/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/admin\/columns\/(\d+)$/, key: 'GET /admin/columns/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/admin\/columns\/(\d+)$/, key: 'PUT /admin/columns/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/admin\/columns\/(\d+)$/, key: 'PATCH /admin/columns/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/admin\/columns\/(\d+)$/, key: 'DELETE /admin/columns/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/admin\/users\/(\d+)$/, key: 'PATCH /admin/users/:id', extract: (m) => Number(m[1]) },
-    { pattern: /^\/admin\/tags\/([^/]+)$/, key: 'PATCH /admin/tags/:slug', extract: (m) => decodeURIComponent(m[1]) },
+    {
+      pattern: /^\/my\/columns\/(\d+)$/,
+      key: 'PATCH /my/columns/:id',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/my\/columns\/(\d+)$/,
+      key: 'DELETE /my/columns/:id',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/columns\/([^/]+)$/,
+      key: 'GET /columns/:slug',
+      extract: (m) => decodeURIComponent(m[1]),
+    },
+    {
+      pattern: /^\/admin\/questions\/(\d+)$/,
+      key: 'PATCH /admin/questions/:id',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/admin\/questions\/(\d+)$/,
+      key: 'DELETE /admin/questions/:id',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/admin\/projects\/(\d+)\/updates$/,
+      key: 'GET /admin/projects/:id/updates',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/admin\/project-updates\/(\d+)$/,
+      key: 'DELETE /admin/project-updates/:id',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/admin\/projects\/(\d+)$/,
+      key: 'GET /admin/projects/:id',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/admin\/projects\/(\d+)$/,
+      key: 'PATCH /admin/projects/:id',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/admin\/projects\/(\d+)$/,
+      key: 'DELETE /admin/projects/:id',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/admin\/columns\/(\d+)$/,
+      key: 'GET /admin/columns/:id',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/admin\/columns\/(\d+)$/,
+      key: 'PUT /admin/columns/:id',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/admin\/columns\/(\d+)$/,
+      key: 'PATCH /admin/columns/:id',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/admin\/columns\/(\d+)$/,
+      key: 'DELETE /admin/columns/:id',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/admin\/users\/(\d+)$/,
+      key: 'PATCH /admin/users/:id',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/admin\/tags\/([^/]+)$/,
+      key: 'PATCH /admin/tags/:slug',
+      extract: (m) => decodeURIComponent(m[1]),
+    },
   ]
 
   for (const rule of rules) {

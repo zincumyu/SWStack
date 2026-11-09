@@ -11,9 +11,7 @@ import ColumnEditorForm from '@/components/columns/ColumnEditorForm.vue'
 
 const route = useRoute()
 
-const columnId = computed(() =>
-  route.name === 'my-column-edit' ? Number(route.params.id) : null,
-)
+const columnId = computed(() => (route.name === 'my-column-edit' ? Number(route.params.id) : null))
 </script>
 
 <style scoped>

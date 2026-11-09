@@ -50,12 +50,7 @@
           <option value="suspended">已停用</option>
         </select>
         <button class="btn btn-secondary btn-sm" type="submit">筛选</button>
-        <button
-          v-if="hasFilters"
-          class="btn btn-ghost btn-sm"
-          type="button"
-          @click="clearFilters"
-        >
+        <button v-if="hasFilters" class="btn btn-ghost btn-sm" type="button" @click="clearFilters">
           重置
         </button>
         <span class="admin-counter">{{ adminStore.userTotal }} 位用户</span>
@@ -84,9 +79,7 @@
         </EmptyState>
       </div>
 
-      <div v-else-if="adminStore.users.length === 0" class="admin-empty">
-        没有符合条件的用户.
-      </div>
+      <div v-else-if="adminStore.users.length === 0" class="admin-empty">没有符合条件的用户.</div>
 
       <div v-else class="admin-table-wrap">
         <table class="admin-table user-admin-table">
@@ -130,9 +123,7 @@
                 </select>
               </td>
               <td>
-                <span v-if="member.role === 'admin'" class="permission-state admin">
-                  管理员
-                </span>
+                <span v-if="member.role === 'admin'" class="permission-state admin"> 管理员 </span>
                 <button
                   v-else
                   class="permission-button"
@@ -160,9 +151,15 @@
               </td>
               <td>
                 <div class="user-stats">
-                  <span><strong>{{ formatCompact(member.reputation) }}</strong> 声望</span>
-                  <span><strong>{{ member.questionCount }}</strong> 提问</span>
-                  <span><strong>{{ member.answerCount }}</strong> 回答</span>
+                  <span
+                    ><strong>{{ formatCompact(member.reputation) }}</strong> 声望</span
+                  >
+                  <span
+                    ><strong>{{ member.questionCount }}</strong> 提问</span
+                  >
+                  <span
+                    ><strong>{{ member.answerCount }}</strong> 回答</span
+                  >
                 </div>
               </td>
               <td class="joined-cell">{{ formatShortDate(member.joinedAt) }}</td>
@@ -226,14 +223,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import {
-  Ban,
-  RefreshCw,
-  RotateCcw,
-  Search,
-  ShieldCheck,
-  ShieldOff,
-} from 'lucide-vue-next'
+import { Ban, RefreshCw, RotateCcw, Search, ShieldCheck, ShieldOff } from 'lucide-vue-next'
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue'
 import AdminPagination from '@/components/admin/AdminPagination.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
@@ -260,9 +250,7 @@ const pendingStatusId = ref<number | null>(null)
 const currentUserId = computed(() => sessionStore.user?.id ?? null)
 const hasFilters = computed(
   () =>
-    Boolean(searchDraft.value.trim()) ||
-    roleFilter.value !== 'all' ||
-    statusFilter.value !== 'all',
+    Boolean(searchDraft.value.trim()) || roleFilter.value !== 'all' || statusFilter.value !== 'all',
 )
 
 function readRole(value: unknown): 'all' | UserRole {

@@ -1,9 +1,4 @@
-import type {
-  NotificationItem,
-  NotificationQuery,
-  NotificationType,
-  PageResult,
-} from '@/api/types'
+import type { NotificationItem, NotificationQuery, NotificationType, PageResult } from '@/api/types'
 import { users } from './data'
 
 export interface NotificationDraft {
@@ -109,10 +104,7 @@ export function userIdByHandle(handle: string): number | null {
   return users.find((user) => user.handle === handle)?.id ?? null
 }
 
-export function notifyUser(
-  userId: number,
-  draft: NotificationDraft,
-): NotificationItem | null {
+export function notifyUser(userId: number, draft: NotificationDraft): NotificationItem | null {
   if (!users.some((user) => user.id === userId)) {
     return null
   }

@@ -19,13 +19,17 @@
 
     <div v-else-if="communityStore.overviewError && !communityStore.stats" class="overview-error">
       <p>{{ communityStore.overviewError }}</p>
-      <button class="text-link" type="button" @click="communityStore.loadOverview(true)">重新加载</button>
+      <button class="text-link" type="button" @click="communityStore.loadOverview(true)">
+        重新加载
+      </button>
     </div>
 
     <template v-else-if="communityStore.stats">
       <div class="overview-grid">
         <div class="overview-stat">
-          <span class="overview-value">{{ formatCompact(communityStore.stats.questionCount) }}</span>
+          <span class="overview-value">{{
+            formatCompact(communityStore.stats.questionCount)
+          }}</span>
           <span class="overview-label">问题</span>
         </div>
         <div class="overview-stat">
@@ -33,7 +37,9 @@
           <span class="overview-label">回答</span>
         </div>
         <div class="overview-stat">
-          <span class="overview-value">{{ formatCompact(communityStore.stats.developerCount) }}</span>
+          <span class="overview-value">{{
+            formatCompact(communityStore.stats.developerCount)
+          }}</span>
           <span class="overview-label">开发者</span>
         </div>
         <div class="overview-stat">

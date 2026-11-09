@@ -28,7 +28,12 @@
           <h2 id="create-tag-title">新建标签</h2>
           <p>标签标识用于 URL, 创建后保持不变.</p>
         </div>
-        <button class="icon-button" type="button" aria-label="关闭新建标签" @click="closeCreateForm">
+        <button
+          class="icon-button"
+          type="button"
+          aria-label="关闭新建标签"
+          @click="closeCreateForm"
+        >
           <X :size="15" />
         </button>
       </div>
@@ -104,21 +109,12 @@
             aria-label="搜索标签"
           />
         </label>
-        <select
-          v-model="statusFilter"
-          class="admin-select"
-          aria-label="按标签状态筛选"
-        >
+        <select v-model="statusFilter" class="admin-select" aria-label="按标签状态筛选">
           <option value="all">全部状态</option>
           <option value="active">公开</option>
           <option value="hidden">已隐藏</option>
         </select>
-        <button
-          v-if="hasFilters"
-          class="btn btn-ghost btn-sm"
-          type="button"
-          @click="clearFilters"
-        >
+        <button v-if="hasFilters" class="btn btn-ghost btn-sm" type="button" @click="clearFilters">
           重置
         </button>
         <span class="admin-counter">{{ filteredTags.length }} 个标签</span>
@@ -145,9 +141,7 @@
         </EmptyState>
       </div>
 
-      <div v-else-if="filteredTags.length === 0" class="admin-empty">
-        没有符合条件的标签.
-      </div>
+      <div v-else-if="filteredTags.length === 0" class="admin-empty">没有符合条件的标签.</div>
 
       <div v-else class="admin-table-wrap">
         <table class="admin-table tag-table">
@@ -238,16 +232,7 @@
 <script setup lang="ts">
 import { computed, nextTick, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import {
-  AlertCircle,
-  Eye,
-  EyeOff,
-  Pencil,
-  Plus,
-  RefreshCw,
-  Search,
-  X,
-} from 'lucide-vue-next'
+import { AlertCircle, Eye, EyeOff, Pencil, Plus, RefreshCw, Search, X } from 'lucide-vue-next'
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import type { AdminTag, AdminTagStatus } from '@/api/types'
@@ -291,9 +276,7 @@ const filteredTags = computed(() => {
   })
 })
 
-const hasFilters = computed(
-  () => Boolean(keyword.value.trim()) || statusFilter.value !== 'all',
-)
+const hasFilters = computed(() => Boolean(keyword.value.trim()) || statusFilter.value !== 'all')
 
 function readStatus(value: unknown): 'all' | AdminTagStatus {
   return value === 'active' || value === 'hidden' ? value : 'all'

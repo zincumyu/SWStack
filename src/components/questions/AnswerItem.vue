@@ -18,9 +18,7 @@
         <CommentList v-if="answer.comments.length" :comments="answer.comments" />
 
         <div class="answer-actions">
-          <button class="text-link answer-share" type="button" @click="shareAnswer">
-            分享
-          </button>
+          <button class="text-link answer-share" type="button" @click="shareAnswer">分享</button>
           <span class="answer-published">发布于 {{ formatRelativeTime(answer.createdAt) }}</span>
         </div>
 

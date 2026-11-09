@@ -11,19 +11,15 @@
           变成可以复用的知识.
         </h1>
         <p class="hero-intro">
-          SWStack 是面向高校开发者的技术问答社区. 从课程项目到实验室踩坑,
-          把具体的问题讲清楚, 把有用的答案留下来.
+          SWStack 是面向高校开发者的技术问答社区. 从课程项目到实验室踩坑, 把具体的问题讲清楚,
+          把有用的答案留下来.
         </p>
         <div class="hero-actions">
           <RouterLink class="btn btn-primary" :to="enterTarget">
             {{ sessionStore.isAuthenticated ? '浏览问题' : '登录进入社区' }}
             <ArrowRight :size="14" aria-hidden="true" />
           </RouterLink>
-          <RouterLink
-            v-if="sessionStore.isAuthenticated"
-            class="btn btn-secondary"
-            :to="askTarget"
-          >
+          <RouterLink v-if="sessionStore.isAuthenticated" class="btn btn-secondary" :to="askTarget">
             提出一个问题
           </RouterLink>
           <a v-else class="btn btn-secondary" href="#start-title">三步开始</a>
@@ -102,9 +98,7 @@
         <RouterLink class="btn btn-primary" :to="joinTarget">
           {{ sessionStore.isAuthenticated ? '去提问' : '登录加入' }}
         </RouterLink>
-        <RouterLink class="btn btn-secondary" :to="usersTarget">
-          认识开发者
-        </RouterLink>
+        <RouterLink class="btn btn-secondary" :to="usersTarget"> 认识开发者 </RouterLink>
       </div>
     </section>
   </div>
@@ -138,14 +132,10 @@ const browseTarget = computed<RouteLocationRaw>(() =>
     : { name: 'login', query: { redirect: '/' } },
 )
 const askTarget = computed<RouteLocationRaw>(() =>
-  sessionStore.isAuthenticated
-    ? { name: 'ask' }
-    : { name: 'login', query: { redirect: '/ask' } },
+  sessionStore.isAuthenticated ? { name: 'ask' } : { name: 'login', query: { redirect: '/ask' } },
 )
 const tagsTarget = computed<RouteLocationRaw>(() =>
-  sessionStore.isAuthenticated
-    ? { name: 'tags' }
-    : { name: 'login', query: { redirect: '/tags' } },
+  sessionStore.isAuthenticated ? { name: 'tags' } : { name: 'login', query: { redirect: '/tags' } },
 )
 const usersTarget = computed<RouteLocationRaw>(() =>
   sessionStore.isAuthenticated
@@ -322,7 +312,9 @@ const statsNote = computed(() => {
   flex-direction: column;
   padding: 15px 16px 14px;
   color: var(--text);
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
 }
 
 .step-card:hover {

@@ -52,8 +52,7 @@ const columnSeeds: ColumnSeed[] = [
     id: 1,
     slug: 'vue3-engineering-path',
     title: 'Vue 3 工程化入门路径: 从组件到可交付项目',
-    summary:
-      '按阶段梳理 Vue 3 与 TypeScript 的学习顺序, 配套练习和可以放进作品集的项目清单.',
+    summary: '按阶段梳理 Vue 3 与 TypeScript 的学习顺序, 配套练习和可以放进作品集的项目清单.',
     level: 'beginner',
     tagSlugs: ['vue3', 'typescript', 'git'],
     authorHandle: 'luxing',
@@ -154,8 +153,7 @@ const filtered = computed(() =>
     id: 2,
     slug: 'fastapi-api-design',
     title: '用 FastAPI 设计一个可演进的校园 API',
-    summary:
-      '从路由分层, 数据校验到数据库查询, 用一个小型课程项目走通后端接口设计.',
+    summary: '从路由分层, 数据校验到数据库查询, 用一个小型课程项目走通后端接口设计.',
     level: 'intermediate',
     tagSlugs: ['python', 'fastapi', 'sql'],
     authorHandle: 'chenmo',
@@ -266,8 +264,7 @@ def register(
     id: 3,
     slug: 'git-team-workflow',
     title: 'Git 协作路线: 从个人提交到团队合并',
-    summary:
-      '整理分支, 提交, 评审和回滚的常用动作, 适合第一次参与多人项目的同学.',
+    summary: '整理分支, 提交, 评审和回滚的常用动作, 适合第一次参与多人项目的同学.',
     level: 'beginner',
     tagSlugs: ['git'],
     authorHandle: 'luxing',
@@ -358,8 +355,7 @@ Verified with the duplicate signup case in the API test suite.
     id: 4,
     slug: 'sql-index-learning-path',
     title: 'SQL 索引学习路线: 学会读懂执行计划',
-    summary:
-      '用真实查询理解索引选择, 回表, 联合索引和 EXPLAIN, 不再靠试错加索引.',
+    summary: '用真实查询理解索引选择, 回表, 联合索引和 EXPLAIN, 不再靠试错加索引.',
     level: 'intermediate',
     tagSlugs: ['sql'],
     authorHandle: 'zhaoqing',
@@ -454,8 +450,7 @@ limit 20;
     id: 5,
     slug: 'rust-ownership-map',
     title: 'Rust 所有权进阶地图: 从借用检查到异步',
-    summary:
-      '按概念依赖顺序整理所有权, 生命周期, Trait 和异步运行时, 附可执行的练习.',
+    summary: '按概念依赖顺序整理所有权, 生命周期, Trait 和异步运行时, 附可执行的练习.',
     level: 'advanced',
     tagSlugs: ['rust', 'algorithm'],
     authorHandle: 'linyi',
@@ -541,8 +536,7 @@ Rust 编译器是最好的老师. 先读完整错误信息, 再查文档. 不要
     id: 6,
     slug: 'docker-reproducible-dev',
     title: 'Docker 开发环境实践: 让课程项目一键启动',
-    summary:
-      '从 Dockerfile, Compose 到环境变量和健康检查, 搭建队友都能复现的本地环境.',
+    summary: '从 Dockerfile, Compose 到环境变量和健康检查, 搭建队友都能复现的本地环境.',
     level: 'intermediate',
     tagSlugs: ['docker', 'git'],
     authorHandle: 'jiangran',
@@ -664,8 +658,7 @@ db:
     id: 7,
     slug: 'algorithm-review-template',
     title: '算法复盘模板: 把刷题记录变成可复用笔记',
-    summary:
-      '一套面向面试和课程考试的复盘模板, 记录思路, 复杂度, 反例和同类题.',
+    summary: '一套面向面试和课程考试的复盘模板, 记录思路, 复杂度, 反例和同类题.',
     level: 'advanced',
     tagSlugs: ['algorithm', 'python'],
     authorHandle: 'shenyan',
@@ -839,9 +832,7 @@ export function searchPublicColumns(keyword: string): ColumnSummary[] {
 }
 
 export function getPublicColumn(slug: string): ColumnDetail | null {
-  const seed = columnSeeds.find(
-    (item) => item.slug === slug && item.status === 'published',
-  )
+  const seed = columnSeeds.find((item) => item.slug === slug && item.status === 'published')
   return seed ? toDetail(seed) : null
 }
 
@@ -855,10 +846,7 @@ export function listAdminColumns(query: AdminColumnQuery): PageResult<AdminColum
     .filter((seed) => status === 'all' || seed.status === status)
     .filter((seed) => matchesLevel(seed.level, query.level))
     .filter((seed) => matchesKeyword(seed, keyword))
-    .sort(
-      (a, b) =>
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-    )
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     .map(toAdminColumn)
 
   return pageResult(filtered, page, pageSize)
@@ -875,10 +863,7 @@ export function isColumnSlugTaken(slug: string, excludeId?: number): boolean {
   )
 }
 
-export function createAdminColumn(
-  input: ColumnInput,
-  authorHandle: string,
-): AdminColumnDetail {
+export function createAdminColumn(input: ColumnInput, authorHandle: string): AdminColumnDetail {
   const now = new Date().toISOString()
   const seed: ColumnSeed = {
     id: nextColumnId++,
@@ -920,10 +905,7 @@ function applyPublishedAt(seed: ColumnSeed, wasPublished: boolean, now: string):
   }
 }
 
-export function updateAdminColumn(
-  id: number,
-  input: ColumnInput,
-): AdminColumnDetail | null {
+export function updateAdminColumn(id: number, input: ColumnInput): AdminColumnDetail | null {
   const seed = columnSeeds.find((item) => item.id === id)
   if (!seed) {
     return null
@@ -941,35 +923,23 @@ export function updateAdminColumn(
   return toAdminDetail(seed)
 }
 
-export function listMyColumns(
-  authorHandle: string,
-  query: MyColumnQuery,
-): PageResult<AdminColumn> {
+export function listMyColumns(authorHandle: string, query: MyColumnQuery): PageResult<AdminColumn> {
   const page = Math.max(1, Math.trunc(query.page ?? 1))
   const pageSize = Math.min(24, Math.max(1, Math.trunc(query.pageSize ?? 8)))
 
   const filtered = columnSeeds
     .filter((seed) => seed.authorHandle === authorHandle)
-    .sort(
-      (a, b) =>
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-    )
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     .map(toAdminColumn)
 
   return pageResult(filtered, page, pageSize)
 }
 
-export function createMyColumn(
-  input: ColumnInput,
-  authorHandle: string,
-): AdminColumnDetail {
+export function createMyColumn(input: ColumnInput, authorHandle: string): AdminColumnDetail {
   return createAdminColumn({ ...input, featured: false }, authorHandle)
 }
 
-export function updateMyColumn(
-  id: number,
-  input: ColumnInput,
-): AdminColumnDetail | null {
+export function updateMyColumn(id: number, input: ColumnInput): AdminColumnDetail | null {
   const seed = columnSeeds.find((item) => item.id === id)
   if (!seed) {
     return null
@@ -986,10 +956,7 @@ export function updateMyColumn(
   return toAdminDetail(seed)
 }
 
-export function setMyColumnStatus(
-  id: number,
-  status: ColumnStatus,
-): AdminColumn | null {
+export function setMyColumnStatus(id: number, status: ColumnStatus): AdminColumn | null {
   const seed = columnSeeds.find((item) => item.id === id)
   if (!seed) {
     return null

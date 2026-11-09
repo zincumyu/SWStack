@@ -28,8 +28,7 @@
     <section
       class="panel board-panel"
       :class="{
-        'is-closed':
-          adminStore.projectBoardLoaded && !adminStore.projectBoardEnabled,
+        'is-closed': adminStore.projectBoardLoaded && !adminStore.projectBoardEnabled,
       }"
       aria-labelledby="board-panel-title"
     >
@@ -91,10 +90,7 @@
       </div>
     </section>
 
-    <p
-      v-if="adminStore.projectBoardLoaded && !adminStore.projectBoardEnabled"
-      class="board-note"
-    >
+    <p v-if="adminStore.projectBoardLoaded && !adminStore.projectBoardEnabled" class="board-note">
       <EyeOff :size="12" aria-hidden="true" />
       项目板块当前对访客隐藏, 管理员仍可在此维护项目.
     </p>
@@ -142,12 +138,7 @@
           <option value="teammates">找队友</option>
         </select>
         <button class="btn btn-secondary btn-sm" type="submit">筛选</button>
-        <button
-          v-if="hasFilters"
-          class="btn btn-ghost btn-sm"
-          type="button"
-          @click="clearFilters"
-        >
+        <button v-if="hasFilters" class="btn btn-ghost btn-sm" type="button" @click="clearFilters">
           重置
         </button>
         <span class="admin-counter">{{ adminStore.projectTotal }} 条记录</span>
@@ -155,9 +146,7 @@
 
       <p
         v-if="
-          !adminStore.projectsLoading &&
-          !adminStore.projectsError &&
-          adminStore.projects.length
+          !adminStore.projectsLoading && !adminStore.projectsError && adminStore.projects.length
         "
         class="admin-table-hint"
       >
@@ -175,9 +164,7 @@
 
       <div v-else-if="adminStore.projectsError" class="project-error">
         <EmptyState title="加载项目失败" :description="adminStore.projectsError">
-          <button class="btn btn-secondary btn-sm" type="button" @click="refresh">
-            重试
-          </button>
+          <button class="btn btn-secondary btn-sm" type="button" @click="refresh">重试</button>
         </EmptyState>
       </div>
 
@@ -242,12 +229,7 @@
               </td>
               <td>
                 <div class="need-cell">
-                  <span
-                    v-for="need in project.needs"
-                    :key="need"
-                    class="need-chip"
-                    :class="need"
-                  >
+                  <span v-for="need in project.needs" :key="need" class="need-chip" :class="need">
                     {{ PROJECT_NEED_META[need].label }}
                   </span>
                   <span v-if="project.needs.length === 0" class="need-none">暂无</span>
@@ -308,10 +290,7 @@
                         :disabled="adminStore.projectBusyId === project.id"
                         @click="toggleFeatured(project)"
                       >
-                        <Star
-                          :size="11"
-                          :fill="project.isFeatured ? 'currentColor' : 'none'"
-                        />
+                        <Star :size="11" :fill="project.isFeatured ? 'currentColor' : 'none'" />
                         {{ project.isFeatured ? '取消' : '精选' }}
                       </button>
                       <button
@@ -393,16 +372,12 @@ const pageSize = 10
 const page = ref(1)
 const searchDraft = ref('')
 const reviewFilter = ref<'all' | ProjectReviewStatus>(readReview(route.query.review))
-const visibilityFilter = ref<'all' | AdminProjectVisibility>(
-  readVisibility(route.query.visibility),
-)
+const visibilityFilter = ref<'all' | AdminProjectVisibility>(readVisibility(route.query.visibility))
 const needFilter = ref<'all' | ProjectNeed>('all')
 const pendingDeleteId = ref<number | null>(null)
 
 function readReview(value: unknown): 'all' | ProjectReviewStatus {
-  return value === 'pending' || value === 'approved' || value === 'rejected'
-    ? value
-    : 'all'
+  return value === 'pending' || value === 'approved' || value === 'rejected' ? value : 'all'
 }
 
 function readVisibility(value: unknown): 'all' | AdminProjectVisibility {
@@ -428,13 +403,9 @@ function reviewSub(project: AdminProject): string {
       : '等待管理员处理'
   }
   if (project.reviewStatus === 'rejected') {
-    return project.reviewedAt
-      ? `退回于 ${formatRelativeTime(project.reviewedAt)}`
-      : '等待成员修改'
+    return project.reviewedAt ? `退回于 ${formatRelativeTime(project.reviewedAt)}` : '等待成员修改'
   }
-  return project.reviewedAt
-    ? `通过于 ${formatRelativeTime(project.reviewedAt)}`
-    : '已通过审核'
+  return project.reviewedAt ? `通过于 ${formatRelativeTime(project.reviewedAt)}` : '已通过审核'
 }
 
 function load(): void {

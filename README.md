@@ -29,51 +29,51 @@ npm run dev
 
 ## 常用脚本
 
-| 命令 | 说明 |
-| --- | --- |
-| `npm run dev` | 启动开发服务器 |
-| `npm run build` | 类型检查并构建到 `dist/` |
-| `npm run preview` | 预览生产构建 |
+| 命令                | 说明                           |
+| ------------------- | ------------------------------ |
+| `npm run dev`       | 启动开发服务器                 |
+| `npm run build`     | 类型检查并构建到 `dist/`       |
+| `npm run preview`   | 预览生产构建                   |
 | `npm run typecheck` | 只运行 Vue/TypeScript 类型检查 |
 
 构建产物位于 `dist/`. 部署到静态托管时需要将未知路径回退到 `index.html`.
 
 ## 页面路由
 
-| 路由 | 页面 |
-| --- | --- |
-| `/` | 问题列表与排序 |
-| `/search?q=&type=&page=` | 全站搜索, 覆盖问题, 项目, 专栏, 标签与开发者 |
-| `/questions/:id` | 问题详情, Markdown 正文, 回答与投票 |
-| `/tags` | 标签目录 |
-| `/tags/:slug` | 标签下的问题 |
-| `/projects` | 项目展示, 支持状态与需求筛选 |
-| `/projects/:slug` | 项目详情, 截图画廊, README, 成员与开发日志 |
-| `/my/projects` | 我的项目工作台, 需要登录 |
-| `/my/projects/new` | 发布项目, 上传封面与截图并提交审核, 需要登录 |
-| `/my/projects/:id/edit` | 编辑自己的项目并重新提交审核, 需要登录 |
-| `/my/projects/:id/updates` | 管理自己项目的开发日志, 需要登录 |
-| `/columns` | 专栏列表, 支持关键词, 难度与标签筛选 |
-| `/columns/:slug` | 专栏详情, Markdown 正文与资源清单 |
-| `/my/columns` | 我的专栏工作台, 需要专栏写作权限 |
-| `/my/columns/new` | 新建自己的专栏, 需要专栏写作权限 |
-| `/my/columns/:id/edit` | 编辑自己的专栏, 需要专栏写作权限 |
-| `/users` | 开发者目录 |
-| `/users/:handle` | 开发者主页 |
-| `/ask` | 提问表单, 需要登录 |
-| `/notifications` | 站内通知, 需要登录 |
-| `/login` | 登录页 |
-| `/welcome` | 新手指南 |
-| `/admin` | 管理总览, 需要管理员 |
-| `/admin/questions` | 问题管理 |
-| `/admin/projects` | 项目管理, 审核队列与板块可见性 |
-| `/admin/projects/:id/review` | 审核单个项目, 通过或驳回 |
-| `/admin/projects/:id/updates` | 删除项目中的违规开发日志 |
-| `/admin/columns` | 专栏管理 |
-| `/admin/columns/new` | 新建专栏 |
-| `/admin/columns/:id/edit` | 编辑专栏 |
-| `/admin/users` | 用户管理 |
-| `/admin/tags` | 标签管理 |
+| 路由                          | 页面                                         |
+| ----------------------------- | -------------------------------------------- |
+| `/`                           | 问题列表与排序                               |
+| `/search?q=&type=&page=`      | 全站搜索, 覆盖问题, 项目, 专栏, 标签与开发者 |
+| `/questions/:id`              | 问题详情, Markdown 正文, 回答与投票          |
+| `/tags`                       | 标签目录                                     |
+| `/tags/:slug`                 | 标签下的问题                                 |
+| `/projects`                   | 项目展示, 支持状态与需求筛选                 |
+| `/projects/:slug`             | 项目详情, 截图画廊, README, 成员与开发日志   |
+| `/my/projects`                | 我的项目工作台, 需要登录                     |
+| `/my/projects/new`            | 发布项目, 上传封面与截图并提交审核, 需要登录 |
+| `/my/projects/:id/edit`       | 编辑自己的项目并重新提交审核, 需要登录       |
+| `/my/projects/:id/updates`    | 管理自己项目的开发日志, 需要登录             |
+| `/columns`                    | 专栏列表, 支持关键词, 难度与标签筛选         |
+| `/columns/:slug`              | 专栏详情, Markdown 正文与资源清单            |
+| `/my/columns`                 | 我的专栏工作台, 需要专栏写作权限             |
+| `/my/columns/new`             | 新建自己的专栏, 需要专栏写作权限             |
+| `/my/columns/:id/edit`        | 编辑自己的专栏, 需要专栏写作权限             |
+| `/users`                      | 开发者目录                                   |
+| `/users/:handle`              | 开发者主页                                   |
+| `/ask`                        | 提问表单, 需要登录                           |
+| `/notifications`              | 站内通知, 需要登录                           |
+| `/login`                      | 登录页                                       |
+| `/welcome`                    | 新手指南                                     |
+| `/admin`                      | 管理总览, 需要管理员                         |
+| `/admin/questions`            | 问题管理                                     |
+| `/admin/projects`             | 项目管理, 审核队列与板块可见性               |
+| `/admin/projects/:id/review`  | 审核单个项目, 通过或驳回                     |
+| `/admin/projects/:id/updates` | 删除项目中的违规开发日志                     |
+| `/admin/columns`              | 专栏管理                                     |
+| `/admin/columns/new`          | 新建专栏                                     |
+| `/admin/columns/:id/edit`     | 编辑专栏                                     |
+| `/admin/users`                | 用户管理                                     |
+| `/admin/tags`                 | 标签管理                                     |
 
 游客仅可访问 `/welcome` 与 `/login`. 访问其他路由会跳转到 `/welcome`, 并保留登录后返回的目标页面.
 
@@ -104,10 +104,10 @@ src/
 
 Mock 环境提供两个演示账号.
 
-| 角色 | 邮箱 | 密码 |
-| --- | --- | --- |
-| 管理员 | `admin@swstack.dev` | `admin123` |
-| 学生 | `student@swstack.dev` | `student123` |
+| 角色   | 邮箱                  | 密码         |
+| ------ | --------------------- | ------------ |
+| 管理员 | `admin@swstack.dev`   | `admin123`   |
+| 学生   | `student@swstack.dev` | `student123` |
 
 登录页支持一键填入演示账号. 勾选 `保持登录` 时登录状态写入 `localStorage`, 否则写入 `sessionStorage`. 退出登录会清除两者. 接入 FastAPI 后建议改用服务端 Cookie 会话.
 
@@ -185,69 +185,69 @@ VITE_API_BASE_URL=/api
 
 ## API 契约
 
-| 方法 | 路径 | 返回 |
-| --- | --- | --- |
-| POST | `/api/auth/login` | `AuthResult` |
-| POST | `/api/auth/logout` | `{ "success": true }` |
-| GET | `/api/session/me` | `AuthUser` |
-| POST | `/api/uploads/images` | `UploadedImage` |
-| GET | `/api/questions` | `PageResult<QuestionSummary>` |
-| GET | `/api/questions/:id` | `QuestionDetail` |
-| POST | `/api/questions` | `QuestionSummary` |
-| POST | `/api/questions/:id/vote` | `VoteResult` |
-| POST | `/api/questions/:id/bookmark` | `BookmarkResult` |
-| POST | `/api/questions/:id/answers` | `Answer` |
-| POST | `/api/answers/:id/vote` | `VoteResult` |
-| GET | `/api/tags` | `Tag[]` |
-| GET | `/api/users` | `UserProfile[]` |
-| GET | `/api/users/:handle` | `UserProfile` |
-| GET | `/api/search` | `SearchResults` |
-| GET | `/api/community/overview` | `CommunityOverview` |
-| GET | `/api/projects/board` | `ProjectBoardSettings` |
-| GET | `/api/projects` | `PageResult<ProjectSummary>` |
-| GET | `/api/projects/:slug` | `ProjectDetail` |
-| GET | `/api/projects/mine` | `MyProject[]` |
-| GET | `/api/projects/mine/:id` | `ProjectEditData` |
-| GET | `/api/projects/mine/:id/updates` | `ProjectUpdatesWorkspace` |
-| POST | `/api/projects/mine/:id/updates` | `ProjectUpdate` |
-| PATCH | `/api/project-updates/mine/:updateId` | `ProjectUpdate` |
-| DELETE | `/api/project-updates/mine/:updateId` | `ProjectUpdateDeleteResult` |
-| POST | `/api/projects` | `MyProject` |
-| PATCH | `/api/projects/:id` | `MyProject` |
-| GET | `/api/columns` | `PageResult<ColumnSummary>` |
-| GET | `/api/columns/:slug` | `ColumnDetail` |
-| GET | `/api/my/columns` | `PageResult<ColumnWorkspaceItem>` |
-| GET | `/api/my/columns/:id` | `ColumnWorkspaceDetail` |
-| POST | `/api/my/columns` | `ColumnWorkspaceDetail` |
-| PUT | `/api/my/columns/:id` | `ColumnWorkspaceDetail` |
-| PATCH | `/api/my/columns/:id` | `ColumnWorkspaceItem` |
-| DELETE | `/api/my/columns/:id` | `AdminDeleteResult` |
-| GET | `/api/notifications` | `PageResult<NotificationItem>` |
-| GET | `/api/notifications/unread-count` | `NotificationUnreadCount` |
-| PATCH | `/api/notifications/:id` | `NotificationItem` |
-| POST | `/api/notifications/read-all` | `NotificationReadAllResult` |
-| GET | `/api/admin/overview` | `AdminOverview` |
-| GET | `/api/admin/questions` | `PageResult<AdminQuestion>` |
-| PATCH | `/api/admin/questions/:id` | `AdminQuestion` |
-| DELETE | `/api/admin/questions/:id` | `AdminDeleteResult` |
-| GET | `/api/admin/projects` | `AdminProjectsResult` |
-| GET | `/api/admin/projects/:id` | `AdminProjectDetail` |
-| GET | `/api/admin/projects/:id/updates` | `AdminProjectUpdatesWorkspace` |
-| DELETE | `/api/admin/project-updates/:updateId` | `ProjectUpdateDeleteResult` |
-| PATCH | `/api/admin/projects/board` | `ProjectBoardSettings` |
-| PATCH | `/api/admin/projects/:id` | `AdminProject` |
-| DELETE | `/api/admin/projects/:id` | `AdminDeleteResult` |
-| GET | `/api/admin/columns` | `PageResult<AdminColumn>` |
-| GET | `/api/admin/columns/:id` | `AdminColumnDetail` |
-| POST | `/api/admin/columns` | `AdminColumnDetail` |
-| PUT | `/api/admin/columns/:id` | `AdminColumnDetail` |
-| PATCH | `/api/admin/columns/:id` | `AdminColumn` |
-| DELETE | `/api/admin/columns/:id` | `AdminDeleteResult` |
-| GET | `/api/admin/users` | `PageResult<AdminUser>` |
-| PATCH | `/api/admin/users/:id` | `AdminUser` |
-| GET | `/api/admin/tags` | `AdminTag[]` |
-| POST | `/api/admin/tags` | `AdminTag` |
-| PATCH | `/api/admin/tags/:slug` | `AdminTag` |
+| 方法   | 路径                                   | 返回                              |
+| ------ | -------------------------------------- | --------------------------------- |
+| POST   | `/api/auth/login`                      | `AuthResult`                      |
+| POST   | `/api/auth/logout`                     | `{ "success": true }`             |
+| GET    | `/api/session/me`                      | `AuthUser`                        |
+| POST   | `/api/uploads/images`                  | `UploadedImage`                   |
+| GET    | `/api/questions`                       | `PageResult<QuestionSummary>`     |
+| GET    | `/api/questions/:id`                   | `QuestionDetail`                  |
+| POST   | `/api/questions`                       | `QuestionSummary`                 |
+| POST   | `/api/questions/:id/vote`              | `VoteResult`                      |
+| POST   | `/api/questions/:id/bookmark`          | `BookmarkResult`                  |
+| POST   | `/api/questions/:id/answers`           | `Answer`                          |
+| POST   | `/api/answers/:id/vote`                | `VoteResult`                      |
+| GET    | `/api/tags`                            | `Tag[]`                           |
+| GET    | `/api/users`                           | `UserProfile[]`                   |
+| GET    | `/api/users/:handle`                   | `UserProfile`                     |
+| GET    | `/api/search`                          | `SearchResults`                   |
+| GET    | `/api/community/overview`              | `CommunityOverview`               |
+| GET    | `/api/projects/board`                  | `ProjectBoardSettings`            |
+| GET    | `/api/projects`                        | `PageResult<ProjectSummary>`      |
+| GET    | `/api/projects/:slug`                  | `ProjectDetail`                   |
+| GET    | `/api/projects/mine`                   | `MyProject[]`                     |
+| GET    | `/api/projects/mine/:id`               | `ProjectEditData`                 |
+| GET    | `/api/projects/mine/:id/updates`       | `ProjectUpdatesWorkspace`         |
+| POST   | `/api/projects/mine/:id/updates`       | `ProjectUpdate`                   |
+| PATCH  | `/api/project-updates/mine/:updateId`  | `ProjectUpdate`                   |
+| DELETE | `/api/project-updates/mine/:updateId`  | `ProjectUpdateDeleteResult`       |
+| POST   | `/api/projects`                        | `MyProject`                       |
+| PATCH  | `/api/projects/:id`                    | `MyProject`                       |
+| GET    | `/api/columns`                         | `PageResult<ColumnSummary>`       |
+| GET    | `/api/columns/:slug`                   | `ColumnDetail`                    |
+| GET    | `/api/my/columns`                      | `PageResult<ColumnWorkspaceItem>` |
+| GET    | `/api/my/columns/:id`                  | `ColumnWorkspaceDetail`           |
+| POST   | `/api/my/columns`                      | `ColumnWorkspaceDetail`           |
+| PUT    | `/api/my/columns/:id`                  | `ColumnWorkspaceDetail`           |
+| PATCH  | `/api/my/columns/:id`                  | `ColumnWorkspaceItem`             |
+| DELETE | `/api/my/columns/:id`                  | `AdminDeleteResult`               |
+| GET    | `/api/notifications`                   | `PageResult<NotificationItem>`    |
+| GET    | `/api/notifications/unread-count`      | `NotificationUnreadCount`         |
+| PATCH  | `/api/notifications/:id`               | `NotificationItem`                |
+| POST   | `/api/notifications/read-all`          | `NotificationReadAllResult`       |
+| GET    | `/api/admin/overview`                  | `AdminOverview`                   |
+| GET    | `/api/admin/questions`                 | `PageResult<AdminQuestion>`       |
+| PATCH  | `/api/admin/questions/:id`             | `AdminQuestion`                   |
+| DELETE | `/api/admin/questions/:id`             | `AdminDeleteResult`               |
+| GET    | `/api/admin/projects`                  | `AdminProjectsResult`             |
+| GET    | `/api/admin/projects/:id`              | `AdminProjectDetail`              |
+| GET    | `/api/admin/projects/:id/updates`      | `AdminProjectUpdatesWorkspace`    |
+| DELETE | `/api/admin/project-updates/:updateId` | `ProjectUpdateDeleteResult`       |
+| PATCH  | `/api/admin/projects/board`            | `ProjectBoardSettings`            |
+| PATCH  | `/api/admin/projects/:id`              | `AdminProject`                    |
+| DELETE | `/api/admin/projects/:id`              | `AdminDeleteResult`               |
+| GET    | `/api/admin/columns`                   | `PageResult<AdminColumn>`         |
+| GET    | `/api/admin/columns/:id`               | `AdminColumnDetail`               |
+| POST   | `/api/admin/columns`                   | `AdminColumnDetail`               |
+| PUT    | `/api/admin/columns/:id`               | `AdminColumnDetail`               |
+| PATCH  | `/api/admin/columns/:id`               | `AdminColumn`                     |
+| DELETE | `/api/admin/columns/:id`               | `AdminDeleteResult`               |
+| GET    | `/api/admin/users`                     | `PageResult<AdminUser>`           |
+| PATCH  | `/api/admin/users/:id`                 | `AdminUser`                       |
+| GET    | `/api/admin/tags`                      | `AdminTag[]`                      |
+| POST   | `/api/admin/tags`                      | `AdminTag`                        |
+| PATCH  | `/api/admin/tags/:slug`                | `AdminTag`                        |
 
 登录请求:
 

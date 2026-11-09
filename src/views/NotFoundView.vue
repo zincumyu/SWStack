@@ -8,9 +8,7 @@
         <RouterLink class="btn btn-primary" to="/">回到问题列表</RouterLink>
         <RouterLink class="btn btn-secondary" to="/tags">浏览标签</RouterLink>
       </div>
-      <div class="not-found-hint">
-        也可以按 <kbd>/</kbd> 搜索问题
-      </div>
+      <div class="not-found-hint">也可以按 <kbd>/</kbd> 搜索问题</div>
     </div>
   </div>
 </template>

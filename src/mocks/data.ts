@@ -291,7 +291,9 @@ export interface QuestionRecord {
   comments: QuestionComment[]
 }
 
-function question(seed: Omit<QuestionRecord, 'answersList'> & { answers: Answer[] }): QuestionRecord {
+function question(
+  seed: Omit<QuestionRecord, 'answersList'> & { answers: Answer[] },
+): QuestionRecord {
   const { answers, ...record } = seed
   return { ...record, answersList: answers }
 }
@@ -300,7 +302,8 @@ export const questions: QuestionRecord[] = [
   question({
     id: 101,
     title: 'Vue 3 中 ref 与 reactive 在组合式函数里应该如何选择',
-    excerpt: '封装筛选器时既有单个关键字, 也有整体替换的分页对象. 想确认 ref/reactive 的边界和消费端解构时的正确做法.',
+    excerpt:
+      '封装筛选器时既有单个关键字, 也有整体替换的分页对象. 想确认 ref/reactive 的边界和消费端解构时的正确做法.',
     body: `我在封装一个项目筛选器的组合式函数. 状态里既有单个关键字, 也有需要整体替换的分页对象. 现在写法大致如下:
 
 \`\`\`ts
@@ -337,8 +340,16 @@ export function useProjectFilters() {
     viewerVote: 0,
     bookmarked: false,
     comments: [
-      comment('luxing', '补充一下, 这类组合式函数最好同时暴露一个只读的 query 快照, 方便序列化到 URL.', ago({ hours: 2 })),
-      comment('chenmo', '如果筛选状态会跨页面保留, 可以从第一天就把它放进路由 query.', ago({ hours: 1, minutes: 30 })),
+      comment(
+        'luxing',
+        '补充一下, 这类组合式函数最好同时暴露一个只读的 query 快照, 方便序列化到 URL.',
+        ago({ hours: 2 }),
+      ),
+      comment(
+        'chenmo',
+        '如果筛选状态会跨页面保留, 可以从第一天就把它放进路由 query.',
+        ago({ hours: 1, minutes: 30 }),
+      ),
     ],
     answers: [
       makeAnswer(101, {
@@ -387,7 +398,11 @@ export function usePaging() {
 
 最后一点: 如果筛选条件需要分享链接或刷新恢复, 应该把 query 作为唯一事实来源, 不要同时在组件内维护一份重复状态.`,
         comments: [
-          comment('zhouqi', '第二段用 computed 暴露 page 的方式很清楚. 我之前一直把所有字段 toRefs, 结果类型推导变得很难读.', ago({ hours: 2 })),
+          comment(
+            'zhouqi',
+            '第二段用 computed 暴露 page 的方式很清楚. 我之前一直把所有字段 toRefs, 结果类型推导变得很难读.',
+            ago({ hours: 2 }),
+          ),
         ],
       }),
       makeAnswer(101, {
@@ -417,7 +432,8 @@ watch(query, (value) => {
   question({
     id: 102,
     title: 'FastAPI 依赖注入如何优雅地复用数据库会话',
-    excerpt: '每个路由都声明 Depends(get_session) 感觉重复. 想在请求级别共享 AsyncSession, 同时保证异常时能正确回滚.',
+    excerpt:
+      '每个路由都声明 Depends(get_session) 感觉重复. 想在请求级别共享 AsyncSession, 同时保证异常时能正确回滚.',
     body: `项目从 Flask 迁移到 FastAPI. 现在每个路由都这样声明:
 
 \`\`\`python
@@ -443,7 +459,11 @@ async def list_projects(
     viewerVote: 0,
     bookmarked: true,
     comments: [
-      comment('shenyan', 'FastAPI 默认依赖缓存是请求级别的, 同一个依赖函数会在一次请求中只执行一次.', ago({ hours: 5 })),
+      comment(
+        'shenyan',
+        'FastAPI 默认依赖缓存是请求级别的, 同一个依赖函数会在一次请求中只执行一次.',
+        ago({ hours: 5 }),
+      ),
     ],
     answers: [
       makeAnswer(102, {
@@ -476,7 +496,11 @@ async def get_session() -> AsyncIterator[AsyncSession]:
 
 还需要注意: \`async with\` 退出时会 close session, 但不会自动 commit. 不要把 close 当成 commit.`,
         comments: [
-          comment('chenmo', '确认了依赖是请求级缓存. rollback 放在 yield 外面之后, 异常路径的行为清楚很多.', ago({ hours: 4, minutes: 30 })),
+          comment(
+            'chenmo',
+            '确认了依赖是请求级缓存. rollback 放在 yield 外面之后, 异常路径的行为清楚很多.',
+            ago({ hours: 4, minutes: 30 }),
+          ),
         ],
       }),
       makeAnswer(102, {
@@ -492,7 +516,8 @@ async def get_session() -> AsyncIterator[AsyncSession]:
   question({
     id: 103,
     title: 'TypeScript 泛型约束在 API 响应包装类型里怎么写',
-    excerpt: '想写一个通用的 ApiResponse<T>, 但后端有的接口返回数组, 有的返回深层的 items. 如何让类型提示不丢字段.',
+    excerpt:
+      '想写一个通用的 ApiResponse<T>, 但后端有的接口返回数组, 有的返回深层的 items. 如何让类型提示不丢字段.',
     body: `后端响应格式大致如下:
 
 \`\`\`ts
@@ -588,7 +613,8 @@ type ProjectPage = z.infer<typeof projectPageSchema>
   question({
     id: 104,
     title: 'Go 的 errgroup 如何正确传递 context 取消信号',
-    excerpt: '三个下游请求并行执行, 其中任意一个失败后其他请求还在继续. 想确认 errgroup.WithContext 的取消时机.',
+    excerpt:
+      '三个下游请求并行执行, 其中任意一个失败后其他请求还在继续. 想确认 errgroup.WithContext 的取消时机.',
     body: `代码结构如下:
 
 \`\`\`go
@@ -682,7 +708,8 @@ group, groupCtx := errgroup.WithContext(ctx)
   question({
     id: 105,
     title: 'Docker 多阶段构建中如何减小 Node 前端镜像体积',
-    excerpt: '构建镜像接近 800MB, 最终只需要静态文件. 想保留可复现构建, 同时不把 node_modules 和源码带进运行镜像.',
+    excerpt:
+      '构建镜像接近 800MB, 最终只需要静态文件. 想保留可复现构建, 同时不把 node_modules 和源码带进运行镜像.',
     body: `当前 Dockerfile:
 
 \`\`\`dockerfile
@@ -748,7 +775,8 @@ dist
   question({
     id: 106,
     title: 'Rust 所有权规则下如何返回一个借用字符串',
-    excerpt: '想从结构体方法里返回 name 字段的 &str, 编译器提示生命周期不匹配. 不确定应该加生命周期还是返回 String.',
+    excerpt:
+      '想从结构体方法里返回 name 字段的 &str, 编译器提示生命周期不匹配. 不确定应该加生命周期还是返回 String.',
     body: `有一个配置结构体:
 
 \`\`\`rust
@@ -837,7 +865,11 @@ impl Service {
 
 不要为了绕开生命周期而滥用 \`Box::leak\` 或内部可变性. 先问清楚谁应该拥有数据.`,
         comments: [
-          comment('linyi', '关键确实是谁拥有数据. 我改成持有 Arc<Config> 后, 生命周期问题自然消失了.', ago({ days: 1, hours: 8 })),
+          comment(
+            'linyi',
+            '关键确实是谁拥有数据. 我改成持有 Arc<Config> 后, 生命周期问题自然消失了.',
+            ago({ days: 1, hours: 8 }),
+          ),
         ],
       }),
       makeAnswer(106, {
@@ -865,7 +897,8 @@ impl Service {
   question({
     id: 107,
     title: 'SQL 索引在联合查询中没有命中是什么原因',
-    excerpt: 'orders 和 users 联表查询只走主键索引, 明明建了 user_id 索引. 想搞清楚执行计划和隐式转换的影响.',
+    excerpt:
+      'orders 和 users 联表查询只走主键索引, 明明建了 user_id 索引. 想搞清楚执行计划和隐式转换的影响.',
     body: `查询如下:
 
 \`\`\`sql
@@ -896,7 +929,8 @@ limit 20;
   question({
     id: 108,
     title: 'React 18 并发渲染下 useEffect 重复执行如何排查',
-    excerpt: 'StrictMode 开发环境里请求发了两次, 去掉 StrictMode 就正常. 这是框架 bug 还是应该修改副作用结构.',
+    excerpt:
+      'StrictMode 开发环境里请求发了两次, 去掉 StrictMode 就正常. 这是框架 bug 还是应该修改副作用结构.',
     body: `组件挂载时会请求一次项目列表:
 
 \`\`\`tsx
@@ -957,7 +991,8 @@ async function fetchProjects(signal: AbortSignal) {
   question({
     id: 109,
     title: 'Composition API 中 watch 和 watchEffect 的清理时机',
-    excerpt: '在副作用里注册了监听器, 组件卸载后仍然收到回调. 想确认 onCleanup 和 onUnmounted 的执行顺序.',
+    excerpt:
+      '在副作用里注册了监听器, 组件卸载后仍然收到回调. 想确认 onCleanup 和 onUnmounted 的执行顺序.',
     body: `我有一段监听窗口尺寸的逻辑:
 
 \`\`\`ts
@@ -1015,7 +1050,8 @@ watch(active, (value, _oldValue, onCleanup) => {
   question({
     id: 110,
     title: 'Git rebase 之后如何安全地恢复已经被覆盖的提交',
-    excerpt: '交互式 rebase 时误删了两个提交并强制推送. 想在团队仓库里找回原始提交, 同时避免再次破坏历史.',
+    excerpt:
+      '交互式 rebase 时误删了两个提交并强制推送. 想在团队仓库里找回原始提交, 同时避免再次破坏历史.',
     body: `我在功能分支上执行了 \`git rebase -i main\`, 本想合并三个提交, 结果误操作删除了其中两个. 随后执行了 \`git push --force-with-lease\`.
 
 现在分支看起来丢失了部分实现. 我记得 rebase 之前的提交哈希没有记录, 只记得当时在终端里看到过.
@@ -1031,7 +1067,11 @@ watch(active, (value, _oldValue, onCleanup) => {
     viewerVote: 0,
     bookmarked: false,
     comments: [
-      comment('suhe', '先别继续 rebase 或 gc. reflog 一般还在, 尽快把目标提交固定到一个新分支上.', ago({ minutes: 42 })),
+      comment(
+        'suhe',
+        '先别继续 rebase 或 gc. reflog 一般还在, 尽快把目标提交固定到一个新分支上.',
+        ago({ minutes: 42 }),
+      ),
     ],
     answers: [
       makeAnswer(110, {
@@ -1073,7 +1113,11 @@ git rebase -i origin/main
 
 这次每一步都先确认提交列表, 不要在有未提交改动时开始 rebase.`,
         comments: [
-          comment('jiangran', 'reflog 里找到了. 建了 recovery 分支后对比, 两个提交都完整. 谢谢.', ago({ days: 3, hours: 2 })),
+          comment(
+            'jiangran',
+            'reflog 里找到了. 建了 recovery 分支后对比, 两个提交都完整. 谢谢.',
+            ago({ days: 3, hours: 2 }),
+          ),
         ],
       }),
       makeAnswer(110, {
@@ -1089,7 +1133,8 @@ git rebase -i origin/main
   question({
     id: 111,
     title: 'Python 异步任务中共享 aiohttp session 的最佳实践',
-    excerpt: '为每个请求创建 ClientSession 很慢, 但全局单例在事件循环关闭时又报错. 想了解应用生命周期内的正确作用域.',
+    excerpt:
+      '为每个请求创建 ClientSession 很慢, 但全局单例在事件循环关闭时又报错. 想了解应用生命周期内的正确作用域.',
     body: `服务使用 FastAPI 和 aiohttp 调用第三方 API. 现在每个函数里都会:
 
 \`\`\`python
@@ -1435,7 +1480,14 @@ export const userProfiles: UserProfileSeed[] = users.map((user) => {
 })
 
 export function toQuestionSummary(record: QuestionRecord): QuestionSummary {
-  const { answersList, body: _body, viewerVote: _viewerVote, bookmarked: _bookmarked, comments: _comments, ...summary } = record
+  const {
+    answersList,
+    body: _body,
+    viewerVote: _viewerVote,
+    bookmarked: _bookmarked,
+    comments: _comments,
+    ...summary
+  } = record
   return {
     ...summary,
     answerCount: answersList.length,
@@ -1448,7 +1500,8 @@ export function toQuestionDetail(record: QuestionRecord): QuestionDetail {
     .filter((item) => item.id !== record.id)
     .map((item) => ({
       record: item,
-      overlap: item.tags.filter((tag) => record.tags.some((current) => current.slug === tag.slug)).length,
+      overlap: item.tags.filter((tag) => record.tags.some((current) => current.slug === tag.slug))
+        .length,
     }))
     .filter((item) => item.overlap > 0)
     .sort((a, b) => b.overlap - a.overlap || b.record.score - a.record.score)
@@ -1489,8 +1542,6 @@ export const topMembers: TopMember[] = [
   { user: users[6], weeklyScore: 430, topTag: 'rust' },
 ]
 
-export const popularTags = [...tags]
-  .sort((a, b) => b.weeklyCount - a.weeklyCount)
-  .slice(0, 6)
+export const popularTags = [...tags].sort((a, b) => b.weeklyCount - a.weeklyCount).slice(0, 6)
 
 export const questionSummaries = questions.map(toQuestionSummary)

@@ -1,8 +1,6 @@
 <template>
   <div v-if="total > 0" class="admin-pagination">
-    <span class="pagination-summary">
-      第 {{ startItem }}-{{ endItem }} 条, 共 {{ total }} 条
-    </span>
+    <span class="pagination-summary"> 第 {{ startItem }}-{{ endItem }} 条, 共 {{ total }} 条 </span>
     <div class="pagination-controls">
       <button
         class="pagination-button"
