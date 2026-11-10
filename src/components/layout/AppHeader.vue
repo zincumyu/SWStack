@@ -23,7 +23,9 @@
             专栏
           </RouterLink>
           <RouterLink class="nav-link" :class="{ active: tagsActive }" to="/tags">标签</RouterLink>
-          <RouterLink class="nav-link" :class="{ active: usersActive }" to="/users">开发者</RouterLink>
+          <RouterLink class="nav-link" :class="{ active: usersActive }" to="/users"
+            >开发者</RouterLink
+          >
         </template>
         <RouterLink
           v-else
@@ -61,11 +63,7 @@
           :title="notificationAria"
         >
           <Bell :size="18" />
-          <span
-            v-if="notificationStore.unread > 0"
-            class="notification-count"
-            aria-hidden="true"
-          >
+          <span v-if="notificationStore.unread > 0" class="notification-count" aria-hidden="true">
             {{ notificationBadge }}
           </span>
         </RouterLink>
@@ -112,13 +110,11 @@
             <UserAvatar :user="sessionStore.user" :size="27" />
             <span class="profile-copy">
               <span class="profile-name">{{ sessionStore.user.name }}</span>
-              <span class="profile-reputation">{{ formatCompact(sessionStore.user.reputation) }}</span>
+              <span class="profile-reputation">{{
+                formatCompact(sessionStore.user.reputation)
+              }}</span>
             </span>
-            <ChevronDown
-              :size="13"
-              class="profile-chevron"
-              :class="{ rotated: profileMenuOpen }"
-            />
+            <ChevronDown :size="13" class="profile-chevron" :class="{ rotated: profileMenuOpen }" />
           </button>
 
           <div v-if="profileMenuOpen" class="profile-dropdown" role="menu">
@@ -176,11 +172,7 @@
             >
               <Bell :size="14" />
               通知
-              <span
-                v-if="notificationStore.unread > 0"
-                class="menu-unread"
-                aria-hidden="true"
-              >
+              <span v-if="notificationStore.unread > 0" class="menu-unread" aria-hidden="true">
                 {{ notificationBadge }}
               </span>
             </RouterLink>
@@ -255,9 +247,7 @@ const brandTarget = computed<RouteLocationRaw>(() =>
 )
 
 const askTarget = computed<RouteLocationRaw>(() =>
-  sessionStore.isAuthenticated
-    ? { name: 'ask' }
-    : { name: 'login', query: { redirect: '/ask' } },
+  sessionStore.isAuthenticated ? { name: 'ask' } : { name: 'login', query: { redirect: '/ask' } },
 )
 
 const loginTarget = computed<RouteLocationRaw>(() => ({
@@ -268,12 +258,8 @@ const loginTarget = computed<RouteLocationRaw>(() => ({
 const questionsActive = computed(() =>
   ['questions', 'question-detail'].includes(String(route.name)),
 )
-const projectsActive = computed(() =>
-  ['projects', 'project-detail'].includes(String(route.name)),
-)
-const columnsActive = computed(() =>
-  ['columns', 'column-detail'].includes(String(route.name)),
-)
+const projectsActive = computed(() => ['projects', 'project-detail'].includes(String(route.name)))
+const columnsActive = computed(() => ['columns', 'column-detail'].includes(String(route.name)))
 const tagsActive = computed(() => ['tags', 'tag-detail'].includes(String(route.name)))
 const usersActive = computed(() => ['users', 'user-profile'].includes(String(route.name)))
 const notificationBadge = computed(() =>

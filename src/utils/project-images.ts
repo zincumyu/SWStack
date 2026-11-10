@@ -31,8 +31,7 @@ export function isProjectImageRef(value: string): boolean {
   }
   if (source.toLowerCase().startsWith('data:image/')) {
     return (
-      /^data:image\/(?:png|jpeg|webp);base64,/i.test(source) &&
-      source.length <= MAX_DATA_URL_LENGTH
+      /^data:image\/(?:png|jpeg|webp);base64,/i.test(source) && source.length <= MAX_DATA_URL_LENGTH
     )
   }
   if (source.length > 300) {

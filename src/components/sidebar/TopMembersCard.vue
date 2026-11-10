@@ -22,7 +22,9 @@
         class="member-row"
         :to="{ name: 'user-profile', params: { handle: member.user.handle } }"
       >
-        <span class="rank" :class="{ first: index === 0 }">{{ String(index + 1).padStart(2, '0') }}</span>
+        <span class="rank" :class="{ first: index === 0 }">{{
+          String(index + 1).padStart(2, '0')
+        }}</span>
         <UserAvatar :user="member.user" :size="25" />
         <span class="member-copy">
           <span class="member-name">{{ member.user.name }}</span>

@@ -69,12 +69,7 @@
         </option>
       </select>
       <button class="btn btn-secondary btn-sm" type="submit">搜索</button>
-      <button
-        v-if="hasFilters"
-        class="btn btn-ghost btn-sm"
-        type="button"
-        @click="resetFilters"
-      >
+      <button v-if="hasFilters" class="btn btn-ghost btn-sm" type="button" @click="resetFilters">
         重置
       </button>
       <span class="column-count">{{ total }} 篇</span>
@@ -97,17 +92,12 @@
 
     <div v-else-if="error" class="panel column-state">
       <EmptyState title="加载专栏失败" :description="error">
-        <button class="btn btn-secondary btn-sm" type="button" @click="load()">
-          重试
-        </button>
+        <button class="btn btn-secondary btn-sm" type="button" @click="load()">重试</button>
       </EmptyState>
     </div>
 
     <div v-else-if="columns.length === 0" class="panel column-state">
-      <EmptyState
-        title="没有找到专栏"
-        description="换一个关键词, 难度或标签再试试."
-      >
+      <EmptyState title="没有找到专栏" description="换一个关键词, 难度或标签再试试.">
         <button
           v-if="hasFilters"
           class="btn btn-secondary btn-sm"
@@ -208,9 +198,7 @@ let loadSequence = 0
 
 const hasFilters = computed(
   () =>
-    Boolean(searchDraft.value.trim()) ||
-    levelFilter.value !== 'all' ||
-    Boolean(tagFilter.value),
+    Boolean(searchDraft.value.trim()) || levelFilter.value !== 'all' || Boolean(tagFilter.value),
 )
 
 onMounted(() => {
@@ -455,7 +443,9 @@ function goToPage(next: number): void {
   flex-direction: column;
   padding: 14px;
   color: var(--text);
-  transition: border-color 120ms ease, background-color 120ms ease;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
 }
 
 .column-card:hover {

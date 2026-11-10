@@ -16,10 +16,7 @@
         <span class="related-title">{{ question.title }}</span>
         <span class="related-meta">
           <span class="related-score">{{ question.score }} 票</span>
-          <span
-            class="related-answers"
-            :class="{ accepted: question.hasAcceptedAnswer }"
-          >
+          <span class="related-answers" :class="{ accepted: question.hasAcceptedAnswer }">
             <Check v-if="question.hasAcceptedAnswer" :size="11" />
             {{ question.answerCount }} 回答
           </span>

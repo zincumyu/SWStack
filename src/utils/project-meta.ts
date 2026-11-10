@@ -1,9 +1,6 @@
 import type { ProjectNeed, ProjectReviewStatus, ProjectStatus } from '@/api/types'
 
-export const PROJECT_STATUS_META: Record<
-  ProjectStatus,
-  { label: string; description: string }
-> = {
+export const PROJECT_STATUS_META: Record<ProjectStatus, { label: string; description: string }> = {
   idea: { label: '构思中', description: '方向已确定, 正在验证需求与原型.' },
   building: { label: '开发中', description: '核心功能正在实现, 欢迎参与讨论.' },
   beta: { label: '内测中', description: '已有可用版本, 正在收集真实使用反馈.' },
@@ -11,10 +8,7 @@ export const PROJECT_STATUS_META: Record<
   archived: { label: '已归档', description: '项目暂停维护, 保留代码与文档.' },
 }
 
-export const PROJECT_NEED_META: Record<
-  ProjectNeed,
-  { label: string; description: string }
-> = {
+export const PROJECT_NEED_META: Record<ProjectNeed, { label: string; description: string }> = {
   feedback: {
     label: '求反馈',
     description: '需要真实使用反馈, 问题复现或体验建议.',

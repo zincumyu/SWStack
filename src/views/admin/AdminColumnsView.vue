@@ -6,12 +6,7 @@
       description="管理全部专栏内容与发布状态. 草稿不会公开, 发布后会出现在专栏首页和搜索结果中."
     >
       <template #actions>
-        <button
-          class="btn btn-secondary btn-sm"
-          type="button"
-          :disabled="loading"
-          @click="load()"
-        >
+        <button class="btn btn-secondary btn-sm" type="button" :disabled="loading" @click="load()">
           <RefreshCw :size="13" :class="{ spinning: loading }" />
           {{ loading ? '刷新中' : '刷新' }}
         </button>
@@ -55,12 +50,7 @@
           </option>
         </select>
         <button class="btn btn-secondary btn-sm" type="submit">筛选</button>
-        <button
-          v-if="hasFilters"
-          class="btn btn-ghost btn-sm"
-          type="button"
-          @click="clearFilters"
-        >
+        <button v-if="hasFilters" class="btn btn-ghost btn-sm" type="button" @click="clearFilters">
           重置
         </button>
         <span class="admin-counter">{{ total }} 条记录</span>
@@ -81,15 +71,11 @@
 
       <div v-else-if="error" class="column-error">
         <EmptyState title="加载专栏失败" :description="error">
-          <button class="btn btn-secondary btn-sm" type="button" @click="load()">
-            重试
-          </button>
+          <button class="btn btn-secondary btn-sm" type="button" @click="load()">重试</button>
         </EmptyState>
       </div>
 
-      <div v-else-if="columns.length === 0" class="admin-empty">
-        没有符合条件的专栏.
-      </div>
+      <div v-else-if="columns.length === 0" class="admin-empty">没有符合条件的专栏.</div>
 
       <div v-else class="admin-table-wrap">
         <table class="admin-table column-admin-table">
@@ -116,9 +102,7 @@
                   </RouterLink>
                   <span v-else class="column-title-text">{{ column.title }}</span>
                   <span v-if="column.featured" class="featured-label">精选</span>
-                  <span v-if="column.moderationLocked" class="locked-label">
-                    管理员已下线
-                  </span>
+                  <span v-if="column.moderationLocked" class="locked-label"> 管理员已下线 </span>
                 </div>
                 <span class="column-slug">
                   #{{ column.id }} / {{ column.slug }} · @{{ column.author.handle }}
@@ -197,10 +181,7 @@
                       :disabled="busyId === column.id"
                       @click="toggleFeatured(column)"
                     >
-                      <Star
-                        :size="11"
-                        :fill="column.featured ? 'currentColor' : 'none'"
-                      />
+                      <Star :size="11" :fill="column.featured ? 'currentColor' : 'none'" />
                       {{ column.featured ? '取消' : '精选' }}
                     </button>
                     <button
@@ -233,31 +214,15 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import {
-  Pencil,
-  Plus,
-  RefreshCw,
-  Search,
-  Star,
-  Trash2,
-} from 'lucide-vue-next'
+import { Pencil, Plus, RefreshCw, Search, Star, Trash2 } from 'lucide-vue-next'
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue'
 import AdminPagination from '@/components/admin/AdminPagination.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import { adminColumnApi } from '@/api/columns'
-import type {
-  AdminColumn,
-  AdminColumnQuery,
-  ColumnLevelFilter,
-  ColumnStatus,
-} from '@/api/types'
+import type { AdminColumn, AdminColumnQuery, ColumnLevelFilter, ColumnStatus } from '@/api/types'
 import { useToastStore } from '@/stores/toast'
 import { getErrorMessage } from '@/utils/errors'
-import {
-  COLUMN_LEVEL_META,
-  COLUMN_LEVELS,
-  COLUMN_STATUS_META,
-} from '@/utils/column-meta'
+import { COLUMN_LEVEL_META, COLUMN_LEVELS, COLUMN_STATUS_META } from '@/utils/column-meta'
 import { formatRelativeTime, formatShortDate } from '@/utils/format'
 
 const toastStore = useToastStore()

@@ -123,8 +123,7 @@ export const useMyProjectsStore = defineStore('my-projects', () => {
       items.value[index] = next
     }
     items.value = [...items.value].sort(
-      (a, b) =>
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
     )
     useProjectStore().invalidateAll()
     useAdminStore().invalidateProjects()

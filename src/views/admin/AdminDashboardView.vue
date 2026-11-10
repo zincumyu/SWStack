@@ -41,10 +41,7 @@
     </div>
 
     <div v-else-if="!overview || !stats" class="panel">
-      <EmptyState
-        title="管理数据加载失败"
-        :description="adminStore.overviewError || '请稍后重试.'"
-      >
+      <EmptyState title="管理数据加载失败" :description="adminStore.overviewError || '请稍后重试.'">
         <button class="btn btn-secondary btn-sm" type="button" @click="refresh">重试</button>
       </EmptyState>
     </div>
@@ -96,8 +93,7 @@
           <strong class="stat-value">{{ formatNumber(stats.projectCount) }}</strong>
           <span class="stat-meta stat-project-meta">
             <span>
-              {{ stats.pendingProjectCount }} 个待审核 /
-              {{ stats.hiddenProjectCount }} 个已隐藏
+              {{ stats.pendingProjectCount }} 个待审核 / {{ stats.hiddenProjectCount }} 个已隐藏
             </span>
             <span>板块{{ stats.projectBoardEnabled ? '公开' : '已关闭' }}</span>
           </span>
@@ -222,10 +218,7 @@
               <span class="recent-user-name">{{ member.name }}</span>
               <span>@{{ member.handle }}</span>
             </div>
-            <span
-              class="admin-badge"
-              :class="member.role === 'admin' ? 'admin' : 'member'"
-            >
+            <span class="admin-badge" :class="member.role === 'admin' ? 'admin' : 'member'">
               {{ member.role === 'admin' ? '管理员' : '成员' }}
             </span>
             <span class="recent-time">{{ formatShortDate(member.joinedAt) }}</span>

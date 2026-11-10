@@ -30,9 +30,7 @@
         >
           <X :size="13" />
         </button>
-        <button class="btn btn-primary search-submit" type="submit">
-          搜索
-        </button>
+        <button class="btn btn-primary search-submit" type="submit">搜索</button>
       </form>
     </header>
 
@@ -55,14 +53,15 @@
       </button>
     </nav>
 
-    <div v-if="keyword && result && !searchStore.loading && !searchStore.error" class="result-summary">
+    <div
+      v-if="keyword && result && !searchStore.loading && !searchStore.error"
+      class="result-summary"
+    >
       <span>
         <Layers3 :size="13" aria-hidden="true" />
         共找到 {{ totalResultCount }} 条结果
       </span>
-      <button class="clear-search" type="button" @click="clearSearch">
-        清除搜索
-      </button>
+      <button class="clear-search" type="button" @click="clearSearch">清除搜索</button>
     </div>
 
     <div
@@ -83,9 +82,7 @@
 
     <div v-else-if="keyword && searchStore.error" class="panel search-state">
       <EmptyState title="搜索失败" :description="searchStore.error">
-        <button class="btn btn-secondary btn-sm" type="button" @click="retrySearch">
-          重试
-        </button>
+        <button class="btn btn-secondary btn-sm" type="button" @click="retrySearch">重试</button>
       </EmptyState>
     </div>
 
@@ -118,7 +115,11 @@
 
       <div v-else>
         <div class="scope-note" aria-live="polite">
-          <span>{{ activeType === 'all' ? '每个范围展示前 4 条' : `${activeTabLabel}范围共 ${result.total} 条` }}</span>
+          <span>{{
+            activeType === 'all'
+              ? '每个范围展示前 4 条'
+              : `${activeTabLabel}范围共 ${result.total} 条`
+          }}</span>
           <button
             v-if="activeType !== 'all'"
             class="note-clear"
@@ -153,11 +154,7 @@
             </button>
           </header>
 
-          <component
-            :is="section.component"
-            :items="section.items"
-            :keyword="keyword"
-          />
+          <component :is="section.component" :items="section.items" :keyword="keyword" />
         </section>
 
         <AdminPagination
@@ -171,7 +168,10 @@
       </div>
     </template>
 
-    <div v-else-if="communityStore.tagsLoading && communityStore.allTags.length === 0" class="landing-grid">
+    <div
+      v-else-if="communityStore.tagsLoading && communityStore.allTags.length === 0"
+      class="landing-grid"
+    >
       <section class="panel guide-panel" aria-busy="true">
         <span class="skeleton guide-skeleton-title" />
         <span class="skeleton guide-skeleton-line" />
@@ -308,14 +308,7 @@ interface ResultSection {
 }
 
 const SEARCH_PAGE_SIZE = 8
-const SEARCH_TYPES: SearchType[] = [
-  'all',
-  'questions',
-  'projects',
-  'columns',
-  'tags',
-  'users',
-]
+const SEARCH_TYPES: SearchType[] = ['all', 'questions', 'projects', 'columns', 'tags', 'users']
 
 const SEARCH_TABS: SearchTab[] = [
   { key: 'all', label: '全部', icon: Layers3 },
@@ -392,9 +385,7 @@ const activeTabLabel = computed(
   () => SEARCH_TABS.find((tab) => tab.key === activeType.value)?.label ?? '全部',
 )
 const popularTags = computed(() => {
-  return [...communityStore.allTags]
-    .sort((a, b) => b.questionCount - a.questionCount)
-    .slice(0, 9)
+  return [...communityStore.allTags].sort((a, b) => b.questionCount - a.questionCount).slice(0, 9)
 })
 const resultSections = computed<ResultSection[]>(() => {
   const current = result.value
@@ -477,9 +468,7 @@ watch(
 )
 
 watchEffect(() => {
-  document.title = keyword.value
-    ? `搜索 ${keyword.value} - SWStack`
-    : '全站搜索 - SWStack'
+  document.title = keyword.value ? `搜索 ${keyword.value} - SWStack` : '全站搜索 - SWStack'
 })
 
 void communityStore.loadTags()
@@ -713,7 +702,9 @@ function retrySearch(): void {
   background: transparent;
   color: var(--text-muted);
   font-size: 12px;
-  transition: background-color 120ms ease, color 120ms ease;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
 }
 
 .scope-tab:hover {

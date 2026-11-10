@@ -27,9 +27,7 @@
           <Eye :size="13" />
           查看公开页
         </RouterLink>
-        <RouterLink class="btn btn-secondary btn-sm" :to="backTarget">
-          取消
-        </RouterLink>
+        <RouterLink class="btn btn-secondary btn-sm" :to="backTarget"> 取消 </RouterLink>
         <button
           class="btn btn-primary btn-sm"
           type="submit"
@@ -57,9 +55,7 @@
 
     <div v-else-if="loadError" class="panel page-state">
       <EmptyState title="无法加载专栏" :description="loadError">
-        <button class="btn btn-secondary btn-sm" type="button" @click="init">
-          重试
-        </button>
+        <button class="btn btn-secondary btn-sm" type="button" @click="init">重试</button>
         <RouterLink class="btn btn-ghost btn-sm" :to="backTarget">
           {{ backLabel }}
         </RouterLink>
@@ -79,7 +75,11 @@
         {{ errors.form }}
       </div>
 
-      <div v-if="!isAdminMode && form.moderationLocked" class="form-banner locked-banner" role="status">
+      <div
+        v-if="!isAdminMode && form.moderationLocked"
+        class="form-banner locked-banner"
+        role="status"
+      >
         <ShieldAlert :size="14" aria-hidden="true" />
         管理员已将这篇专栏下线. 你仍可以修改并保存为草稿, 需要管理员重新发布后才会公开.
       </div>
@@ -214,14 +214,15 @@
         </div>
 
         <div class="section-body">
-          <div v-if="communityStore.tagsLoading && communityStore.allTags.length === 0" class="tag-loading">
+          <div
+            v-if="communityStore.tagsLoading && communityStore.allTags.length === 0"
+            class="tag-loading"
+          >
             <span class="skeleton tag-skeleton" v-for="index in 8" :key="index" />
           </div>
           <div v-else-if="communityStore.tagsError" class="tag-load-error">
             <span>{{ communityStore.tagsError }}</span>
-            <button class="btn btn-secondary btn-sm" type="button" @click="retryTags">
-              重试
-            </button>
+            <button class="btn btn-secondary btn-sm" type="button" @click="retryTags">重试</button>
           </div>
           <div v-else class="tag-options">
             <label
@@ -318,11 +319,7 @@
           </div>
 
           <div v-else class="resource-list">
-            <div
-              v-for="(resource, index) in form.resources"
-              :key="index"
-              class="resource-row"
-            >
+            <div v-for="(resource, index) in form.resources" :key="index" class="resource-row">
               <div class="resource-row-head">
                 <span class="resource-number">资源 {{ index + 1 }}</span>
                 <button
@@ -365,9 +362,7 @@
                   />
                 </div>
                 <div class="field resource-description-field">
-                  <label class="field-label" :for="`resource-description-${index}`">
-                    说明
-                  </label>
+                  <label class="field-label" :for="`resource-description-${index}`"> 说明 </label>
                   <input
                     :id="`resource-description-${index}`"
                     v-model="resource.description"
@@ -388,9 +383,7 @@
           <p v-if="errors.resources" class="field-error resource-error">
             {{ errors.resources }}
           </p>
-          <p v-else class="resources-hint">
-            链接需要是 http(s) 地址. 发布前请确认资源可以访问.
-          </p>
+          <p v-else class="resources-hint">链接需要是 http(s) 地址. 发布前请确认资源可以访问.</p>
         </div>
       </section>
 
@@ -400,9 +393,7 @@
           {{ footerNote }}
         </p>
         <div class="footer-actions">
-          <RouterLink class="btn btn-secondary btn-sm" :to="backTarget">
-            取消
-          </RouterLink>
+          <RouterLink class="btn btn-secondary btn-sm" :to="backTarget"> 取消 </RouterLink>
           <button class="btn btn-primary btn-sm" type="submit" :disabled="saving">
             <Save :size="13" />
             {{ saving ? '保存中...' : '保存专栏' }}
@@ -432,12 +423,7 @@ import AdminPageHeader from '@/components/admin/AdminPageHeader.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import MarkdownRenderer from '@/components/markdown/MarkdownRenderer.vue'
 import { adminColumnApi, myColumnApi } from '@/api/columns'
-import type {
-  ColumnInput,
-  ColumnLevel,
-  ColumnStatus,
-  ColumnWorkspaceDetail,
-} from '@/api/types'
+import type { ColumnInput, ColumnLevel, ColumnStatus, ColumnWorkspaceDetail } from '@/api/types'
 import { useCommunityStore } from '@/stores/community'
 import { useToastStore } from '@/stores/toast'
 import { getErrorMessage } from '@/utils/errors'
@@ -476,16 +462,12 @@ const isEdit = computed(() => props.columnId !== null)
 const invalidId = computed(
   () =>
     isEdit.value &&
-    (props.columnId === null ||
-      !Number.isInteger(props.columnId) ||
-      props.columnId <= 0),
+    (props.columnId === null || !Number.isInteger(props.columnId) || props.columnId <= 0),
 )
 const backTarget = computed(() =>
   isAdminMode.value ? { name: 'admin-columns' } : { name: 'my-columns' },
 )
-const backLabel = computed(() =>
-  isAdminMode.value ? '返回专栏管理' : '返回我的专栏',
-)
+const backLabel = computed(() => (isAdminMode.value ? '返回专栏管理' : '返回我的专栏'))
 const editorDescription = computed(() =>
   isAdminMode.value
     ? '用 Markdown 组织学习路径, 并附上可验证的外部资源. 草稿只有管理员可见.'
@@ -707,8 +689,7 @@ async function save(): Promise<void> {
   }
   saving.value = true
   errors.form = ''
-  const status =
-    !isAdminMode.value && form.moderationLocked ? 'draft' : form.status
+  const status = !isAdminMode.value && form.moderationLocked ? 'draft' : form.status
   const input: ColumnInput = {
     title: form.title.trim(),
     slug: form.slug.trim(),

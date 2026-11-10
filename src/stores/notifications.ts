@@ -1,11 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { notificationApi } from '@/api/notifications'
-import type {
-  NotificationFilter,
-  NotificationItem,
-  NotificationQuery,
-} from '@/api/types'
+import type { NotificationFilter, NotificationItem, NotificationQuery } from '@/api/types'
 import { getErrorMessage } from '@/utils/errors'
 
 export const useNotificationStore = defineStore('notifications', () => {
@@ -21,9 +17,7 @@ export const useNotificationStore = defineStore('notifications', () => {
   const markingAll = ref(false)
   let sequence = 0
 
-  async function load(
-    options: { page?: number; filter?: NotificationFilter } = {},
-  ): Promise<void> {
+  async function load(options: { page?: number; filter?: NotificationFilter } = {}): Promise<void> {
     const nextPage = Math.max(1, options.page ?? page.value)
     const nextFilter = options.filter ?? filter.value
     const current = ++sequence
@@ -110,9 +104,7 @@ export const useNotificationStore = defineStore('notifications', () => {
     try {
       const result = await notificationApi.markAllRead()
       items.value =
-        filter.value === 'unread'
-          ? []
-          : items.value.map((item) => ({ ...item, read: true }))
+        filter.value === 'unread' ? [] : items.value.map((item) => ({ ...item, read: true }))
       if (filter.value === 'unread') {
         total.value = 0
         page.value = 1

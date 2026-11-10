@@ -193,12 +193,7 @@ import TopMembersCard from '@/components/sidebar/TopMembersCard.vue'
 import CommunityOverviewCard from '@/components/sidebar/CommunityOverviewCard.vue'
 import { useUserDirectoryStore } from '@/stores/users'
 import { useToastStore } from '@/stores/toast'
-import {
-  formatCompact,
-  formatNumber,
-  formatRelativeTime,
-  formatShortDate,
-} from '@/utils/format'
+import { formatCompact, formatNumber, formatRelativeTime, formatShortDate } from '@/utils/format'
 
 const route = useRoute()
 const userStore = useUserDirectoryStore()
@@ -230,9 +225,7 @@ watch(
 )
 
 watchEffect(() => {
-  document.title = profile.value
-    ? `${profile.value.name} - SWStack`
-    : '开发者主页 - SWStack'
+  document.title = profile.value ? `${profile.value.name} - SWStack` : '开发者主页 - SWStack'
 })
 </script>
 

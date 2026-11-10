@@ -88,7 +88,12 @@
     <template v-else>
       <section class="panel project-context" aria-labelledby="workspace-project-title">
         <div class="context-cover">
-          <img :src="project!.coverImage" :alt="`${project!.name} 项目封面`" />
+          <img
+            :src="project!.coverImage"
+            :alt="`${project!.name} 项目封面`"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
         <div class="context-copy">
           <div class="context-badges">
@@ -117,11 +122,7 @@
         </div>
       </section>
 
-      <p
-        v-if="error"
-        class="inline-error"
-        role="alert"
-      >
+      <p v-if="error" class="inline-error" role="alert">
         <AlertCircle :size="12" aria-hidden="true" />
         {{ error }}
       </p>
@@ -144,7 +145,11 @@
                   : '日志已经保存在工作台, 项目公开后会进入详情页时间线.'
               }}
             </p>
-            <button class="btn btn-secondary btn-sm mobile-compose" type="button" @click="startCreate">
+            <button
+              class="btn btn-secondary btn-sm mobile-compose"
+              type="button"
+              @click="startCreate"
+            >
               <Plus :size="12" />
               写日志
             </button>
@@ -307,11 +312,7 @@ import ProjectReviewBadge from '@/components/projects/ProjectReviewBadge.vue'
 import ProjectStatusBadge from '@/components/projects/ProjectStatusBadge.vue'
 import ProjectUpdateList from '@/components/projects/ProjectUpdateList.vue'
 import { projectApi } from '@/api/projects'
-import type {
-  ProjectUpdate,
-  ProjectUpdateInput,
-  ProjectUpdatesWorkspace,
-} from '@/api/types'
+import type { ProjectUpdate, ProjectUpdateInput, ProjectUpdatesWorkspace } from '@/api/types'
 import { useAdminStore } from '@/stores/admin'
 import { useMyProjectsStore } from '@/stores/my-projects'
 import { useProjectStore } from '@/stores/projects'
@@ -326,9 +327,7 @@ const myProjectsStore = useMyProjectsStore()
 const toastStore = useToastStore()
 
 const projectId = computed(() => Number(route.params.id))
-const invalidId = computed(
-  () => !Number.isInteger(projectId.value) || projectId.value <= 0,
-)
+const invalidId = computed(() => !Number.isInteger(projectId.value) || projectId.value <= 0)
 const workspace = ref<ProjectUpdatesWorkspace | null>(null)
 const loading = ref(false)
 const error = ref('')
@@ -596,9 +595,7 @@ async function confirmDelete(id: number): Promise<void> {
   try {
     await projectApi.deleteUpdate(id)
     if (workspace.value) {
-      workspace.value.updates = workspace.value.updates.filter(
-        (item) => item.id !== id,
-      )
+      workspace.value.updates = workspace.value.updates.filter((item) => item.id !== id)
       workspace.value.project.updateCount = workspace.value.updates.length
     }
     if (wasEditing) {

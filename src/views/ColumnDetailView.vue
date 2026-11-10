@@ -7,12 +7,7 @@
       </RouterLink>
     </div>
 
-    <div
-      v-if="loading && !column"
-      class="column-loading"
-      aria-busy="true"
-      aria-label="专栏加载中"
-    >
+    <div v-if="loading && !column" class="column-loading" aria-busy="true" aria-label="专栏加载中">
       <div class="panel hero-skeleton">
         <span class="skeleton loading-meta" />
         <span class="skeleton loading-title" />
@@ -29,12 +24,8 @@
 
     <div v-else-if="error" class="panel page-state">
       <EmptyState title="专栏不可用" :description="error">
-        <button class="btn btn-secondary btn-sm" type="button" @click="load">
-          重试
-        </button>
-        <RouterLink class="btn btn-ghost btn-sm" :to="{ name: 'columns' }">
-          返回专栏
-        </RouterLink>
+        <button class="btn btn-secondary btn-sm" type="button" @click="load">重试</button>
+        <RouterLink class="btn btn-ghost btn-sm" :to="{ name: 'columns' }"> 返回专栏 </RouterLink>
       </EmptyState>
     </div>
 
@@ -157,13 +148,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import {
-  ArrowLeft,
-  ArrowUpRight,
-  BookOpen,
-  ExternalLink,
-  Link2,
-} from 'lucide-vue-next'
+import { ArrowLeft, ArrowUpRight, BookOpen, ExternalLink, Link2 } from 'lucide-vue-next'
 import EmptyState from '@/components/common/EmptyState.vue'
 import TagChip from '@/components/common/TagChip.vue'
 import UserAvatar from '@/components/common/UserAvatar.vue'

@@ -22,17 +22,10 @@
           }}
         </p>
       </div>
-      <ProjectReviewBadge
-        v-if="reviewState"
-        :status="reviewState.reviewStatus"
-      />
+      <ProjectReviewBadge v-if="reviewState" :status="reviewState.reviewStatus" />
     </header>
 
-    <div
-      v-if="isEdit && myStore.editorLoading"
-      class="panel editor-loading"
-      aria-busy="true"
-    >
+    <div v-if="isEdit && myStore.editorLoading" class="panel editor-loading" aria-busy="true">
       <div class="loading-grid">
         <div class="loading-block">
           <span class="skeleton loading-line short" />
@@ -49,9 +42,7 @@
 
     <div v-else-if="isEdit && myStore.editorError" class="panel page-state">
       <EmptyState title="加载项目失败" :description="myStore.editorError">
-        <button class="btn btn-secondary btn-sm" type="button" @click="retryLoad">
-          重试
-        </button>
+        <button class="btn btn-secondary btn-sm" type="button" @click="retryLoad">重试</button>
         <RouterLink class="btn btn-ghost btn-sm" :to="{ name: 'my-projects' }">
           返回我的项目
         </RouterLink>
@@ -79,20 +70,14 @@
             <p>{{ reviewState.reviewNote || '请根据本次审核意见修改后重新提交.' }}</p>
           </div>
         </div>
-        <div
-          v-else-if="reviewState?.reviewStatus === 'approved'"
-          class="review-banner approved"
-        >
+        <div v-else-if="reviewState?.reviewStatus === 'approved'" class="review-banner approved">
           <Info :size="15" aria-hidden="true" />
           <div>
             <strong>项目当前已上线</strong>
             <p>保存修改后会重新进入审核, 审核通过前会暂时从公开项目展示下线.</p>
           </div>
         </div>
-        <div
-          v-else-if="reviewState?.reviewStatus === 'pending'"
-          class="review-banner pending"
-        >
+        <div v-else-if="reviewState?.reviewStatus === 'pending'" class="review-banner pending">
           <Clock3 :size="15" aria-hidden="true" />
           <div>
             <strong>项目正在审核中</strong>
@@ -252,9 +237,7 @@
               <div class="screenshot-head">
                 <div>
                   <span class="field-label">详情截图</span>
-                  <p class="field-hint">
-                    可选, 最多 4 张. 通过审核后会展示在项目详情的截图画廊.
-                  </p>
+                  <p class="field-hint">可选, 最多 4 张. 通过审核后会展示在项目详情的截图画廊.</p>
                 </div>
                 <span class="field-counter">
                   {{ form.screenshots.length }}/{{ SCREENSHOT_LIMIT }}
@@ -267,7 +250,12 @@
                   :key="index"
                   class="screenshot-item"
                 >
-                  <img :src="image" :alt="`详情截图 ${index + 1}`" loading="lazy" />
+                  <img
+                    :src="image"
+                    :alt="`详情截图 ${index + 1}`"
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <button
                     class="screenshot-remove"
                     type="button"
@@ -291,9 +279,7 @@
                   <Loader2 v-if="screenshotsUploading" :size="17" class="spin" />
                   <ImagePlus v-else :size="17" />
                   <span>{{ screenshotsUploading ? '上传中...' : '添加详情截图' }}</span>
-                  <small>
-                    {{ SCREENSHOT_LIMIT - form.screenshots.length }} 个空位
-                  </small>
+                  <small> {{ SCREENSHOT_LIMIT - form.screenshots.length }} 个空位 </small>
                 </button>
               </div>
 
@@ -325,11 +311,7 @@
                 <span class="required-mark" aria-hidden="true">*</span>
               </label>
               <select id="project-status" v-model="form.status" class="text-field select-field">
-                <option
-                  v-for="(meta, value) in PROJECT_STATUS_META"
-                  :key="value"
-                  :value="value"
-                >
+                <option v-for="(meta, value) in PROJECT_STATUS_META" :key="value" :value="value">
                   {{ meta.label }}
                 </option>
               </select>
@@ -582,10 +564,7 @@
               <ClipboardCheck :size="14" aria-hidden="true" />
               审核流程
             </h2>
-            <ProjectReviewBadge
-              v-if="reviewState"
-              :status="reviewState.reviewStatus"
-            />
+            <ProjectReviewBadge v-if="reviewState" :status="reviewState.reviewStatus" />
           </div>
           <ol class="review-steps">
             <li class="done">
@@ -1047,10 +1026,7 @@ async function uploadScreenshots(files: File[]): Promise<void> {
       if (version !== formVersion) {
         return
       }
-      if (
-        form.screenshots.length < SCREENSHOT_LIMIT &&
-        !form.screenshots.includes(image.url)
-      ) {
+      if (form.screenshots.length < SCREENSHOT_LIMIT && !form.screenshots.includes(image.url)) {
         form.screenshots.push(image.url)
       }
     }

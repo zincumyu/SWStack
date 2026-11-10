@@ -17,9 +17,14 @@ npm run dev
 ## 提交前检查
 
 ```bash
+npm run lint
+npm run format:check
 npm run typecheck
+npm test
 npm run build
 ```
+
+代码风格由 ESLint (flat config) 与 Prettier 约束, 提交前可执行 `npm run format` 自动格式化.
 
 ## 分支与提交
 

@@ -55,10 +55,7 @@
       v-else-if="projectStore.boardError && !projectStore.boardEnabled"
       class="panel board-error"
     >
-      <EmptyState
-        title="项目板块加载失败"
-        :description="projectStore.boardError"
-      >
+      <EmptyState title="项目板块加载失败" :description="projectStore.boardError">
         <button class="btn btn-secondary btn-sm" type="button" @click="retry">重试</button>
       </EmptyState>
     </div>
@@ -100,12 +97,7 @@
           <option value="teammates">找队友</option>
         </select>
         <button class="btn btn-secondary btn-sm" type="submit">搜索</button>
-        <button
-          v-if="hasFilters"
-          class="btn btn-ghost btn-sm"
-          type="button"
-          @click="resetFilters"
-        >
+        <button v-if="hasFilters" class="btn btn-ghost btn-sm" type="button" @click="resetFilters">
           重置
         </button>
         <span class="project-count">{{ projectStore.total }} 个项目</span>
@@ -129,19 +121,13 @@
       </div>
 
       <div v-else-if="projectStore.listError" class="panel board-error">
-        <EmptyState
-          title="加载项目失败"
-          :description="projectStore.listError"
-        >
+        <EmptyState title="加载项目失败" :description="projectStore.listError">
           <button class="btn btn-secondary btn-sm" type="button" @click="retry">重试</button>
         </EmptyState>
       </div>
 
       <div v-else-if="projectStore.projects.length === 0" class="panel board-error">
-        <EmptyState
-          title="没有找到项目"
-          description="换一个关键词, 状态或需求再试试."
-        >
+        <EmptyState title="没有找到项目" description="换一个关键词, 状态或需求再试试.">
           <button
             v-if="hasFilters"
             class="btn btn-secondary btn-sm"
@@ -190,9 +176,7 @@ const submitTarget = computed<RouteLocationRaw>(() =>
 
 const hasFilters = computed(
   () =>
-    Boolean(searchDraft.value.trim()) ||
-    statusFilter.value !== 'all' ||
-    needFilter.value !== 'all',
+    Boolean(searchDraft.value.trim()) || statusFilter.value !== 'all' || needFilter.value !== 'all',
 )
 
 const headCount = computed(() => {

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { ApiError } from '@/api/errors'
 import { questionApi } from '@/api/questions'
 import type { Answer, QuestionDetail } from '@/api/types'
 import { getErrorMessage } from '@/utils/errors'
@@ -28,7 +29,7 @@ export const useQuestionDetailStore = defineStore('question-detail', () => {
         return
       }
       error.value = getErrorMessage(cause)
-      notFound.value = cause instanceof Error && cause.message.includes('没有找到')
+      notFound.value = cause instanceof ApiError && cause.status === 404
     } finally {
       if (sequence === requestSequence) {
         loading.value = false

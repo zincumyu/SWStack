@@ -1,11 +1,7 @@
 <template>
   <article class="project-card panel">
     <div class="cover-wrap">
-      <RouterLink
-        class="cover-link"
-        :to="detailTarget"
-        :aria-label="`查看项目 ${project.name}`"
-      >
+      <RouterLink class="cover-link" :to="detailTarget" :aria-label="`查看项目 ${project.name}`">
         <img
           :src="project.coverImage"
           :alt="`${project.name} 界面截图`"
@@ -33,12 +29,7 @@
       </div>
 
       <div class="need-list">
-        <span
-          v-for="need in project.needs"
-          :key="need"
-          class="need-chip"
-          :class="need"
-        >
+        <span v-for="need in project.needs" :key="need" class="need-chip" :class="need">
           <MessageSquareText v-if="need === 'feedback'" :size="10" aria-hidden="true" />
           <UsersRound v-else :size="10" aria-hidden="true" />
           {{ PROJECT_NEED_META[need].label }}
@@ -90,13 +81,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
-import {
-  ExternalLink,
-  Github,
-  History,
-  MessageSquareText,
-  UsersRound,
-} from 'lucide-vue-next'
+import { ExternalLink, Github, History, MessageSquareText, UsersRound } from 'lucide-vue-next'
 import ProjectStatusBadge from '@/components/projects/ProjectStatusBadge.vue'
 import UserAvatar from '@/components/common/UserAvatar.vue'
 import type { ProjectSummary } from '@/api/types'
@@ -119,7 +104,9 @@ const detailTarget = computed<RouteLocationRaw>(() => ({
   min-width: 0;
   flex-direction: column;
   overflow: hidden;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
 }
 
 .project-card:hover {

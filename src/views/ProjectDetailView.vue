@@ -86,7 +86,12 @@
     <template v-else-if="project">
       <section class="project-hero panel" aria-labelledby="project-title">
         <div class="hero-cover">
-          <img :src="project.coverImage" :alt="`${project.name} 界面截图`" />
+          <img
+            :src="project.coverImage"
+            :alt="`${project.name} 界面截图`"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
 
         <div class="hero-copy">
@@ -106,12 +111,7 @@
           </div>
 
           <div class="hero-needs">
-            <span
-              v-for="need in project.needs"
-              :key="need"
-              class="need-pill"
-              :class="need"
-            >
+            <span v-for="need in project.needs" :key="need" class="need-pill" :class="need">
               <MessageSquareText v-if="need === 'feedback'" :size="11" />
               <UsersRound v-else :size="11" />
               {{ PROJECT_NEED_META[need].label }}
@@ -186,15 +186,10 @@
                 <Images :size="14" aria-hidden="true" />
                 项目截图
               </h2>
-              <span class="panel-note">
-                {{ project.screenshots.length }} 张, 点击放大
-              </span>
+              <span class="panel-note"> {{ project.screenshots.length }} 张, 点击放大 </span>
             </div>
             <div class="gallery-body">
-              <ProjectGallery
-                :images="project.screenshots"
-                :label="`${project.name} 截图`"
-              />
+              <ProjectGallery :images="project.screenshots" :label="`${project.name} 截图`" />
             </div>
           </section>
 
@@ -256,12 +251,7 @@
             </div>
             <div class="needs-body">
               <div v-if="project.needs.length" class="need-rows">
-                <div
-                  v-for="need in project.needs"
-                  :key="need"
-                  class="need-row"
-                  :class="need"
-                >
+                <div v-for="need in project.needs" :key="need" class="need-row" :class="need">
                   <span class="need-icon" aria-hidden="true">
                     <MessageSquareText v-if="need === 'feedback'" :size="13" />
                     <UsersRound v-else :size="13" />
@@ -396,9 +386,7 @@ const sessionStore = useSessionStore()
 const slug = computed(() => String(route.params.slug ?? ''))
 const project = computed(() => projectStore.current)
 const isOwner = computed(
-  () =>
-    Boolean(project.value) &&
-    sessionStore.user?.handle === project.value?.owner.handle,
+  () => Boolean(project.value) && sessionStore.user?.handle === project.value?.owner.handle,
 )
 
 const contactUrl = computed(() => {
@@ -407,9 +395,7 @@ const contactUrl = computed(() => {
     return ''
   }
   const needs = project.value?.needs ?? []
-  return needs.includes('feedback') && !needs.includes('teammates')
-    ? `${github}/issues`
-    : github
+  return needs.includes('feedback') && !needs.includes('teammates') ? `${github}/issues` : github
 })
 
 const contactLabel = computed(() => {

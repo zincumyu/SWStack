@@ -33,11 +33,7 @@
             <UserAvatar :user="project.owner" :size="16" />
             <SearchHighlight :text="project.owner.name" :keyword="keyword" />
           </span>
-          <span
-            v-for="tech in project.techStack.slice(0, 4)"
-            :key="tech"
-            class="tech-chip"
-          >
+          <span v-for="tech in project.techStack.slice(0, 4)" :key="tech" class="tech-chip">
             <SearchHighlight :text="tech" :keyword="keyword" />
           </span>
           <span class="project-updates">{{ project.updateCount }} 篇日志</span>

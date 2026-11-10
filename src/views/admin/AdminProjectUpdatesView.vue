@@ -82,7 +82,12 @@
     <template v-else>
       <section class="panel project-bar" aria-labelledby="admin-updates-project-title">
         <div class="project-cover">
-          <img :src="project.coverImage" :alt="`${project.name} 项目封面`" />
+          <img
+            :src="project.coverImage"
+            :alt="`${project.name} 项目封面`"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
         <div class="project-copy">
           <div class="project-badges">
@@ -131,9 +136,7 @@
         </div>
         <div class="moderation-note">
           <EyeOff :size="12" aria-hidden="true" />
-          <span>
-            审核页只读. 如需处理违规日志, 请在此删除. 删除后成员无法恢复该内容.
-          </span>
+          <span> 审核页只读. 如需处理违规日志, 请在此删除. 删除后成员无法恢复该内容. </span>
         </div>
         <ProjectUpdateList
           :updates="updates"
@@ -182,9 +185,7 @@ const projectStore = useProjectStore()
 const toastStore = useToastStore()
 
 const projectId = computed(() => Number(route.params.id))
-const invalidId = computed(
-  () => !Number.isInteger(projectId.value) || projectId.value <= 0,
-)
+const invalidId = computed(() => !Number.isInteger(projectId.value) || projectId.value <= 0)
 const workspace = ref<AdminProjectUpdatesWorkspace | null>(null)
 const loading = ref(false)
 const error = ref('')
@@ -196,9 +197,7 @@ let loadSequence = 0
 const project = computed(() => workspace.value?.project ?? null)
 const updates = computed(() => workspace.value?.updates ?? [])
 const isPublic = computed(
-  () =>
-    project.value?.reviewStatus === 'approved' &&
-    project.value.visibility === 'published',
+  () => project.value?.reviewStatus === 'approved' && project.value.visibility === 'published',
 )
 
 watch(
@@ -275,9 +274,7 @@ async function confirmDelete(id: number): Promise<void> {
   try {
     await adminApi.deleteProjectUpdate(id)
     if (workspace.value) {
-      workspace.value.updates = workspace.value.updates.filter(
-        (item) => item.id !== id,
-      )
+      workspace.value.updates = workspace.value.updates.filter((item) => item.id !== id)
       workspace.value.project.updateCount = workspace.value.updates.length
     }
     pendingDeleteId.value = null

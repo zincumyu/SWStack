@@ -28,11 +28,7 @@
             <UserAvatar :user="column.author" :size="16" />
             <SearchHighlight :text="column.author.name" :keyword="keyword" />
           </span>
-          <span
-            v-for="tag in column.tags.slice(0, 3)"
-            :key="tag.slug"
-            class="column-tag"
-          >
+          <span v-for="tag in column.tags.slice(0, 3)" :key="tag.slug" class="column-tag">
             #<SearchHighlight :text="tag.name" :keyword="keyword" />
           </span>
           <span class="column-resources">{{ column.resourceCount }} 个资源</span>

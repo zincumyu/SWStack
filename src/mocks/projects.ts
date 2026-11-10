@@ -495,9 +495,7 @@ for (const seed of projectSeeds) {
       createdAt: daysAgo(update.daysAgo),
       authorHandle: update.author,
     }))
-    .sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    )
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   updatesByProject.set(seed.id, records)
 }
 
@@ -543,8 +541,7 @@ export function getProjectReviewedAt(id: number): string | undefined {
 
 export function isProjectPublic(seed: ProjectSeed): boolean {
   return (
-    getProjectVisibility(seed.id) === 'published' &&
-    getProjectReviewStatus(seed.id) === 'approved'
+    getProjectVisibility(seed.id) === 'published' && getProjectReviewStatus(seed.id) === 'approved'
   )
 }
 
@@ -579,9 +576,8 @@ export function getProjectStats(): {
 } {
   return {
     projectCount: projectSeeds.length,
-    hiddenProjectCount: projectSeeds.filter(
-      (seed) => getProjectVisibility(seed.id) === 'hidden',
-    ).length,
+    hiddenProjectCount: projectSeeds.filter((seed) => getProjectVisibility(seed.id) === 'hidden')
+      .length,
     pendingProjectCount: projectSeeds.filter(
       (seed) => getProjectReviewStatus(seed.id) === 'pending',
     ).length,
@@ -618,9 +614,7 @@ function toProjectUpdate(record: ProjectUpdateRecord): ProjectUpdate {
 
 export function toProjectUpdates(seed: ProjectSeed): ProjectUpdate[] {
   return [...projectUpdates(seed)]
-    .sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    )
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .map(toProjectUpdate)
 }
 
@@ -777,10 +771,7 @@ export function toProjectEditData(seed: ProjectSeed): ProjectEditData {
   }
 }
 
-export function createProjectSeed(
-  input: ProjectDraftInput,
-  ownerHandle: string,
-): ProjectSeed {
+export function createProjectSeed(input: ProjectDraftInput, ownerHandle: string): ProjectSeed {
   const id = Math.max(0, ...projectSeeds.map((item) => item.id)) + 1
   const seed: ProjectSeed = {
     id,

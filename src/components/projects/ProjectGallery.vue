@@ -9,7 +9,7 @@
         :aria-label="`放大第 ${index + 1} 张${label}`"
         @click="open(index)"
       >
-        <img :src="image" :alt="`${label} ${index + 1}`" loading="lazy" />
+        <img :src="image" :alt="`${label} ${index + 1}`" loading="lazy" decoding="async" />
         <span class="thumb-index">{{ String(index + 1).padStart(2, '0') }}</span>
         <span class="thumb-zoom" aria-hidden="true">
           <ZoomIn :size="12" />
@@ -28,9 +28,7 @@
         @click.self="close"
       >
         <div class="lightbox-bar">
-          <span class="lightbox-count">
-            {{ activeIndex + 1 }} / {{ images.length }}
-          </span>
+          <span class="lightbox-count"> {{ activeIndex + 1 }} / {{ images.length }} </span>
           <span class="lightbox-title">{{ label }}</span>
           <button
             ref="closeButton"
@@ -134,9 +132,7 @@ function handleKeydown(event: KeyboardEvent): void {
     return
   }
   if (event.key === 'Tab') {
-    const buttons = dialogRoot.value?.querySelectorAll<HTMLButtonElement>(
-      'button:not(:disabled)',
-    )
+    const buttons = dialogRoot.value?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')
     if (!buttons?.length) {
       return
     }

@@ -76,8 +76,7 @@ export function setTagStatus(slug: string, status: AdminTagStatus): void {
 
 export function accountEmail(userId: number, handle: string): string {
   return (
-    accounts.find((account) => account.userId === userId)?.email ??
-    `${handle}@campus.swstack.dev`
+    accounts.find((account) => account.userId === userId)?.email ?? `${handle}@campus.swstack.dev`
   )
 }
 

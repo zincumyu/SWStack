@@ -18,12 +18,7 @@
         <span v-if="total > 0" class="head-count">共 {{ total }} 篇专栏</span>
       </div>
       <div class="head-actions">
-        <button
-          class="btn btn-secondary btn-sm"
-          type="button"
-          :disabled="loading"
-          @click="load()"
-        >
+        <button class="btn btn-secondary btn-sm" type="button" :disabled="loading" @click="load()">
           <RefreshCw :size="13" :class="{ spinning: loading }" />
           {{ loading ? '刷新中' : '刷新' }}
         </button>
@@ -49,9 +44,7 @@
 
     <div v-else-if="error" class="panel page-state">
       <EmptyState title="加载我的专栏失败" :description="error">
-        <button class="btn btn-secondary btn-sm" type="button" @click="load()">
-          重试
-        </button>
+        <button class="btn btn-secondary btn-sm" type="button" @click="load()">重试</button>
       </EmptyState>
     </div>
 
@@ -189,26 +182,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import {
-  ArrowLeft,
-  Eye,
-  Pencil,
-  Plus,
-  RefreshCw,
-  Send,
-  ShieldCheck,
-  Trash2,
-} from 'lucide-vue-next'
+import { ArrowLeft, Eye, Pencil, Plus, RefreshCw, Send, ShieldCheck, Trash2 } from 'lucide-vue-next'
 import AdminPagination from '@/components/admin/AdminPagination.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import { myColumnApi } from '@/api/columns'
 import type { ColumnWorkspaceItem } from '@/api/types'
 import { useToastStore } from '@/stores/toast'
 import { getErrorMessage } from '@/utils/errors'
-import {
-  COLUMN_LEVEL_META,
-  COLUMN_STATUS_META,
-} from '@/utils/column-meta'
+import { COLUMN_LEVEL_META, COLUMN_STATUS_META } from '@/utils/column-meta'
 import { formatRelativeTime } from '@/utils/format'
 
 const toastStore = useToastStore()

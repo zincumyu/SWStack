@@ -41,19 +41,16 @@
           <option value="unanswered">未回答</option>
         </select>
         <button class="btn btn-secondary btn-sm" type="submit">筛选</button>
-        <button
-          v-if="hasFilters"
-          class="btn btn-ghost btn-sm"
-          type="button"
-          @click="clearFilters"
-        >
+        <button v-if="hasFilters" class="btn btn-ghost btn-sm" type="button" @click="clearFilters">
           重置
         </button>
         <span class="admin-counter">{{ adminStore.questionTotal }} 条记录</span>
       </form>
 
       <p
-        v-if="!adminStore.questionsLoading && !adminStore.questionsError && adminStore.questions.length"
+        v-if="
+          !adminStore.questionsLoading && !adminStore.questionsError && adminStore.questions.length
+        "
         class="admin-table-hint"
       >
         左右滑动表格可查看完整内容.
@@ -68,10 +65,7 @@
       </div>
 
       <div v-else-if="adminStore.questionsError" class="question-error">
-        <EmptyState
-          title="加载问题失败"
-          :description="adminStore.questionsError"
-        >
+        <EmptyState title="加载问题失败" :description="adminStore.questionsError">
           <button class="btn btn-secondary btn-sm" type="button" @click="refresh">重试</button>
         </EmptyState>
       </div>
@@ -159,10 +153,7 @@
                       :disabled="adminStore.questionBusyId === question.id"
                       @click="toggleFeatured(question)"
                     >
-                      <Star
-                        :size="11"
-                        :fill="question.isFeatured ? 'currentColor' : 'none'"
-                      />
+                      <Star :size="11" :fill="question.isFeatured ? 'currentColor' : 'none'" />
                       {{ question.isFeatured ? '取消精选' : '精选' }}
                     </button>
                     <button
@@ -206,14 +197,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import {
-  Eye,
-  EyeOff,
-  RefreshCw,
-  Search,
-  Star,
-  Trash2,
-} from 'lucide-vue-next'
+import { Eye, EyeOff, RefreshCw, Search, Star, Trash2 } from 'lucide-vue-next'
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue'
 import AdminPagination from '@/components/admin/AdminPagination.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
@@ -234,14 +218,10 @@ const searchDraft = ref(typeof route.query.q === 'string' ? route.query.q : '')
 const statusFilter = ref<AdminQuestionFilter>(readStatus(route.query.status))
 const pendingDeleteId = ref<number | null>(null)
 
-const hasFilters = computed(
-  () => Boolean(searchDraft.value.trim()) || statusFilter.value !== 'all',
-)
+const hasFilters = computed(() => Boolean(searchDraft.value.trim()) || statusFilter.value !== 'all')
 
 function readStatus(value: unknown): AdminQuestionFilter {
-  return value === 'hidden' || value === 'published' || value === 'unanswered'
-    ? value
-    : 'all'
+  return value === 'hidden' || value === 'published' || value === 'unanswered' ? value : 'all'
 }
 
 function load(): void {

@@ -14,10 +14,17 @@ export const useSessionStore = defineStore('session', () => {
 
   const isAuthenticated = computed(() => Boolean(user.value))
   const isAdmin = computed(() => user.value?.role === 'admin')
-  const canWriteColumns = computed(
-    () => Boolean(user.value && (user.value.role === 'admin' || user.value.canWriteColumns)),
+  const canWriteColumns = computed(() =>
+    Boolean(user.value && (user.value.role === 'admin' || user.value.canWriteColumns)),
   )
 
+  /**
+   * 加载当前会话.
+   *
+   * 只有成功或明确未登录 (401) 时才把 `initialized` 置为 true.
+   * 网络错误或 5xx 会保留可重试状态, 下次 `load()` 重新请求,
+   * 避免一次失败就把整个应用永久锁在未登录状态.
+   */
   function load(): Promise<void> {
     if (initialized.value) {
       return Promise.resolve()
@@ -32,18 +39,20 @@ export const useSessionStore = defineStore('session', () => {
       .me()
       .then((result) => {
         user.value = result
+        initialized.value = true
       })
       .catch((cause) => {
         if (cause instanceof ApiError && cause.status === 401) {
           user.value = null
           error.value = null
+          initialized.value = true
           return
         }
+        user.value = null
         error.value = getErrorMessage(cause)
       })
       .finally(() => {
         loading.value = false
-        initialized.value = true
         pending = null
       })
 

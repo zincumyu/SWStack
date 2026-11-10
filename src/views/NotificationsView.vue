@@ -102,9 +102,7 @@
         >
           查看全部通知
         </button>
-        <button v-else class="btn btn-secondary btn-sm" type="button" @click="refresh">
-          刷新
-        </button>
+        <button v-else class="btn btn-secondary btn-sm" type="button" @click="refresh">刷新</button>
       </EmptyState>
     </div>
 
@@ -169,11 +167,7 @@ import {
 } from 'lucide-vue-next'
 import AdminPagination from '@/components/admin/AdminPagination.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
-import type {
-  NotificationFilter,
-  NotificationItem,
-  NotificationType,
-} from '@/api/types'
+import type { NotificationFilter, NotificationItem, NotificationType } from '@/api/types'
 import { useNotificationStore } from '@/stores/notifications'
 import { useToastStore } from '@/stores/toast'
 import { getErrorMessage } from '@/utils/errors'
@@ -182,10 +176,7 @@ import { formatRelativeTime } from '@/utils/format'
 const store = useNotificationStore()
 const toastStore = useToastStore()
 
-const TYPE_META: Record<
-  NotificationType,
-  { label: string; icon: Component }
-> = {
+const TYPE_META: Record<NotificationType, { label: string; icon: Component }> = {
   project_approved: { label: '项目审核', icon: CheckCircle2 },
   project_rejected: { label: '项目审核', icon: XCircle },
   column_access_granted: { label: '专栏权限', icon: ShieldCheck },
@@ -223,9 +214,7 @@ function openNotification(item: NotificationItem): void {
 async function handleMarkAll(): Promise<void> {
   try {
     const updated = await store.markAllRead()
-    toastStore.success(
-      updated > 0 ? `已将 ${updated} 条通知标为已读` : '没有未读通知',
-    )
+    toastStore.success(updated > 0 ? `已将 ${updated} 条通知标为已读` : '没有未读通知')
   } catch (cause) {
     toastStore.error(getErrorMessage(cause))
   }

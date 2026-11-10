@@ -80,11 +80,7 @@
     </div>
 
     <template v-else>
-      <div
-        v-if="reviewTarget.reviewStatus === 'rejected'"
-        class="review-note-banner"
-        role="status"
-      >
+      <div v-if="reviewTarget.reviewStatus === 'rejected'" class="review-note-banner" role="status">
         <AlertTriangle :size="14" aria-hidden="true" />
         <div>
           <strong>该项目曾因资料问题被退回</strong>
@@ -99,6 +95,8 @@
               <img
                 :src="reviewTarget.coverImage"
                 :alt="`${reviewTarget.name} 项目截图`"
+                loading="lazy"
+                decoding="async"
               />
             </div>
             <div class="hero-copy">
@@ -133,11 +131,7 @@
               </div>
 
               <div class="hero-tech">
-                <span
-                  v-for="tech in reviewTarget.techStack"
-                  :key="tech"
-                  class="tech-chip"
-                >
+                <span v-for="tech in reviewTarget.techStack" :key="tech" class="tech-chip">
                   {{ tech }}
                 </span>
               </div>
@@ -155,10 +149,7 @@
                 <span class="need-hint">{{ needsHint }}</span>
               </div>
 
-              <div
-                v-if="reviewTarget.githubUrl || reviewTarget.demoUrl"
-                class="hero-links"
-              >
+              <div v-if="reviewTarget.githubUrl || reviewTarget.demoUrl" class="hero-links">
                 <a
                   v-if="reviewTarget.githubUrl"
                   :href="reviewTarget.githubUrl"
@@ -182,10 +173,7 @@
             </div>
           </section>
 
-          <section
-            class="panel review-gallery"
-            aria-labelledby="review-gallery-title"
-          >
+          <section class="panel review-gallery" aria-labelledby="review-gallery-title">
             <div class="panel-header">
               <h2 id="review-gallery-title" class="panel-title">
                 <Images :size="14" aria-hidden="true" />
@@ -320,9 +308,7 @@
                 <div class="note-field">
                   <div class="note-label-row">
                     <label class="note-label" for="review-note">审核备注</label>
-                    <span class="note-mode">
-                      通过时可选 / 驳回时必填
-                    </span>
+                    <span class="note-mode"> 通过时可选 / 驳回时必填 </span>
                   </div>
                   <textarea
                     id="review-note"
@@ -340,12 +326,7 @@
                   <p v-if="noteError" class="note-error">{{ noteError }}</p>
                 </div>
 
-                <div
-                  v-if="actionError"
-                  class="action-error"
-                  role="alert"
-                  aria-live="polite"
-                >
+                <div v-if="actionError" class="action-error" role="alert" aria-live="polite">
                   <AlertCircle :size="13" />
                   {{ actionError }}
                 </div>
@@ -483,9 +464,7 @@ const needsHint = computed(() => {
   if (!reviewTarget.value || reviewTarget.value.needs.length === 0) {
     return ''
   }
-  return reviewTarget.value.needs
-    .map((need) => PROJECT_NEED_META[need].description)
-    .join(' ')
+  return reviewTarget.value.needs.map((need) => PROJECT_NEED_META[need].description).join(' ')
 })
 
 async function load(force = false): Promise<void> {

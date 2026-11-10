@@ -123,7 +123,12 @@
                 提问者已采纳一个回答
               </span>
             </div>
-            <div v-if="answersSorted.length > 1" class="answer-sort" role="group" aria-label="回答排序">
+            <div
+              v-if="answersSorted.length > 1"
+              class="answer-sort"
+              role="group"
+              aria-label="回答排序"
+            >
               <button
                 class="sort-button"
                 :class="{ active: answerSort === 'votes' }"
@@ -193,14 +198,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import {
-  BellPlus,
-  Check,
-  CheckCircle2,
-  ChevronRight,
-  LogIn,
-  Share2,
-} from 'lucide-vue-next'
+import { BellPlus, Check, CheckCircle2, ChevronRight, LogIn, Share2 } from 'lucide-vue-next'
 import AnswerEditor from '@/components/questions/AnswerEditor.vue'
 import AnswerItem from '@/components/questions/AnswerItem.vue'
 import CommentList from '@/components/questions/CommentList.vue'
@@ -216,12 +214,7 @@ import { useQuestionDetailStore } from '@/stores/question-detail'
 import { useSessionStore } from '@/stores/session'
 import { useToastStore } from '@/stores/toast'
 import { copyCurrentUrl } from '@/utils/clipboard'
-import {
-  formatCompact,
-  formatDateTime,
-  formatNumber,
-  formatRelativeTime,
-} from '@/utils/format'
+import { formatCompact, formatDateTime, formatNumber, formatRelativeTime } from '@/utils/format'
 import { getErrorMessage } from '@/utils/errors'
 
 const route = useRoute()
@@ -359,9 +352,7 @@ watch(
 )
 
 watchEffect(() => {
-  document.title = question.value
-    ? `${question.value.title} - SWStack`
-    : '问题详情 - SWStack'
+  document.title = question.value ? `${question.value.title} - SWStack` : '问题详情 - SWStack'
 })
 
 onBeforeUnmount(() => {
