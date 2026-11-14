@@ -163,6 +163,9 @@ import {
   RefreshCw,
   ShieldCheck,
   ShieldOff,
+  UserCheck,
+  UserPlus,
+  UserX,
   XCircle,
 } from 'lucide-vue-next'
 import AdminPagination from '@/components/admin/AdminPagination.vue'
@@ -183,6 +186,9 @@ const TYPE_META: Record<NotificationType, { label: string; icon: Component }> = 
   column_access_revoked: { label: '专栏权限', icon: ShieldOff },
   column_unpublished: { label: '专栏管理', icon: EyeOff },
   question_answered: { label: '问答', icon: MessageSquare },
+  project_application_received: { label: '组队申请', icon: UserPlus },
+  project_application_accepted: { label: '组队申请', icon: UserCheck },
+  project_application_rejected: { label: '组队申请', icon: UserX },
 }
 
 function refresh(): void {
@@ -482,6 +488,24 @@ onMounted(() => {
   border-color: #d3e5f2;
   background: #eaf3fa;
   color: var(--link);
+}
+
+.type-icon.project_application_received {
+  border-color: var(--brand-border);
+  background: var(--brand-soft);
+  color: var(--brand-hover);
+}
+
+.type-icon.project_application_accepted {
+  border-color: #cfe4d7;
+  background: var(--accepted-bg);
+  color: var(--accepted);
+}
+
+.type-icon.project_application_rejected {
+  border-color: #e8cfcf;
+  background: #fbf1f1;
+  color: var(--danger);
 }
 
 .notification-copy {

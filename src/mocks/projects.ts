@@ -668,12 +668,23 @@ export function deleteProjectUpdate(seed: ProjectSeed, updateId: number): boolea
   return true
 }
 
-function toMembers(seed: ProjectSeed): ProjectMember[] {
+export function toMembers(seed: ProjectSeed): ProjectMember[] {
   return seed.members.map((member) => ({
     user: userByHandle(member.handle),
     role: member.role,
     isOwner: member.handle === seed.ownerHandle,
   }))
+}
+
+export function isProjectMember(seed: ProjectSeed, handle: string): boolean {
+  return seed.members.some((member) => member.handle === handle)
+}
+
+export function addProjectMember(seed: ProjectSeed, handle: string, role: string): void {
+  if (isProjectMember(seed, handle)) {
+    return
+  }
+  seed.members.push({ handle, role })
 }
 
 export function toProjectSummary(seed: ProjectSeed): ProjectSummary {

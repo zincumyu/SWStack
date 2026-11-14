@@ -41,6 +41,10 @@ import type {
   NotificationReadAllResult,
   NotificationUnreadCount,
   PageResult,
+  ProjectApplication,
+  ProjectApplicationInput,
+  ProjectApplicationReviewInput,
+  ProjectApplicationsWorkspace,
   ProjectBoardSettings,
   ProjectDetail,
   ProjectDraftInput,
@@ -90,6 +94,7 @@ import {
   accountEmail,
   authenticate,
   clearSession,
+  currentSessionUser,
   getQuestionStatus,
   getTagStatus,
   getUserColumnAccess,
@@ -109,6 +114,7 @@ import {
 import {
   applyProjectInput,
   applyProjectUpdate,
+  addProjectMember,
   createProjectSeed,
   createProjectUpdate,
   deleteProjectUpdate,
@@ -116,6 +122,7 @@ import {
   getProjectBoardEnabled,
   getProjectReviewStatus,
   getProjectStats,
+  isProjectMember,
   isProjectPublic,
   projectSeeds,
   setProjectBoardEnabled,
@@ -129,6 +136,14 @@ import {
   toProjectSummary,
   toProjectUpdates,
 } from './projects'
+import {
+  createProjectApplication,
+  findProjectApplicationRecord,
+  findViewerApplication,
+  hasApplicantApplied,
+  listProjectApplications,
+  reviewProjectApplication,
+} from './project-applications'
 import {
   createAdminColumn,
   createMyColumn,
@@ -407,6 +422,55 @@ function readProjectUpdateInput(value: unknown): ProjectUpdateInput {
     throw new ApiError('开发日志内容需要 20-3000 个字符', 422)
   }
   return { title, body }
+}
+
+const PROJECT_APPLICATION_SKILL_LIMIT = 8
+
+function readProjectApplicationInput(value: unknown): ProjectApplicationInput {
+  const input = (value ?? {}) as Partial<ProjectApplicationInput>
+  const focus = readString(input.focus)
+  const message = readString(input.message)
+
+  if (focus.length < 2 || focus.length > 40) {
+    throw new ApiError('想参与的模块需要 2-40 个字符', 422)
+  }
+  if (message.length < 20 || message.length > 1000) {
+    throw new ApiError('自我介绍需要 20-1000 个字符', 422)
+  }
+
+  const skills = Array.from(
+    new Set(
+      (Array.isArray(input.skills) ? input.skills : [])
+        .map(readString)
+        .filter((item) => item.length > 0),
+    ),
+  )
+  if (skills.length < 1 || skills.length > PROJECT_APPLICATION_SKILL_LIMIT) {
+    throw new ApiError(`请填写 1-${PROJECT_APPLICATION_SKILL_LIMIT} 项相关技能`, 422)
+  }
+  if (skills.some((item) => item.length < 2 || item.length > 24)) {
+    throw new ApiError('每项技能需要 2-24 个字符', 422)
+  }
+
+  return { skills, focus, message }
+}
+
+function readProjectApplicationReviewInput(value: unknown): ProjectApplicationReviewInput {
+  const input = (value ?? {}) as Partial<ProjectApplicationReviewInput>
+  const status = readString(input.status)
+  const reviewNote = readString(input.reviewNote)
+
+  if (status !== 'accepted' && status !== 'rejected') {
+    throw new ApiError('无效的申请处理结果', 422)
+  }
+  if (status === 'rejected' && (reviewNote.length < 5 || reviewNote.length > 200)) {
+    throw new ApiError('拒绝申请时需要填写原因, 5-200 个字符', 422)
+  }
+  if (reviewNote.length > 200) {
+    throw new ApiError('审核备注不能超过 200 个字符', 422)
+  }
+
+  return { status, reviewNote: reviewNote || undefined }
 }
 
 function readColumnInput(value: unknown, currentId?: number): ColumnInput {
@@ -1042,7 +1106,111 @@ const handlers = {
     if (!seed || !isProjectPublic(seed)) {
       throw new ApiError('没有找到这个项目', 404)
     }
-    return clone(toProjectDetail(seed))
+    const detail = toProjectDetail(seed)
+    const viewer = currentSessionUser()
+    if (viewer) {
+      detail.viewerApplication = findViewerApplication(seed.id, viewer.handle)
+    }
+    return clone(detail)
+  },
+
+  async 'POST /projects/:id/applications'(
+    config: ApiRequestConfig,
+    id: number,
+  ): Promise<ProjectApplication> {
+    const user = requireSessionUser()
+    const seed = projectSeeds.find((item) => item.id === id)
+    if (!seed || !isProjectPublic(seed)) {
+      throw new ApiError('没有找到这个项目', 404)
+    }
+    if (seed.ownerHandle === user.handle) {
+      throw new ApiError('项目负责人不需要申请加入自己的项目', 409)
+    }
+    if (isProjectMember(seed, user.handle)) {
+      throw new ApiError('你已经是项目成员', 409)
+    }
+    if (!seed.needs.includes('teammates')) {
+      throw new ApiError('这个项目当前不需要队友', 422)
+    }
+    if (hasApplicantApplied(seed.id, user.handle)) {
+      throw new ApiError('你已经提交过这个项目的申请, 请等待负责人处理', 409)
+    }
+
+    const input = readProjectApplicationInput(config.data)
+    const application = createProjectApplication(seed.id, user.handle, input)
+    notifyUserByHandle(seed.ownerHandle, {
+      type: 'project_application_received',
+      title: '收到新的组队申请',
+      body: `${user.name} 申请加入 ${seed.name}: ${input.focus}.`,
+      link: `/my/projects/${seed.id}/applications`,
+    })
+    return clone(application)
+  },
+
+  async 'GET /projects/mine/:id/applications'(
+    _config: ApiRequestConfig,
+    id: number,
+  ): Promise<ProjectApplicationsWorkspace> {
+    const user = requireSessionUser()
+    const seed = projectSeeds.find((item) => item.id === id)
+    if (!seed) {
+      throw new ApiError('没有找到这个项目', 404)
+    }
+    if (seed.ownerHandle !== user.handle) {
+      throw new ApiError('只有项目负责人可以查看组队申请', 403)
+    }
+    return clone({
+      project: toMyProject(seed),
+      applications: listProjectApplications(seed.id),
+    })
+  },
+
+  async 'PATCH /project-applications/:id'(
+    config: ApiRequestConfig,
+    id: number,
+  ): Promise<ProjectApplication> {
+    const user = requireSessionUser()
+    const record = findProjectApplicationRecord(id)
+    if (!record) {
+      throw new ApiError('没有找到这条申请', 404)
+    }
+    const seed = projectSeeds.find((item) => item.id === record.projectId)
+    if (!seed) {
+      throw new ApiError('没有找到这个项目', 404)
+    }
+    if (seed.ownerHandle !== user.handle) {
+      throw new ApiError('只有项目负责人可以处理组队申请', 403)
+    }
+    if (record.status !== 'pending') {
+      throw new ApiError('这条申请已经处理过, 不能再次修改', 409)
+    }
+    const input = readProjectApplicationReviewInput(config.data)
+    const applicant = users.find((item) => item.handle === record.applicantHandle)
+    if (!applicant) {
+      throw new ApiError('没有找到申请人账号', 404)
+    }
+    if (input.status === 'accepted') {
+      addProjectMember(seed, record.applicantHandle, record.focus)
+    }
+    const application = reviewProjectApplication(record, input.status, input.reviewNote)
+    if (input.status === 'accepted') {
+      notifyUser(applicant.id, {
+        type: 'project_application_accepted',
+        title: '组队申请已通过',
+        body: `你已加入项目 ${seed.name}, 担任 ${record.focus}.${
+          input.reviewNote ? ` 负责人留言: ${input.reviewNote}` : ''
+        }`,
+        link: `/projects/${seed.slug}`,
+      })
+    } else {
+      notifyUser(applicant.id, {
+        type: 'project_application_rejected',
+        title: '组队申请未通过',
+        body: `你对项目 ${seed.name} 的组队申请未通过. 负责人原因: ${input.reviewNote}`,
+        link: `/projects/${seed.slug}`,
+      })
+    }
+    return clone(application)
   },
 
   async 'GET /projects/mine'(): Promise<MyProject[]> {
@@ -1795,6 +1963,21 @@ export async function mockRequest<T>(config: ApiRequestConfig): Promise<T> {
       pattern: /^\/users\/([^/]+)$/,
       key: 'GET /users/:handle',
       extract: (m) => decodeURIComponent(m[1]),
+    },
+    {
+      pattern: /^\/projects\/(\d+)\/applications$/,
+      key: 'POST /projects/:id/applications',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/projects\/mine\/(\d+)\/applications$/,
+      key: 'GET /projects/mine/:id/applications',
+      extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/project-applications\/(\d+)$/,
+      key: 'PATCH /project-applications/:id',
+      extract: (m) => Number(m[1]),
     },
     {
       pattern: /^\/projects\/mine\/(\d+)$/,

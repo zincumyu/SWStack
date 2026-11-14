@@ -48,40 +48,41 @@ npm run dev
 
 ## 页面路由
 
-| 路由                          | 页面                                         |
-| ----------------------------- | -------------------------------------------- |
-| `/`                           | 问题列表与排序                               |
-| `/search?q=&type=&page=`      | 全站搜索, 覆盖问题, 项目, 专栏, 标签与开发者 |
-| `/questions/:id`              | 问题详情, Markdown 正文, 回答与投票          |
-| `/tags`                       | 标签目录                                     |
-| `/tags/:slug`                 | 标签下的问题                                 |
-| `/projects`                   | 项目展示, 支持状态与需求筛选                 |
-| `/projects/:slug`             | 项目详情, 截图画廊, README, 成员与开发日志   |
-| `/my/projects`                | 我的项目工作台, 需要登录                     |
-| `/my/projects/new`            | 发布项目, 上传封面与截图并提交审核, 需要登录 |
-| `/my/projects/:id/edit`       | 编辑自己的项目并重新提交审核, 需要登录       |
-| `/my/projects/:id/updates`    | 管理自己项目的开发日志, 需要登录             |
-| `/columns`                    | 专栏列表, 支持关键词, 难度与标签筛选         |
-| `/columns/:slug`              | 专栏详情, Markdown 正文与资源清单            |
-| `/my/columns`                 | 我的专栏工作台, 需要专栏写作权限             |
-| `/my/columns/new`             | 新建自己的专栏, 需要专栏写作权限             |
-| `/my/columns/:id/edit`        | 编辑自己的专栏, 需要专栏写作权限             |
-| `/users`                      | 开发者目录                                   |
-| `/users/:handle`              | 开发者主页                                   |
-| `/ask`                        | 提问表单, 需要登录                           |
-| `/notifications`              | 站内通知, 需要登录                           |
-| `/login`                      | 登录页                                       |
-| `/welcome`                    | 新手指南                                     |
-| `/admin`                      | 管理总览, 需要管理员                         |
-| `/admin/questions`            | 问题管理                                     |
-| `/admin/projects`             | 项目管理, 审核队列与板块可见性               |
-| `/admin/projects/:id/review`  | 审核单个项目, 通过或驳回                     |
-| `/admin/projects/:id/updates` | 删除项目中的违规开发日志                     |
-| `/admin/columns`              | 专栏管理                                     |
-| `/admin/columns/new`          | 新建专栏                                     |
-| `/admin/columns/:id/edit`     | 编辑专栏                                     |
-| `/admin/users`                | 用户管理                                     |
-| `/admin/tags`                 | 标签管理                                     |
+| 路由                            | 页面                                         |
+| ------------------------------- | -------------------------------------------- |
+| `/`                             | 问题列表与排序                               |
+| `/search?q=&type=&page=`        | 全站搜索, 覆盖问题, 项目, 专栏, 标签与开发者 |
+| `/questions/:id`                | 问题详情, Markdown 正文, 回答与投票          |
+| `/tags`                         | 标签目录                                     |
+| `/tags/:slug`                   | 标签下的问题                                 |
+| `/projects`                     | 项目展示, 支持状态与需求筛选                 |
+| `/projects/:slug`               | 项目详情, 截图画廊, README, 成员与开发日志   |
+| `/my/projects`                  | 我的项目工作台, 需要登录                     |
+| `/my/projects/new`              | 发布项目, 上传封面与截图并提交审核, 需要登录 |
+| `/my/projects/:id/edit`         | 编辑自己的项目并重新提交审核, 需要登录       |
+| `/my/projects/:id/updates`      | 管理自己项目的开发日志, 需要登录             |
+| `/my/projects/:id/applications` | 审核自己项目收到的组队申请, 需要登录         |
+| `/columns`                      | 专栏列表, 支持关键词, 难度与标签筛选         |
+| `/columns/:slug`                | 专栏详情, Markdown 正文与资源清单            |
+| `/my/columns`                   | 我的专栏工作台, 需要专栏写作权限             |
+| `/my/columns/new`               | 新建自己的专栏, 需要专栏写作权限             |
+| `/my/columns/:id/edit`          | 编辑自己的专栏, 需要专栏写作权限             |
+| `/users`                        | 开发者目录                                   |
+| `/users/:handle`                | 开发者主页                                   |
+| `/ask`                          | 提问表单, 需要登录                           |
+| `/notifications`                | 站内通知, 需要登录                           |
+| `/login`                        | 登录页                                       |
+| `/welcome`                      | 新手指南                                     |
+| `/admin`                        | 管理总览, 需要管理员                         |
+| `/admin/questions`              | 问题管理                                     |
+| `/admin/projects`               | 项目管理, 审核队列与板块可见性               |
+| `/admin/projects/:id/review`    | 审核单个项目, 通过或驳回                     |
+| `/admin/projects/:id/updates`   | 删除项目中的违规开发日志                     |
+| `/admin/columns`                | 专栏管理                                     |
+| `/admin/columns/new`            | 新建专栏                                     |
+| `/admin/columns/:id/edit`       | 编辑专栏                                     |
+| `/admin/users`                  | 用户管理                                     |
+| `/admin/tags`                   | 标签管理                                     |
 
 游客仅可访问 `/welcome` 与 `/login`. 访问其他路由会跳转到 `/welcome`, 并保留登录后返回的目标页面.
 
@@ -96,7 +97,7 @@ src/
     layout/     Header, Footer
     common/     Avatar, Tag, Toast, EmptyState
     questions/  问题列表, 详情, 回答, 投票
-    projects/   项目卡片, 截图画廊, 状态, 审核徽标, 开发日志管理, 板块关闭提示
+    projects/   项目卡片, 截图画廊, 状态, 审核徽标, 开发日志管理, 组队申请, 板块关闭提示
     columns/    共享专栏编辑器, 支持管理员与作者两种模式
     search/     分组结果, 关键词高亮与各范围结果行
     sidebar/    右侧统计与推荐面板
@@ -137,6 +138,11 @@ Mock 环境提供两个演示账号.
 - 管理员可以精选, 隐藏或删除已上线项目, 也可以关闭整个项目板块.
 - 项目板块关闭后, 公共导航与页脚入口隐藏, 项目列表和详情显示暂未开放, 成员仍可在工作台维护项目, 管理员入口保持可用.
 - 项目负责人可以新增, 编辑和删除自己项目的开发日志. 日志操作不会重置项目审核状态, 编辑已上线项目资料仍会重新审核.
+- 公开且标记为 `needs = teammates` 的项目允许登录成员提交组队申请. 项目负责人, 已有成员以及非公开项目不能申请.
+- 每个成员对同一项目只能保留一条申请, 重复提交返回 409. 申请通过字段校验后进入 `pending`, 并由 `viewerApplication` 只返回给申请人本人.
+- 项目负责人可以在 `/my/projects/:id/applications` 查看申请, 接受或拒绝. 接受后使用申请的 `focus` 作为成员角色加入成员列表并同步 `memberCount`, 拒绝必须填写 5-200 字符的原因.
+- 已处理的申请不能再修改, 历史记录保留在申请列表中, 待处理的申请排在前面.
+- 新申请会通知项目负责人, 接受或拒绝会通知申请人. 申请人通知跳转项目详情页, 负责人通知跳转申请管理页, 拒绝通知包含处理原因.
 - 未上线项目的日志会先保存在工作台, 项目通过审核后随项目一起公开. 已上线项目的新日志会直接进入公开详情页时间线.
 - 管理员可以从项目管理进入开发日志管理页删除违规日志. 项目审核页保持只读.
 - 管理员可以在用户管理中授予或撤销成员的专栏写作权限. 管理员默认拥有该权限.
@@ -216,6 +222,9 @@ VITE_API_BASE_URL=/api
 | GET    | `/api/projects/:slug`                  | `ProjectDetail`                   |
 | GET    | `/api/projects/mine`                   | `MyProject[]`                     |
 | GET    | `/api/projects/mine/:id`               | `ProjectEditData`                 |
+| POST   | `/api/projects/:id/applications`       | `ProjectApplication`              |
+| GET    | `/api/projects/mine/:id/applications`  | `ProjectApplicationsWorkspace`    |
+| PATCH  | `/api/project-applications/:id`        | `ProjectApplication`              |
 | GET    | `/api/projects/mine/:id/updates`       | `ProjectUpdatesWorkspace`         |
 | POST   | `/api/projects/mine/:id/updates`       | `ProjectUpdate`                   |
 | PATCH  | `/api/project-updates/mine/:updateId`  | `ProjectUpdate`                   |
@@ -299,6 +308,30 @@ VITE_API_BASE_URL=/api
 ```
 
 驳回时 `reviewNote` 至少 5 个字符. 通过时备注可选, 且默认将项目可见性设为 `published`.
+
+组队申请请求:
+
+```json
+{
+  "skills": ["Vue 3", "TypeScript"],
+  "focus": "地图交互",
+  "message": "我做过两个 Vue 项目, 每周可投入 8 小时, 想在首版里完成回收点筛选."
+}
+```
+
+`focus` 为 2-40 个字符, `skills` 为 1-8 项且每项 2-24 个字符, `message` 为 20-1000 个字符. 申请接口要求登录, 目标项目必须公开且 `needs` 包含 `teammates`, 申请人不能是负责人或已有成员, 重复申请返回 409.
+
+审核请求:
+
+```json
+{ "status": "accepted", "reviewNote": "欢迎加入, 先从回收点数据校验开始" }
+```
+
+```json
+{ "status": "rejected", "reviewNote": "当前更需要熟悉 Node.js 的同学, 之后有合适任务再联系你" }
+```
+
+`status` 只接受 `accepted` 与 `rejected`. 拒绝时 `reviewNote` 必填, 长度 5-200 个字符; 接受时可选. 只有项目负责人可以读取申请列表并处理申请, 已处理的申请再次提交会返回 409. `GET /api/projects/:slug` 会按当前登录用户返回 `viewerApplication`, 只包含申请人自己的记录.
 
 开发日志请求:
 

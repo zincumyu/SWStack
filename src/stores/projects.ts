@@ -1,7 +1,8 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
 import { projectApi } from '@/api/projects'
 import type { ProjectDetail, ProjectQuery, ProjectSummary } from '@/api/types'
+import { useSessionStore } from '@/stores/session'
 import { getErrorMessage } from '@/utils/errors'
 
 export const useProjectStore = defineStore('projects', () => {
@@ -26,6 +27,20 @@ export const useProjectStore = defineStore('projects', () => {
 
   const isBoardClosed = computed(
     () => boardLoaded.value && !boardEnabled.value && !boardError.value,
+  )
+
+  const sessionStore = useSessionStore()
+  let scopedHandle = sessionStore.user?.handle ?? null
+
+  watch(
+    () => sessionStore.user?.handle ?? null,
+    (handle) => {
+      if (handle === scopedHandle) {
+        return
+      }
+      scopedHandle = handle
+      invalidateAll()
+    },
   )
 
   function loadBoard(force = false): Promise<void> {

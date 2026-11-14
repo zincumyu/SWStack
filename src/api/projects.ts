@@ -2,6 +2,10 @@ import { request } from './http'
 import type {
   MyProject,
   PageResult,
+  ProjectApplication,
+  ProjectApplicationInput,
+  ProjectApplicationReviewInput,
+  ProjectApplicationsWorkspace,
   ProjectBoardSettings,
   ProjectDetail,
   ProjectDraftInput,
@@ -82,6 +86,28 @@ export const projectApi = {
     return request<ProjectUpdateDeleteResult>({
       url: `/project-updates/mine/${updateId}`,
       method: 'DELETE',
+    })
+  },
+
+  apply(id: number, input: ProjectApplicationInput) {
+    return request<ProjectApplication>({
+      url: `/projects/${id}/applications`,
+      method: 'POST',
+      data: input,
+    })
+  },
+
+  applications(id: number) {
+    return request<ProjectApplicationsWorkspace>({
+      url: `/projects/mine/${id}/applications`,
+    })
+  },
+
+  reviewApplication(applicationId: number, input: ProjectApplicationReviewInput) {
+    return request<ProjectApplication>({
+      url: `/project-applications/${applicationId}`,
+      method: 'PATCH',
+      data: input,
     })
   },
 }
