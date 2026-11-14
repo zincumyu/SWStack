@@ -219,12 +219,44 @@ export interface ProjectSummary {
   demoUrl?: string
 }
 
+export type ProjectApplicationStatus = 'pending' | 'accepted' | 'rejected'
+
+export interface ProjectApplication {
+  id: number
+  projectId: number
+  applicant: UserSummary
+  skills: string[]
+  focus: string
+  message: string
+  status: ProjectApplicationStatus
+  reviewNote?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ProjectApplicationInput {
+  skills: string[]
+  focus: string
+  message: string
+}
+
+export interface ProjectApplicationReviewInput {
+  status: 'accepted' | 'rejected'
+  reviewNote?: string
+}
+
+export interface ProjectApplicationsWorkspace {
+  project: MyProject
+  applications: ProjectApplication[]
+}
+
 export interface ProjectDetail extends ProjectSummary {
   readme: string
   screenshots: string[]
   members: ProjectMember[]
   updates: ProjectUpdate[]
   createdAt: string
+  viewerApplication?: ProjectApplication
 }
 
 export interface ProjectDraftInput {
@@ -408,6 +440,9 @@ export type NotificationType =
   | 'column_access_revoked'
   | 'column_unpublished'
   | 'question_answered'
+  | 'project_application_received'
+  | 'project_application_accepted'
+  | 'project_application_rejected'
 
 export interface NotificationItem {
   id: number

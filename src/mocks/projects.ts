@@ -676,6 +676,17 @@ function toMembers(seed: ProjectSeed): ProjectMember[] {
   }))
 }
 
+export function isProjectMember(seed: ProjectSeed, handle: string): boolean {
+  return seed.members.some((member) => member.handle === handle)
+}
+
+export function addProjectMember(seed: ProjectSeed, handle: string, role: string): void {
+  if (isProjectMember(seed, handle)) {
+    return
+  }
+  seed.members.push({ handle, role })
+}
+
 export function toProjectSummary(seed: ProjectSeed): ProjectSummary {
   return {
     id: seed.id,

@@ -88,6 +88,12 @@ const router = createRouter({
       meta: { title: '编辑项目', requiresAuth: true },
     },
     {
+      path: '/my/projects/:id(\\d+)/applications',
+      name: 'my-project-applications',
+      component: () => import('@/views/MyProjectApplicationsView.vue'),
+      meta: { title: '组队申请', requiresAuth: true },
+    },
+    {
       path: '/my/projects/:id(\\d+)/updates',
       name: 'my-project-updates',
       component: () => import('@/views/MyProjectUpdatesView.vue'),

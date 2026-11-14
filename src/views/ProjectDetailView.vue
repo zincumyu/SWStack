@@ -242,6 +242,8 @@
         </div>
 
         <aside class="detail-side">
+          <ProjectApplicationPanel v-if="showApplicationPanel" :project="project" />
+
           <section class="panel side-panel" aria-labelledby="needs-title">
             <div class="panel-header">
               <h2 id="needs-title" class="panel-title">
@@ -371,6 +373,7 @@ import {
 import EmptyState from '@/components/common/EmptyState.vue'
 import UserAvatar from '@/components/common/UserAvatar.vue'
 import MarkdownRenderer from '@/components/markdown/MarkdownRenderer.vue'
+import ProjectApplicationPanel from '@/components/projects/ProjectApplicationPanel.vue'
 import ProjectBoardClosed from '@/components/projects/ProjectBoardClosed.vue'
 import ProjectGallery from '@/components/projects/ProjectGallery.vue'
 import ProjectStatusBadge from '@/components/projects/ProjectStatusBadge.vue'
@@ -387,6 +390,12 @@ const slug = computed(() => String(route.params.slug ?? ''))
 const project = computed(() => projectStore.current)
 const isOwner = computed(
   () => Boolean(project.value) && sessionStore.user?.handle === project.value?.owner.handle,
+)
+
+const showApplicationPanel = computed(
+  () =>
+    Boolean(project.value?.needs.includes('teammates')) ||
+    Boolean(project.value?.viewerApplication),
 )
 
 const contactUrl = computed(() => {

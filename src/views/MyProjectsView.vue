@@ -131,6 +131,13 @@
             开发日志
           </RouterLink>
           <RouterLink
+            class="btn btn-secondary btn-sm"
+            :to="{ name: 'my-project-applications', params: { id: project.id } }"
+          >
+            <UserPlus :size="12" />
+            组队申请
+          </RouterLink>
+          <RouterLink
             v-if="canView(project)"
             class="btn btn-ghost btn-sm"
             :to="{ name: 'project-detail', params: { slug: project.slug } }"
@@ -146,7 +153,16 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { AlertTriangle, ArrowLeft, Eye, EyeOff, History, Pencil, Plus } from 'lucide-vue-next'
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  History,
+  Pencil,
+  Plus,
+  UserPlus,
+} from 'lucide-vue-next'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ProjectReviewBadge from '@/components/projects/ProjectReviewBadge.vue'
 import ProjectStatusBadge from '@/components/projects/ProjectStatusBadge.vue'
