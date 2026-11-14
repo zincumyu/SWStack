@@ -11,6 +11,8 @@
           <p>来自校园开发者的真实技术问题. 找到可以复用的思路, 也留下你的答案.</p>
         </header>
 
+        <QuestionFeedNav active="latest" />
+
         <QuestionFeed />
       </main>
 
@@ -26,6 +28,7 @@
 <script setup lang="ts">
 import { watchEffect } from 'vue'
 import QuestionFeed from '@/components/questions/QuestionFeed.vue'
+import QuestionFeedNav from '@/components/questions/QuestionFeedNav.vue'
 import CommunityOverviewCard from '@/components/sidebar/CommunityOverviewCard.vue'
 import PopularTagsCard from '@/components/sidebar/PopularTagsCard.vue'
 import TopMembersCard from '@/components/sidebar/TopMembersCard.vue'

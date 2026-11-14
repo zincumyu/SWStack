@@ -1,6 +1,6 @@
 # SWStack Web
 
-面向高校开发者的技术问答前端. 视觉参考 Stack Overflow, 采用浅色密排布局. 当前版本包含问答, 全站搜索, 开发者目录, 项目投稿与开发日志, 图片上传与审核, 管理员与授权作者共同维护的专栏, 站内通知, 项目展示与管理后台, 使用 Mock 数据, API 层已按 FastAPI 后端对接方式隔离.
+面向高校开发者的技术问答前端. 视觉参考 Stack Overflow, 采用浅色密排布局. 当前版本包含问答, 全站搜索与输入联想, 关注关系与关注动态, 开发者目录, 项目投稿与开发日志, 图片上传与审核, 管理员与授权作者共同维护的专栏, 站内通知, 项目展示与管理后台, 使用 Mock 数据, API 层已按 FastAPI 后端对接方式隔离.
 
 ## 技术栈
 
@@ -48,41 +48,42 @@ npm run dev
 
 ## 页面路由
 
-| 路由                            | 页面                                         |
-| ------------------------------- | -------------------------------------------- |
-| `/`                             | 问题列表与排序                               |
-| `/search?q=&type=&page=`        | 全站搜索, 覆盖问题, 项目, 专栏, 标签与开发者 |
-| `/questions/:id`                | 问题详情, Markdown 正文, 回答与投票          |
-| `/tags`                         | 标签目录                                     |
-| `/tags/:slug`                   | 标签下的问题                                 |
-| `/projects`                     | 项目展示, 支持状态与需求筛选                 |
-| `/projects/:slug`               | 项目详情, 截图画廊, README, 成员与开发日志   |
-| `/my/projects`                  | 我的项目工作台, 需要登录                     |
-| `/my/projects/new`              | 发布项目, 上传封面与截图并提交审核, 需要登录 |
-| `/my/projects/:id/edit`         | 编辑自己的项目并重新提交审核, 需要登录       |
-| `/my/projects/:id/updates`      | 管理自己项目的开发日志, 需要登录             |
-| `/my/projects/:id/applications` | 审核自己项目收到的组队申请, 需要登录         |
-| `/columns`                      | 专栏列表, 支持关键词, 难度与标签筛选         |
-| `/columns/:slug`                | 专栏详情, Markdown 正文与资源清单            |
-| `/my/columns`                   | 我的专栏工作台, 需要专栏写作权限             |
-| `/my/columns/new`               | 新建自己的专栏, 需要专栏写作权限             |
-| `/my/columns/:id/edit`          | 编辑自己的专栏, 需要专栏写作权限             |
-| `/users`                        | 开发者目录                                   |
-| `/users/:handle`                | 开发者主页                                   |
-| `/ask`                          | 提问表单, 需要登录                           |
-| `/notifications`                | 站内通知, 需要登录                           |
-| `/login`                        | 登录页                                       |
-| `/welcome`                      | 新手指南                                     |
-| `/admin`                        | 管理总览, 需要管理员                         |
-| `/admin/questions`              | 问题管理                                     |
-| `/admin/projects`               | 项目管理, 审核队列与板块可见性               |
-| `/admin/projects/:id/review`    | 审核单个项目, 通过或驳回                     |
-| `/admin/projects/:id/updates`   | 删除项目中的违规开发日志                     |
-| `/admin/columns`                | 专栏管理                                     |
-| `/admin/columns/new`            | 新建专栏                                     |
-| `/admin/columns/:id/edit`       | 编辑专栏                                     |
-| `/admin/users`                  | 用户管理                                     |
-| `/admin/tags`                   | 标签管理                                     |
+| 路由                            | 页面                                                 |
+| ------------------------------- | ---------------------------------------------------- |
+| `/`                             | 问题列表与排序, 顶部可切换到关注动态                 |
+| `/following`                    | 关注动态, 汇总关注的人和标签下的问题, 专栏与项目日志 |
+| `/search?q=&type=&sort=&page=`  | 全站搜索, 覆盖问题, 项目, 专栏, 标签与开发者         |
+| `/questions/:id`                | 问题详情, Markdown 正文, 回答与投票                  |
+| `/tags`                         | 标签目录                                             |
+| `/tags/:slug`                   | 标签下的问题                                         |
+| `/projects`                     | 项目展示, 支持状态与需求筛选                         |
+| `/projects/:slug`               | 项目详情, 截图画廊, README, 成员与开发日志           |
+| `/my/projects`                  | 我的项目工作台, 需要登录                             |
+| `/my/projects/new`              | 发布项目, 上传封面与截图并提交审核, 需要登录         |
+| `/my/projects/:id/edit`         | 编辑自己的项目并重新提交审核, 需要登录               |
+| `/my/projects/:id/updates`      | 管理自己项目的开发日志, 需要登录                     |
+| `/my/projects/:id/applications` | 审核自己项目收到的组队申请, 需要登录                 |
+| `/columns`                      | 专栏列表, 支持关键词, 难度与标签筛选                 |
+| `/columns/:slug`                | 专栏详情, Markdown 正文与资源清单                    |
+| `/my/columns`                   | 我的专栏工作台, 需要专栏写作权限                     |
+| `/my/columns/new`               | 新建自己的专栏, 需要专栏写作权限                     |
+| `/my/columns/:id/edit`          | 编辑自己的专栏, 需要专栏写作权限                     |
+| `/users`                        | 开发者目录                                           |
+| `/users/:handle`                | 开发者主页                                           |
+| `/ask`                          | 提问表单, 需要登录                                   |
+| `/notifications`                | 站内通知, 需要登录                                   |
+| `/login`                        | 登录页                                               |
+| `/welcome`                      | 新手指南                                             |
+| `/admin`                        | 管理总览, 需要管理员                                 |
+| `/admin/questions`              | 问题管理                                             |
+| `/admin/projects`               | 项目管理, 审核队列与板块可见性                       |
+| `/admin/projects/:id/review`    | 审核单个项目, 通过或驳回                             |
+| `/admin/projects/:id/updates`   | 删除项目中的违规开发日志                             |
+| `/admin/columns`                | 专栏管理                                             |
+| `/admin/columns/new`            | 新建专栏                                             |
+| `/admin/columns/:id/edit`       | 编辑专栏                                             |
+| `/admin/users`                  | 用户管理                                             |
+| `/admin/tags`                   | 标签管理                                             |
 
 游客仅可访问 `/welcome` 与 `/login`. 访问其他路由会跳转到 `/welcome`, 并保留登录后返回的目标页面.
 
@@ -124,6 +125,7 @@ Mock 环境提供两个演示账号.
 
 - 游客只能访问 `/welcome` 与 `/login`. 其他路由统一跳转到 `/welcome`, 登录后按 `redirect` 返回目标页面.
 - `/search` 与搜索接口需要登录, 只返回当前账号可见的公开内容.
+- `/following` 与关注接口需要登录. 只能操作自己的关注关系, 不能关注自己.
 - `/ask` 需要登录.
 - `/my/projects` 及其子路由需要登录, 成员只能编辑自己负责的项目.
 - `/my/columns` 及其子路由需要登录, 并且需要专栏写作权限. 无权限时跳转回专栏列表.
@@ -153,7 +155,12 @@ Mock 环境提供两个演示账号.
 - 管理员开通或撤销专栏写作权限, 下线专栏时, 系统会向对应用户发送通知.
 - 自己的问题收到新回答时, 系统会向提问者发送通知. 自己回答自己的问题不会触发通知.
 - 顶部铃铛与个人菜单显示未读数. 通知页支持全部与未读筛选, 单条已读与全部已读.
+- 登录成员可以在开发者主页与标签页关注或取消关注. 自己的主页不显示关注按钮, 关注者数量会立即更新.
+- `/following` 汇总关注开发者的问题, 已发布专栏, 公开项目的最新日志, 以及关注标签下的问题与专栏. 同一内容只出现一次, 按时间倒序分页.
+- 关注动态只包含公开内容: 隐藏问题, 未发布专栏, 隐藏标签, 停用账号与不可见项目会被过滤.
 - 全站搜索覆盖问题, 项目, 专栏, 标签与开发者. 全部范围先展示分组预览, 单独范围支持分页, 标题, 简介与标签中的关键词会高亮.
+- 搜索支持按相关度或最新排序. 输入框提供防抖联想, 最近搜索按账号保存在 `localStorage`, 最多 6 条, 可在搜索页清除.
+- 搜索页落地态展示最近搜索与热门搜索词. 联想支持方向键, Enter 跳转与 Esc 关闭.
 
 前端路由守卫只负责界面导航. 真实后端必须在每个管理接口上再次校验角色与账号状态.
 
@@ -215,7 +222,13 @@ VITE_API_BASE_URL=/api
 | GET    | `/api/tags`                            | `Tag[]`                           |
 | GET    | `/api/users`                           | `UserProfile[]`                   |
 | GET    | `/api/users/:handle`                   | `UserProfile`                     |
+| GET    | `/api/me/follows`                      | `FollowStatus`                    |
+| POST   | `/api/users/:handle/follow`            | `FollowResult`                    |
+| POST   | `/api/tags/:slug/follow`               | `FollowResult`                    |
+| GET    | `/api/feed/following`                  | `PageResult<FollowingFeedItem>`   |
 | GET    | `/api/search`                          | `SearchResults`                   |
+| GET    | `/api/search/suggest`                  | `SearchSuggestionResult`          |
+| GET    | `/api/search/trending`                 | `TrendingSearchTerm[]`            |
 | GET    | `/api/community/overview`              | `CommunityOverview`               |
 | GET    | `/api/projects/board`                  | `ProjectBoardSettings`            |
 | GET    | `/api/projects`                        | `PageResult<ProjectSummary>`      |
@@ -275,10 +288,17 @@ VITE_API_BASE_URL=/api
 问题列表查询参数: `page`, `pageSize`, `sort`, `tag`, `q`.
 排序值: `newest`, `active`, `unanswered`, `votes`.
 
-全站搜索查询参数: `q`, `type`, `page`, `pageSize`.
+全站搜索查询参数: `q`, `type`, `sort`, `page`, `pageSize`.
 `type` 取值: `all`, `questions`, `projects`, `columns`, `tags`, `users`.
+`sort` 取值: `relevance`, `newest`. 默认 `relevance`.
 `type=all` 时每个范围最多返回 4 条预览, 并保留各范围的完整计数; 指定 `type` 时按 `page` 与 `pageSize` 分页, 默认 8 条, 最大 20 条.
 搜索只包含公开内容: 隐藏问题, 未发布专栏, 隐藏标签, 停用账号以及项目板块关闭时的项目不会返回. 当前 Mock 会匹配标题, 简介, 正文, 标签, 作者信息与项目技术栈等字段.
+
+联想查询参数: `q`, `limit`. 返回 `SearchSuggestionResult`, 其中 `items` 每项包含 `kind`, `label`, `description` 与 `target`. `kind` 取值: `question`, `project`, `column`, `tag`, `user`. `target` 是可直接跳转的前端路径, 后端也可以改为返回资源 ID.
+热门搜索返回 `TrendingSearchTerm[]`, 每项包含 `keyword` 与 `count`.
+
+关注状态返回 `FollowStatus`, 包含当前账号关注的开发者 `users` 与标签 `tags`. 关注与取消关注共用同一个 `POST` 接口, 返回 `FollowResult`, 包含 `following` 与更新后的 `followerCount`.
+关注动态查询参数为 `page`, `pageSize`, 默认每页 12 条. 返回 `PageResult<FollowingFeedItem>`. `type` 取值: `question`, `column`, `projectUpdate`. 项目日志项同时包含 `project` 与 `update`.
 
 管理问题查询参数: `page`, `pageSize`, `q`, `status`.
 `status` 取值: `all`, `published`, `hidden`, `unanswered`.
@@ -468,7 +488,7 @@ curl -X POST http://127.0.0.1:8000/api/uploads/images \
 
 ## 说明
 
-Mock 数据仅用于演示. 刷新页面后投票, 收藏, 新增内容, 开发日志, 专栏, 专栏权限, 通知与管理操作会重置. 登录状态根据 `保持登录` 设置保留在浏览器存储中.
+Mock 数据仅用于演示. 刷新页面后投票, 收藏, 关注关系, 新增内容, 开发日志, 专栏, 专栏权限, 通知与管理操作会重置. 登录状态根据 `保持登录` 设置保留在浏览器存储中.
 
 内置演示项目的封面位于 `public/projects/`, 使用本地 SVG, 不依赖外部图片. 默认项目封面为 `public/projects/project-default.svg`. 项目中的 GitHub 与 Demo 地址是演示占位链接. 成员上传的封面与详情截图在 Mock 中保存为 data URL, 刷新页面后恢复默认. 项目板块开关, 单个项目的隐藏状态, 审核状态和开发日志也只保存在当前页面内存中, 刷新后恢复默认. 专栏草稿与发布状态同样只保存在当前页面内存中.
 

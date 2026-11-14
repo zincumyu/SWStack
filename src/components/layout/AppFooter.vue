@@ -12,6 +12,7 @@
       <nav class="footer-nav" aria-label="页脚导航">
         <template v-if="sessionStore.isAuthenticated">
           <RouterLink to="/">问答</RouterLink>
+          <RouterLink to="/following">关注动态</RouterLink>
           <RouterLink v-if="projectStore.boardEnabled" to="/projects">项目</RouterLink>
           <RouterLink to="/columns">专栏</RouterLink>
           <RouterLink to="/tags">标签</RouterLink>

@@ -34,6 +34,9 @@ import type {
   CommunityOverview,
   CreateAnswerInput,
   CreateQuestionInput,
+  FollowResult,
+  FollowStatus,
+  FollowingFeedItem,
   LoginInput,
   MyProject,
   NotificationItem,
@@ -63,9 +66,13 @@ import type {
   QuestionSort,
   QuestionSummary,
   SearchResults,
+  SearchSort,
+  SearchSuggestionItem,
+  SearchSuggestionResult,
   SearchType,
   SearchUserResult,
   Tag,
+  TrendingSearchTerm,
   UploadedImage,
   UserProfile,
   UserRole,
@@ -168,6 +175,13 @@ import {
   notifyUser,
   notifyUserByHandle,
 } from './notifications'
+import {
+  getFollowStatus,
+  listFollowingFeed,
+  toggleTagFollow,
+  toggleUserFollow,
+  withFollowStats,
+} from './follows'
 
 const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms))
 const clone = <T>(value: T): T => structuredClone(value)
@@ -582,6 +596,10 @@ function readSearchType(value: unknown): SearchType {
   return SEARCH_TYPES.includes(type) ? type : 'all'
 }
 
+function readSearchSort(value: unknown): SearchSort {
+  return readString(value) === 'newest' ? 'newest' : 'relevance'
+}
+
 function toSearchUserResult(profile: UserProfile): SearchUserResult {
   return {
     id: profile.id,
@@ -870,13 +888,207 @@ const handlers = {
     return clone([...visibleTags()].sort((a, b) => b.questionCount - a.questionCount))
   },
 
+  async 'GET /me/follows'(): Promise<FollowStatus> {
+    const user = requireSessionUser()
+    return clone(getFollowStatus(user.id))
+  },
+
+  async 'POST /users/:handle/follow'(
+    _config: ApiRequestConfig,
+    handle: string,
+  ): Promise<FollowResult> {
+    const user = requireSessionUser()
+    return clone(toggleUserFollow(user.id, handle))
+  },
+
+  async 'POST /tags/:slug/follow'(_config: ApiRequestConfig, slug: string): Promise<FollowResult> {
+    const user = requireSessionUser()
+    return clone(toggleTagFollow(user.id, slug))
+  },
+
+  async 'GET /feed/following'(config: ApiRequestConfig): Promise<PageResult<FollowingFeedItem>> {
+    const user = requireSessionUser()
+    return clone(
+      listFollowingFeed(user.id, {
+        page: readNumber(config.params?.page, 1),
+        pageSize: readNumber(config.params?.pageSize, 12),
+      }),
+    )
+  },
+
   async 'GET /users'(): Promise<UserProfile[]> {
     return clone(
       userProfiles
         .filter((profile) => getUserStatus(profile.id) === 'active')
         .map((profile) => buildUserProfile(profile.handle))
         .filter((profile): profile is UserProfile => Boolean(profile))
+        .map(withFollowStats)
         .sort((a, b) => b.reputation - a.reputation),
+    )
+  },
+
+  async 'GET /search/suggest'(config: ApiRequestConfig): Promise<SearchSuggestionResult> {
+    requireSessionUser()
+    const keyword = readString(config.params?.q).trim()
+    const normalized = keyword.toLowerCase()
+    const limit = Math.min(10, Math.max(1, Math.trunc(readNumber(config.params?.limit, 8))))
+    if (!normalized) {
+      return { keyword, items: [] }
+    }
+
+    const matchRank = (text: string): number => {
+      const value = text.toLowerCase()
+      if (value === normalized) {
+        return 0
+      }
+      if (value.startsWith(normalized)) {
+        return 1
+      }
+      return 2
+    }
+    const kindOrder: Record<SearchSuggestionItem['kind'], number> = {
+      question: 0,
+      project: 1,
+      column: 2,
+      tag: 3,
+      user: 4,
+    }
+    const candidates: Array<{ item: SearchSuggestionItem; rank: number }> = []
+
+    questions
+      .filter(
+        (record) => getQuestionStatus(record.id) === 'published' && matchesSearch(record, keyword),
+      )
+      .sort(
+        (a, b) =>
+          matchRank(a.title) - matchRank(b.title) ||
+          b.score - a.score ||
+          new Date(b.lastActivityAt).getTime() - new Date(a.lastActivityAt).getTime(),
+      )
+      .slice(0, 3)
+      .forEach((record) => {
+        candidates.push({
+          rank: matchRank(record.title),
+          item: {
+            kind: 'question',
+            label: record.title,
+            description: `${record.author.name}, ${record.answersList.length} 个回答`,
+            target: `/questions/${record.id}`,
+          },
+        })
+      })
+
+    if (getProjectBoardEnabled()) {
+      projectSeeds
+        .filter((seed) => isProjectPublic(seed) && matchesProjectSearch(seed, keyword))
+        .sort(
+          (a, b) =>
+            matchRank(a.name) - matchRank(b.name) ||
+            Number(b.isFeatured) - Number(a.isFeatured) ||
+            a.createdDaysAgo - b.createdDaysAgo,
+        )
+        .slice(0, 2)
+        .forEach((seed) => {
+          candidates.push({
+            rank: matchRank(seed.name),
+            item: {
+              kind: 'project',
+              label: seed.name,
+              description: seed.tagline,
+              target: `/projects/${encodeURIComponent(seed.slug)}`,
+            },
+          })
+        })
+    }
+
+    searchPublicColumns(keyword)
+      .sort(
+        (a, b) =>
+          matchRank(a.title) - matchRank(b.title) ||
+          Number(b.featured) - Number(a.featured) ||
+          new Date(b.publishedAt ?? b.createdAt).getTime() -
+            new Date(a.publishedAt ?? a.createdAt).getTime(),
+      )
+      .slice(0, 2)
+      .forEach((column) => {
+        candidates.push({
+          rank: matchRank(column.title),
+          item: {
+            kind: 'column',
+            label: column.title,
+            description: `${column.author.name}, ${column.readingMinutes} 分钟`,
+            target: `/columns/${encodeURIComponent(column.slug)}`,
+          },
+        })
+      })
+
+    visibleTags()
+      .filter((tag) => `${tag.name} ${tag.description}`.toLowerCase().includes(normalized))
+      .sort((a, b) => matchRank(a.name) - matchRank(b.name) || b.questionCount - a.questionCount)
+      .slice(0, 2)
+      .forEach((tag) => {
+        candidates.push({
+          rank: matchRank(tag.name),
+          item: {
+            kind: 'tag',
+            label: tag.name,
+            description: `${tag.questionCount} 个问题, 本周新增 ${tag.weeklyCount}`,
+            target: `/tags/${encodeURIComponent(tag.slug)}`,
+          },
+        })
+      })
+
+    userProfiles
+      .filter((profile) => getUserStatus(profile.id) === 'active')
+      .map((profile) => buildUserProfile(profile.handle))
+      .filter((profile): profile is UserProfile => Boolean(profile))
+      .filter((profile) =>
+        [
+          profile.name,
+          profile.handle,
+          profile.title,
+          profile.bio,
+          profile.school,
+          ...profile.topTags.map((tag) => tag.name),
+        ]
+          .join(' ')
+          .toLowerCase()
+          .includes(normalized),
+      )
+      .sort((a, b) => matchRank(a.name) - matchRank(b.name) || b.reputation - a.reputation)
+      .slice(0, 2)
+      .forEach((profile) => {
+        candidates.push({
+          rank: matchRank(profile.name),
+          item: {
+            kind: 'user',
+            label: profile.name,
+            description: `@${profile.handle}, ${profile.title}`,
+            target: `/users/${encodeURIComponent(profile.handle)}`,
+          },
+        })
+      })
+
+    const items = candidates
+      .sort(
+        (a, b) =>
+          a.rank - b.rank ||
+          kindOrder[a.item.kind] - kindOrder[b.item.kind] ||
+          a.item.label.localeCompare(b.item.label),
+      )
+      .slice(0, limit)
+      .map((candidate) => candidate.item)
+
+    return { keyword, items }
+  },
+
+  async 'GET /search/trending'(): Promise<TrendingSearchTerm[]> {
+    requireSessionUser()
+    return clone(
+      visibleTags()
+        .map((tag) => ({ keyword: tag.name, count: tag.weeklyCount }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 8),
     )
   },
 
@@ -885,6 +1097,7 @@ const handlers = {
     const keyword = readString(config.params?.q)
     const normalized = keyword.toLowerCase()
     const type = readSearchType(config.params?.type)
+    const sort = readSearchSort(config.params?.sort)
     const requestedPage = Math.max(1, Math.trunc(readNumber(config.params?.page, 1)))
     const requestedPageSize = Math.min(
       20,
@@ -899,6 +1112,9 @@ const handlers = {
               getQuestionStatus(record.id) === 'published' && matchesSearch(record, keyword),
           )
           .sort((a, b) => {
+            if (sort === 'newest') {
+              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            }
             const aTitle = a.title.toLowerCase().includes(normalized) ? 1 : 0
             const bTitle = b.title.toLowerCase().includes(normalized) ? 1 : 0
             return (
@@ -915,14 +1131,22 @@ const handlers = {
         ? projectSeeds
             .filter((seed) => isProjectPublic(seed) && matchesProjectSearch(seed, keyword))
             .map(toProjectSummary)
-            .sort(
-              (a, b) =>
-                Number(b.isFeatured) - Number(a.isFeatured) ||
-                new Date(b.lastUpdatedAt).getTime() - new Date(a.lastUpdatedAt).getTime(),
+            .sort((a, b) =>
+              sort === 'newest'
+                ? new Date(b.lastUpdatedAt).getTime() - new Date(a.lastUpdatedAt).getTime()
+                : Number(b.isFeatured) - Number(a.isFeatured) ||
+                  new Date(b.lastUpdatedAt).getTime() - new Date(a.lastUpdatedAt).getTime(),
             )
         : []
 
     const matchedColumns = normalized ? searchPublicColumns(keyword) : []
+    if (sort === 'newest') {
+      matchedColumns.sort(
+        (a, b) =>
+          new Date(b.publishedAt ?? b.createdAt).getTime() -
+          new Date(a.publishedAt ?? a.createdAt).getTime(),
+      )
+    }
 
     const matchedTags = normalized
       ? visibleTags()
@@ -930,7 +1154,7 @@ const handlers = {
           .sort((a, b) => b.questionCount - a.questionCount)
       : []
 
-    const matchedUsers = normalized
+    const matchedProfiles = normalized
       ? userProfiles
           .filter((profile) => getUserStatus(profile.id) === 'active')
           .map((profile) => buildUserProfile(profile.handle))
@@ -948,9 +1172,13 @@ const handlers = {
               .toLowerCase()
               .includes(normalized),
           )
-          .sort((a, b) => b.reputation - a.reputation)
-          .map(toSearchUserResult)
+          .sort((a, b) =>
+            sort === 'newest'
+              ? new Date(b.joinedAt).getTime() - new Date(a.joinedAt).getTime()
+              : b.reputation - a.reputation,
+          )
       : []
+    const matchedUsers = matchedProfiles.map(toSearchUserResult)
 
     const counts = {
       questions: matchedQuestions.length,
@@ -967,6 +1195,7 @@ const handlers = {
     const output: SearchResults = {
       keyword,
       type,
+      sort,
       page,
       pageSize,
       total: scopeTotal,
@@ -1007,7 +1236,7 @@ const handlers = {
     if (!profile || getUserStatus(profile.id) === 'suspended') {
       throw new ApiError('没有找到这个开发者', 404)
     }
-    return clone(profile)
+    return clone(withFollowStats(profile))
   },
 
   async 'GET /community/overview'(): Promise<CommunityOverview> {
@@ -1958,6 +2187,16 @@ export async function mockRequest<T>(config: ApiRequestConfig): Promise<T> {
       pattern: /^\/answers\/(\d+)\/vote$/,
       key: 'POST /answers/:id/vote',
       extract: (m) => Number(m[1]),
+    },
+    {
+      pattern: /^\/users\/([^/]+)\/follow$/,
+      key: 'POST /users/:handle/follow',
+      extract: (m) => decodeURIComponent(m[1]),
+    },
+    {
+      pattern: /^\/tags\/([^/]+)\/follow$/,
+      key: 'POST /tags/:slug/follow',
+      extract: (m) => decodeURIComponent(m[1]),
     },
     {
       pattern: /^\/users\/([^/]+)$/,
