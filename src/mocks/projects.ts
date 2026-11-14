@@ -668,7 +668,7 @@ export function deleteProjectUpdate(seed: ProjectSeed, updateId: number): boolea
   return true
 }
 
-export function toMembers(seed: ProjectSeed): ProjectMember[] {
+function toMembers(seed: ProjectSeed): ProjectMember[] {
   return seed.members.map((member) => ({
     user: userByHandle(member.handle),
     role: member.role,
