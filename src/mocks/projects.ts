@@ -505,6 +505,7 @@ const reviewNoteById = new Map<number, string>()
 const submittedAtById = new Map<number, string>()
 const reviewedAtById = new Map<number, string>()
 const editedAtById = new Map<number, string>()
+let nextProjectId = Math.max(0, ...projectSeeds.map((item) => item.id)) + 1
 let boardEnabled = true
 
 export function getProjectBoardEnabled(): boolean {
@@ -583,6 +584,16 @@ export function getProjectStats(): {
     ).length,
     projectBoardEnabled: boardEnabled,
   }
+}
+
+export function deleteProjectState(id: number): void {
+  updatesByProject.delete(id)
+  visibility.delete(id)
+  reviewStatusById.delete(id)
+  reviewNoteById.delete(id)
+  submittedAtById.delete(id)
+  reviewedAtById.delete(id)
+  editedAtById.delete(id)
 }
 
 function updateTimestamp(seed: ProjectSeed): string {
@@ -783,7 +794,7 @@ export function toProjectEditData(seed: ProjectSeed): ProjectEditData {
 }
 
 export function createProjectSeed(input: ProjectDraftInput, ownerHandle: string): ProjectSeed {
-  const id = Math.max(0, ...projectSeeds.map((item) => item.id)) + 1
+  const id = nextProjectId++
   const seed: ProjectSeed = {
     id,
     slug: input.slug,

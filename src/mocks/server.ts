@@ -118,6 +118,7 @@ import {
   createProjectSeed,
   createProjectUpdate,
   deleteProjectUpdate,
+  deleteProjectState,
   findProjectUpdate,
   getProjectBoardEnabled,
   getProjectReviewStatus,
@@ -138,6 +139,7 @@ import {
 } from './projects'
 import {
   createProjectApplication,
+  deleteProjectApplications,
   findProjectApplicationRecord,
   findViewerApplication,
   hasApplicantApplied,
@@ -677,6 +679,49 @@ function buildAdminOverview(): AdminOverview {
   }
 }
 
+type ViewerVote = -1 | 0 | 1
+
+let nextQuestionId = Math.max(0, ...questions.map((item) => item.id)) + 1
+let nextAnswerId =
+  Math.max(0, ...questions.flatMap((item) => item.answersList.map((answer) => answer.id))) + 1
+const questionVotesByUser = new Map<number, Map<number, ViewerVote>>()
+const bookmarksByUser = new Map<number, Set<number>>()
+const answerVotesByUser = new Map<number, Map<number, ViewerVote>>()
+
+function questionVoteFor(userId: number, questionId: number): ViewerVote {
+  return questionVotesByUser.get(userId)?.get(questionId) ?? 0
+}
+
+function setQuestionVoteFor(userId: number, questionId: number, vote: ViewerVote): void {
+  const votes = questionVotesByUser.get(userId) ?? new Map<number, ViewerVote>()
+  votes.set(questionId, vote)
+  questionVotesByUser.set(userId, votes)
+}
+
+function isQuestionBookmarked(userId: number | null, questionId: number): boolean {
+  return userId !== null && (bookmarksByUser.get(userId)?.has(questionId) ?? false)
+}
+
+function setQuestionBookmarked(userId: number, questionId: number, bookmarked: boolean): void {
+  const bookmarks = bookmarksByUser.get(userId) ?? new Set<number>()
+  if (bookmarked) {
+    bookmarks.add(questionId)
+  } else {
+    bookmarks.delete(questionId)
+  }
+  bookmarksByUser.set(userId, bookmarks)
+}
+
+function answerVoteFor(userId: number, answerId: number): ViewerVote {
+  return answerVotesByUser.get(userId)?.get(answerId) ?? 0
+}
+
+function setAnswerVoteFor(userId: number, answerId: number, vote: ViewerVote): void {
+  const votes = answerVotesByUser.get(userId) ?? new Map<number, ViewerVote>()
+  votes.set(answerId, vote)
+  answerVotesByUser.set(userId, votes)
+}
+
 const handlers = {
   async 'POST /auth/login'(config: ApiRequestConfig): Promise<AuthResult> {
     const input = (config.data ?? {}) as LoginInput
@@ -706,6 +751,10 @@ const handlers = {
     const sort = readString(config.params?.sort) as QuestionSort
     const tag = readString(config.params?.tag)
     const keyword = readString(config.params?.q)
+
+    if (tag && getTagStatus(tag) === 'hidden') {
+      return { items: [], total: 0, page, pageSize }
+    }
 
     let items = questions.filter((record) => {
       if (getQuestionStatus(record.id) === 'hidden') {
@@ -763,7 +812,7 @@ const handlers = {
       return existing ? { slug: existing.slug, name: existing.name } : { slug, name: slug }
     })
 
-    const nextId = Math.max(...questions.map((item) => item.id)) + 1
+    const nextId = nextQuestionId++
     const timestamp = new Date().toISOString()
     const record: QuestionRecord = {
       id: nextId,
@@ -777,8 +826,6 @@ const handlers = {
       author: clone(author),
       createdAt: timestamp,
       lastActivityAt: timestamp,
-      viewerVote: 0,
-      bookmarked: false,
       answersList: [],
       comments: [],
     }
@@ -790,29 +837,37 @@ const handlers = {
   async 'GET /questions/:id'(_config: ApiRequestConfig, id: number): Promise<QuestionDetail> {
     const record = findPublicQuestion(id)
     record.viewCount += 1
-    const detail = toQuestionDetail(record)
+    const user = currentSessionUser()
+    const detail = toQuestionDetail(
+      record,
+      user ? questionVoteFor(user.id, record.id) : 0,
+      isQuestionBookmarked(user?.id ?? null, record.id),
+      (answerId) => (user ? answerVoteFor(user.id, answerId) : 0),
+    )
     detail.related = detail.related.filter((item) => getQuestionStatus(item.id) !== 'hidden')
     return clone(detail)
   },
 
   async 'POST /questions/:id/vote'(config: ApiRequestConfig, id: number): Promise<VoteResult> {
-    requireSessionUser()
+    const user = requireSessionUser()
     const record = findPublicQuestion(id)
     const nextVote = asVote((config.data as { value?: unknown } | undefined)?.value)
-    record.score += nextVote - record.viewerVote
-    record.viewerVote = nextVote
-    return { score: record.score, viewerVote: record.viewerVote }
+    const previousVote = questionVoteFor(user.id, record.id)
+    record.score += nextVote - previousVote
+    setQuestionVoteFor(user.id, record.id, nextVote)
+    return { score: record.score, viewerVote: nextVote }
   },
 
   async 'POST /questions/:id/bookmark'(
     config: ApiRequestConfig,
     id: number,
   ): Promise<BookmarkResult> {
-    requireSessionUser()
+    const user = requireSessionUser()
     const record = findPublicQuestion(id)
     const value = (config.data as { bookmarked?: unknown } | undefined)?.bookmarked
-    record.bookmarked = typeof value === 'boolean' ? value : !record.bookmarked
-    return { bookmarked: record.bookmarked }
+    const next = typeof value === 'boolean' ? value : !isQuestionBookmarked(user.id, record.id)
+    setQuestionBookmarked(user.id, record.id, next)
+    return { bookmarked: next }
   },
 
   async 'POST /questions/:id/answers'(config: ApiRequestConfig, id: number): Promise<Answer> {
@@ -823,8 +878,7 @@ const handlers = {
       throw new ApiError('回答至少需要 20 个字符', 422)
     }
 
-    const nextId =
-      Math.max(0, ...questions.flatMap((item) => item.answersList.map((answer) => answer.id))) + 1
+    const nextId = nextAnswerId++
     const answer: Answer = {
       id: nextId,
       questionId: record.id,
@@ -850,7 +904,7 @@ const handlers = {
   },
 
   async 'POST /answers/:id/vote'(config: ApiRequestConfig, id: number): Promise<VoteResult> {
-    requireSessionUser()
+    const user = requireSessionUser()
     const parent = questions.find(
       (record) =>
         getQuestionStatus(record.id) === 'published' &&
@@ -861,9 +915,10 @@ const handlers = {
       throw new ApiError('没有找到这个回答', 404)
     }
     const nextVote = asVote((config.data as { value?: unknown } | undefined)?.value)
-    answer.score += nextVote - answer.viewerVote
-    answer.viewerVote = nextVote
-    return { score: answer.score, viewerVote: answer.viewerVote }
+    const previousVote = answerVoteFor(user.id, answer.id)
+    answer.score += nextVote - previousVote
+    setAnswerVoteFor(user.id, answer.id, nextVote)
+    return { score: answer.score, viewerVote: nextVote }
   },
 
   async 'GET /tags'(): Promise<Tag[]> {
@@ -874,7 +929,9 @@ const handlers = {
     return clone(
       userProfiles
         .filter((profile) => getUserStatus(profile.id) === 'active')
-        .map((profile) => buildUserProfile(profile.handle))
+        .map((profile) =>
+          buildUserProfile(profile.handle, (id) => getQuestionStatus(id) === 'published'),
+        )
         .filter((profile): profile is UserProfile => Boolean(profile))
         .sort((a, b) => b.reputation - a.reputation),
     )
@@ -933,7 +990,9 @@ const handlers = {
     const matchedUsers = normalized
       ? userProfiles
           .filter((profile) => getUserStatus(profile.id) === 'active')
-          .map((profile) => buildUserProfile(profile.handle))
+          .map((profile) =>
+            buildUserProfile(profile.handle, (id) => getQuestionStatus(id) === 'published'),
+          )
           .filter((profile): profile is UserProfile => Boolean(profile))
           .filter((profile) =>
             [
@@ -1003,7 +1062,7 @@ const handlers = {
   },
 
   async 'GET /users/:handle'(_config: ApiRequestConfig, handle: string): Promise<UserProfile> {
-    const profile = buildUserProfile(handle)
+    const profile = buildUserProfile(handle, (id) => getQuestionStatus(id) === 'published')
     if (!profile || getUserStatus(profile.id) === 'suspended') {
       throw new ApiError('没有找到这个开发者', 404)
     }
@@ -1190,6 +1249,9 @@ const handlers = {
       throw new ApiError('没有找到申请人账号', 404)
     }
     if (input.status === 'accepted') {
+      if (isProjectMember(seed, record.applicantHandle)) {
+        throw new ApiError('申请人已经是项目成员, 不能再次加入', 409)
+      }
       addProjectMember(seed, record.applicantHandle, record.focus)
     }
     const application = reviewProjectApplication(record, input.status, input.reviewNote)
@@ -1620,7 +1682,14 @@ const handlers = {
     if (index === -1) {
       throw new ApiError('没有找到这个问题', 404)
     }
-    questions.splice(index, 1)
+    const [removed] = questions.splice(index, 1)
+    questionVotesByUser.forEach((votes) => votes.delete(id))
+    bookmarksByUser.forEach((bookmarks) => bookmarks.delete(id))
+    if (removed) {
+      removed.answersList.forEach((answer) => {
+        answerVotesByUser.forEach((votes) => votes.delete(answer.id))
+      })
+    }
     return { id, deleted: true }
   },
 
@@ -1904,6 +1973,8 @@ const handlers = {
       throw new ApiError('没有找到这个项目', 404)
     }
     projectSeeds.splice(index, 1)
+    deleteProjectState(id)
+    deleteProjectApplications(id)
     return { id, deleted: true }
   },
 }
