@@ -192,6 +192,20 @@ VITE_API_BASE_URL=/api
 
 开发服务器已将 `/api` 代理到 `http://127.0.0.1:8000`. 部署时可直接将 `VITE_API_BASE_URL` 指向后端地址.
 
+`server/` 下有一个可运行的 FastAPI + SQLite 最小后端, 覆盖会话, 问题, 回答, 投票, 收藏, 标签, 开发者, 关注与关注动态, 全站搜索, 社区概览与站内通知. 启动与接口清单见 [`server/README.md`](server/README.md).
+
+```bash
+cd server && uv sync && uv run uvicorn app.main:app --reload --port 8000
+```
+
+前端接入真实后端后的端到端冒烟脚本位于 `e2e/smoke.py`, 需要后端在 8000, 前端在 5173, 以及一个 `--remote-debugging-port=9225` 的无头 Chrome:
+
+```bash
+python -I e2e/smoke.py
+```
+
+脚本覆盖登录, 问题列表与详情, 投票, 收藏, 回答, 关注用户与标签, 关注动态, 搜索联想与热词, 以及提问后列表回读, 共 18 项检查.
+
 响应格式支持两种:
 
 ```json
