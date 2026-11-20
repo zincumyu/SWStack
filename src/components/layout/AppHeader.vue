@@ -37,22 +37,18 @@
         </RouterLink>
       </nav>
 
-      <form
+      <SearchBox
         v-if="sessionStore.isAuthenticated"
-        class="global-search"
-        role="search"
-        @submit.prevent="submitSearch"
-      >
-        <Search :size="15" class="search-icon" aria-hidden="true" />
-        <input
-          ref="searchInput"
-          v-model="searchDraft"
-          type="search"
-          placeholder="搜索问题, 项目, 开发者"
-          aria-label="全站搜索"
-        />
-        <kbd>/</kbd>
-      </form>
+        ref="searchBox"
+        v-model="searchDraft"
+        class="header-search"
+        variant="header"
+        placeholder="搜索问题, 项目, 开发者"
+        aria-label="全站搜索"
+        :show-submit="false"
+        :show-shortcut="true"
+        @submit="submitSearch"
+      />
 
       <div class="header-actions">
         <RouterLink
@@ -138,6 +134,15 @@
             <RouterLink
               class="profile-menu-item"
               role="menuitem"
+              :to="{ name: 'following' }"
+              @click="closeProfileMenu"
+            >
+              <Rss :size="14" />
+              关注动态
+            </RouterLink>
+            <RouterLink
+              class="profile-menu-item"
+              role="menuitem"
               :to="{ name: 'my-projects' }"
               @click="closeProfileMenu"
             >
@@ -219,11 +224,13 @@ import {
   LogIn,
   LogOut,
   PenLine,
-  Search,
+  Rss,
   ShieldCheck,
   UserRound,
 } from 'lucide-vue-next'
 import UserAvatar from '@/components/common/UserAvatar.vue'
+import SearchBox from '@/components/search/SearchBox.vue'
+import { useFollowStore } from '@/stores/follows'
 import { useNotificationStore } from '@/stores/notifications'
 import { useProjectStore } from '@/stores/projects'
 import { useSessionStore } from '@/stores/session'
@@ -236,9 +243,10 @@ const router = useRouter()
 const sessionStore = useSessionStore()
 const projectStore = useProjectStore()
 const notificationStore = useNotificationStore()
+const followStore = useFollowStore()
 const toastStore = useToastStore()
 const searchDraft = ref('')
-const searchInput = ref<HTMLInputElement | null>(null)
+const searchBox = ref<InstanceType<typeof SearchBox> | null>(null)
 const profileMenuRef = ref<HTMLElement | null>(null)
 const profileMenuOpen = ref(false)
 
@@ -274,8 +282,10 @@ watch(
   (userId) => {
     if (userId) {
       void notificationStore.refreshUnread()
+      void followStore.loadStatus()
     } else {
       notificationStore.clear()
+      followStore.reset()
     }
   },
   { immediate: true },
@@ -289,9 +299,8 @@ watch(
   { immediate: true },
 )
 
-function submitSearch(): void {
-  const keyword = searchDraft.value.trim()
-  searchInput.value?.blur()
+function submitSearch(value: string): void {
+  const keyword = value.trim()
   if (!keyword) {
     void router.push({ name: 'search' })
     return
@@ -332,7 +341,7 @@ function handleShortcut(event: KeyboardEvent): void {
     target?.isContentEditable
   if (event.key === '/' && !isTyping) {
     event.preventDefault()
-    searchInput.value?.focus()
+    searchBox.value?.focus()
   }
 }
 
@@ -426,64 +435,6 @@ onBeforeUnmount(() => {
   border-bottom-color: var(--brand);
   color: var(--text);
   font-weight: 600;
-}
-
-.global-search {
-  display: flex;
-  width: 100%;
-  max-width: 340px;
-  min-width: 160px;
-  height: 34px;
-  align-items: center;
-  gap: 7px;
-  padding: 0 9px;
-  border: 1px solid var(--border-strong);
-  border-radius: 3px;
-  background: var(--surface);
-}
-
-.global-search:focus-within {
-  border-color: var(--brand);
-  box-shadow: 0 0 0 2px var(--brand-soft);
-}
-
-.search-icon {
-  flex: 0 0 auto;
-  color: var(--text-muted);
-}
-
-.global-search input {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: var(--text);
-  font-size: 12.5px;
-}
-
-.global-search input::placeholder {
-  color: var(--text-faint);
-}
-
-.global-search input::-webkit-search-cancel-button {
-  cursor: pointer;
-}
-
-.global-search kbd {
-  display: inline-flex;
-  width: 18px;
-  height: 18px;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  background: var(--surface-subtle);
-  color: var(--text-faint);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  line-height: 1;
 }
 
 .header-actions {
@@ -697,10 +648,6 @@ onBeforeUnmount(() => {
     padding: 0 9px;
   }
 
-  .global-search {
-    max-width: 280px;
-  }
-
   .profile-copy,
   .profile-chevron {
     display: none;
@@ -718,10 +665,6 @@ onBeforeUnmount(() => {
 
   .mobile-column-link {
     display: inline-flex;
-  }
-
-  .global-search {
-    max-width: none;
   }
 
   .profile-skeleton {
@@ -745,12 +688,6 @@ onBeforeUnmount(() => {
     font-size: 16px;
   }
 
-  .global-search {
-    order: 5;
-    flex-basis: 100%;
-  }
-
-  .global-search kbd,
   .notification-button {
     display: none;
   }

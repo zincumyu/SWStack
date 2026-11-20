@@ -15,10 +15,28 @@ vi.mock('@/api/questions', () => ({
 
 const { questionApi } = await import('@/api/questions')
 const getMock = vi.mocked(questionApi.get)
+const voteMock = vi.mocked(questionApi.vote)
+const createAnswerMock = vi.mocked(questionApi.createAnswer)
+
+function detail(id: number, overrides: Record<string, unknown> = {}) {
+  return {
+    id,
+    score: 10,
+    viewerVote: 0,
+    bookmarked: false,
+    answersList: [],
+    answerCount: 0,
+    lastActivityAt: '2026-11-19T00:00:00.000Z',
+    ...overrides,
+  } as never
+}
 
 describe('question detail store', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
+    getMock.mockReset()
+    voteMock.mockReset()
+    createAnswerMock.mockReset()
   })
 
   it('flags notFound from the API status, not the message text', async () => {
@@ -57,5 +75,68 @@ describe('question detail store', () => {
     await first
 
     expect(store.question?.id).toBe(2)
+  })
+
+  it('invalidates an in-flight detail load on reset', async () => {
+    let resolveQuestion: (value: unknown) => void = () => undefined
+    getMock.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveQuestion = resolve
+      }) as never,
+    )
+    const store = useQuestionDetailStore()
+
+    const loading = store.load(1)
+    store.reset()
+    resolveQuestion(detail(1))
+    await loading
+
+    expect(store.question).toBeNull()
+    expect(store.loading).toBe(false)
+  })
+
+  it('does not apply a vote response to a different question', async () => {
+    let resolveVote: (value: unknown) => void = () => undefined
+    getMock.mockResolvedValueOnce(detail(1)).mockResolvedValueOnce(detail(2))
+    voteMock.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveVote = resolve
+      }) as never,
+    )
+    const store = useQuestionDetailStore()
+
+    await store.load(1)
+    const action = store.vote(1)
+    await store.load(2)
+    resolveVote({ score: 99, viewerVote: 1 })
+    await action
+
+    expect(store.question?.id).toBe(2)
+    expect(store.question?.score).toBe(10)
+    expect(store.question?.viewerVote).toBe(0)
+  })
+
+  it('does not append an answer to a different question', async () => {
+    let resolveAnswer: (value: unknown) => void = () => undefined
+    getMock.mockResolvedValueOnce(detail(1)).mockResolvedValueOnce(detail(2))
+    createAnswerMock.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveAnswer = resolve
+      }) as never,
+    )
+    const store = useQuestionDetailStore()
+
+    await store.load(1)
+    const action = store.submitAnswer('这是一条足够长的测试回答正文')
+    await store.load(2)
+    resolveAnswer({
+      id: 99,
+      createdAt: '2026-11-19T00:00:00.000Z',
+    })
+    await action
+
+    expect(store.question?.id).toBe(2)
+    expect(store.question?.answersList).toEqual([])
+    expect(store.question?.answerCount).toBe(0)
   })
 })

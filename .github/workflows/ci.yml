@@ -58,3 +58,29 @@ jobs:
           name: dist
           path: dist
           retention-days: 7
+
+  server:
+    name: Backend tests (FastAPI)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: server/uv.lock
+
+      - name: Install dependencies
+        working-directory: server
+        run: uv sync --locked
+
+      - name: Test
+        working-directory: server
+        run: uv run pytest

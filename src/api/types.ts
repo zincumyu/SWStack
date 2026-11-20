@@ -120,11 +120,31 @@ export interface SearchCounts {
   users: number
 }
 
+export type SearchSort = 'relevance' | 'newest'
+
 export interface SearchQuery {
   q: string
   type?: SearchType
+  sort?: SearchSort
   page?: number
   pageSize?: number
+}
+
+export interface SearchSuggestionItem {
+  kind: 'question' | 'project' | 'column' | 'tag' | 'user'
+  label: string
+  description: string
+  target: string
+}
+
+export interface SearchSuggestionResult {
+  keyword: string
+  items: SearchSuggestionItem[]
+}
+
+export interface TrendingSearchTerm {
+  keyword: string
+  count: number
 }
 
 export interface SearchUserResult extends UserSummary {
@@ -137,6 +157,7 @@ export interface SearchUserResult extends UserSummary {
 export interface SearchResults {
   keyword: string
   type: SearchType
+  sort: SearchSort
   page: number
   pageSize: number
   total: number
@@ -400,9 +421,50 @@ export interface UserProfile extends UserSummary {
   questionCount: number
   answerCount: number
   viewCount: number
+  followerCount: number
+  followingCount: number
   topTags: Tag[]
   badges: UserBadge[]
   recentQuestions: QuestionSummary[]
+}
+
+export interface FollowStatus {
+  users: string[]
+  tags: string[]
+}
+
+export interface FollowResult {
+  following: boolean
+  followerCount: number
+}
+
+export interface FollowingFeedBase {
+  id: string
+  createdAt: string
+}
+
+export interface FollowingQuestionFeedItem extends FollowingFeedBase {
+  type: 'question'
+  question: QuestionSummary
+}
+
+export interface FollowingColumnFeedItem extends FollowingFeedBase {
+  type: 'column'
+  column: ColumnSummary
+}
+
+export interface FollowingProjectUpdateFeedItem extends FollowingFeedBase {
+  type: 'projectUpdate'
+  project: ProjectSummary
+  update: ProjectUpdate
+}
+
+export type FollowingFeedItem =
+  FollowingQuestionFeedItem | FollowingColumnFeedItem | FollowingProjectUpdateFeedItem
+
+export interface FollowingFeedQuery {
+  page?: number
+  pageSize?: number
 }
 
 export interface VoteResult {

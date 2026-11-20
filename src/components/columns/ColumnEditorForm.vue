@@ -485,6 +485,13 @@ const saving = ref(false)
 const original = ref<ColumnWorkspaceDetail | null>(null)
 
 let initSequence = 0
+let saveSequence = 0
+
+interface SaveScope {
+  sequence: number
+  mode: 'mine' | 'admin'
+  columnId: number | null
+}
 
 const form = reactive<EditorForm>({
   title: '',
@@ -569,6 +576,8 @@ function hydrate(detail: ColumnWorkspaceDetail): void {
 
 async function init(): Promise<void> {
   const sequence = ++initSequence
+  saveSequence += 1
+  saving.value = false
   resetForm()
   original.value = null
   loadError.value = ''
@@ -684,12 +693,16 @@ async function save(): Promise<void> {
     return
   }
   const id = props.columnId
-  if (isEdit.value && id === null) {
-    return
+  const mode = props.mode
+  const adminMode = mode === 'admin'
+  const scope: SaveScope = {
+    sequence: ++saveSequence,
+    mode,
+    columnId: id,
   }
   saving.value = true
   errors.form = ''
-  const status = !isAdminMode.value && form.moderationLocked ? 'draft' : form.status
+  const status = !adminMode && form.moderationLocked ? 'draft' : form.status
   const input: ColumnInput = {
     title: form.title.trim(),
     slug: form.slug.trim(),
@@ -707,27 +720,45 @@ async function save(): Promise<void> {
   }
 
   try {
-    if (isEdit.value) {
-      if (isAdminMode.value) {
-        await adminColumnApi.update(id as number, input)
+    if (id !== null) {
+      if (adminMode) {
+        await adminColumnApi.update(id, input)
       } else {
-        await myColumnApi.update(id as number, input)
+        await myColumnApi.update(id, input)
+      }
+      if (!isSaveCurrent(scope)) {
+        return
       }
       toastStore.success(status === 'published' ? '专栏已更新并公开' : '专栏已保存为草稿')
     } else {
-      if (isAdminMode.value) {
+      if (adminMode) {
         await adminColumnApi.create(input)
       } else {
         await myColumnApi.create(input)
+      }
+      if (!isSaveCurrent(scope)) {
+        return
       }
       toastStore.success(status === 'published' ? '专栏已发布' : '草稿已保存')
     }
     await router.push(backTarget.value)
   } catch (cause) {
-    errors.form = getErrorMessage(cause)
+    if (isSaveCurrent(scope)) {
+      errors.form = getErrorMessage(cause)
+    }
   } finally {
-    saving.value = false
+    if (isSaveCurrent(scope)) {
+      saving.value = false
+    }
   }
+}
+
+function isSaveCurrent(scope: SaveScope): boolean {
+  return (
+    scope.sequence === saveSequence &&
+    scope.mode === props.mode &&
+    scope.columnId === props.columnId
+  )
 }
 </script>
 

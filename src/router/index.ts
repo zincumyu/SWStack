@@ -142,6 +142,12 @@ const router = createRouter({
       meta: { title: '提问', requiresAuth: true },
     },
     {
+      path: '/following',
+      name: 'following',
+      component: () => import('@/views/FollowingView.vue'),
+      meta: { title: '关注动态', requiresAuth: true },
+    },
+    {
       path: '/notifications',
       name: 'notifications',
       component: () => import('@/views/NotificationsView.vue'),

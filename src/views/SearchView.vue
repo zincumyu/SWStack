@@ -12,26 +12,13 @@
         <p v-else>用一个关键词, 查找问题, 项目, 专栏, 标签和开发者.</p>
       </div>
 
-      <form class="search-form" role="search" @submit.prevent="submitSearch">
-        <Search :size="15" class="form-search-icon" aria-hidden="true" />
-        <input
-          ref="searchInput"
-          v-model="draft"
-          type="search"
-          placeholder="输入关键词"
-          aria-label="全站搜索关键词"
-        />
-        <button
-          v-if="draft"
-          class="input-clear"
-          type="button"
-          aria-label="清除关键词"
-          @click="clearDraft"
-        >
-          <X :size="13" />
-        </button>
-        <button class="btn btn-primary search-submit" type="submit">搜索</button>
-      </form>
+      <SearchBox
+        v-model="draft"
+        variant="page"
+        placeholder="输入关键词"
+        aria-label="全站搜索关键词"
+        @submit="submitSearch"
+      />
     </header>
 
     <nav v-if="keyword" class="scope-tabs" role="tablist" aria-label="搜索范围">
@@ -61,7 +48,30 @@
         <Layers3 :size="13" aria-hidden="true" />
         共找到 {{ totalResultCount }} 条结果
       </span>
-      <button class="clear-search" type="button" @click="clearSearch">清除搜索</button>
+      <div class="summary-actions">
+        <div class="sort-switch" role="group" aria-label="搜索结果排序">
+          <span class="sort-label">排序</span>
+          <button
+            class="sort-button"
+            :class="{ active: sortBy === 'relevance' }"
+            type="button"
+            :aria-pressed="sortBy === 'relevance'"
+            @click="selectSort('relevance')"
+          >
+            相关度
+          </button>
+          <button
+            class="sort-button"
+            :class="{ active: sortBy === 'newest' }"
+            type="button"
+            :aria-pressed="sortBy === 'newest'"
+            @click="selectSort('newest')"
+          >
+            最新
+          </button>
+        </div>
+        <button class="clear-search" type="button" @click="clearSearch">清除搜索</button>
+      </div>
     </div>
 
     <div
@@ -169,7 +179,7 @@
     </template>
 
     <div
-      v-else-if="communityStore.tagsLoading && communityStore.allTags.length === 0"
+      v-else-if="assistStore.trendingLoading && assistStore.trending.length === 0"
       class="landing-grid"
     >
       <section class="panel guide-panel" aria-busy="true">
@@ -208,26 +218,55 @@
       </section>
 
       <div class="landing-side">
-        <section v-if="popularTags.length > 0" class="panel tags-panel">
+        <section v-if="historyStore.recent.length > 0" class="panel tags-panel">
           <header class="guide-head compact">
             <span class="guide-icon" aria-hidden="true">
-              <Tags :size="15" />
+              <Clock3 :size="15" />
             </span>
             <div>
-              <h2>热门关键词</h2>
-              <p>从社区正在讨论的技术主题开始.</p>
+              <h2>最近搜索</h2>
+              <p>继续上次查找的关键词.</p>
+            </div>
+            <button class="panel-action" type="button" @click="historyStore.clear()">清除</button>
+          </header>
+          <div class="recent-list">
+            <div v-for="term in historyStore.recent" :key="term" class="recent-row">
+              <button class="recent-search" type="button" @click="searchKeyword(term)">
+                <Clock3 :size="12" aria-hidden="true" />
+                <span>{{ term }}</span>
+              </button>
+              <button
+                class="recent-remove"
+                type="button"
+                :aria-label="`移除最近搜索 ${term}`"
+                @click="historyStore.remove(term)"
+              >
+                <X :size="12" />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section v-if="assistStore.trending.length > 0" class="panel tags-panel">
+          <header class="guide-head compact">
+            <span class="guide-icon" aria-hidden="true">
+              <TrendingUp :size="15" />
+            </span>
+            <div>
+              <h2>热门搜索</h2>
+              <p>从社区本周正在讨论的主题开始.</p>
             </div>
           </header>
           <div class="popular-tags">
             <button
-              v-for="tag in popularTags"
-              :key="tag.slug"
+              v-for="term in assistStore.trending"
+              :key="term.keyword"
               class="popular-tag"
               type="button"
-              @click="searchKeyword(tag.name)"
+              @click="searchKeyword(term.keyword)"
             >
-              <span>{{ tag.name }}</span>
-              <strong>{{ tag.questionCount }}</strong>
+              <span>{{ term.keyword }}</span>
+              <strong>{{ term.count }}</strong>
             </button>
           </div>
         </section>
@@ -261,19 +300,21 @@ import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
+  Clock3,
   Compass,
   FolderGit2,
   Layers3,
   Lightbulb,
   MessageSquareText,
-  Search,
   Tag,
   Tags,
+  TrendingUp,
   UsersRound,
   X,
 } from 'lucide-vue-next'
 import AdminPagination from '@/components/admin/AdminPagination.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
+import SearchBox from '@/components/search/SearchBox.vue'
 import SearchColumnResults from '@/components/search/SearchColumnResults.vue'
 import SearchProjectResults from '@/components/search/SearchProjectResults.vue'
 import SearchQuestionResults from '@/components/search/SearchQuestionResults.vue'
@@ -283,11 +324,13 @@ import type {
   ColumnSummary,
   ProjectSummary,
   QuestionSummary,
+  SearchSort,
   SearchType,
   SearchUserResult,
   Tag as TagResult,
 } from '@/api/types'
-import { useCommunityStore } from '@/stores/community'
+import { useSearchAssistStore } from '@/stores/search-assist'
+import { useSearchHistoryStore } from '@/stores/search-history'
 import { useSearchStore } from '@/stores/search'
 
 type ResultScope = Exclude<SearchType, 'all'>
@@ -360,8 +403,8 @@ const SCOPE_GUIDES: Array<{
 const route = useRoute()
 const router = useRouter()
 const searchStore = useSearchStore()
-const communityStore = useCommunityStore()
-const searchInput = ref<HTMLInputElement | null>(null)
+const assistStore = useSearchAssistStore()
+const historyStore = useSearchHistoryStore()
 const draft = ref('')
 
 const keyword = computed(() => readQuery(route.query.q).trim())
@@ -369,6 +412,9 @@ const activeType = computed<SearchType>(() => {
   const value = readQuery(route.query.type)
   return SEARCH_TYPES.includes(value as SearchType) ? (value as SearchType) : 'all'
 })
+const sortBy = computed<SearchSort>(() =>
+  readQuery(route.query.sort) === 'newest' ? 'newest' : 'relevance',
+)
 const currentPage = computed(() => {
   const value = Number.parseInt(readQuery(route.query.page), 10)
   return Number.isFinite(value) && value > 0 ? value : 1
@@ -384,9 +430,6 @@ const totalResultCount = computed(() => {
 const activeTabLabel = computed(
   () => SEARCH_TABS.find((tab) => tab.key === activeType.value)?.label ?? '全部',
 )
-const popularTags = computed(() => {
-  return [...communityStore.allTags].sort((a, b) => b.questionCount - a.questionCount).slice(0, 9)
-})
 const resultSections = computed<ResultSection[]>(() => {
   const current = result.value
   if (!current) {
@@ -451,7 +494,7 @@ watch(
 )
 
 watch(
-  [keyword, activeType, currentPage],
+  [keyword, activeType, currentPage, sortBy],
   () => {
     if (!keyword.value) {
       searchStore.reset()
@@ -460,6 +503,7 @@ watch(
     void searchStore.search({
       q: keyword.value,
       type: activeType.value,
+      sort: sortBy.value,
       page: currentPage.value,
       pageSize: SEARCH_PAGE_SIZE,
     })
@@ -471,7 +515,7 @@ watchEffect(() => {
   document.title = keyword.value ? `搜索 ${keyword.value} - SWStack` : '全站搜索 - SWStack'
 })
 
-void communityStore.loadTags()
+void assistStore.loadTrending()
 
 onBeforeUnmount(() => {
   searchStore.reset()
@@ -499,12 +543,17 @@ function buildQuery(type: SearchType, page = 1): Record<string, string> {
       query.page = String(page)
     }
   }
+  if (sortBy.value === 'newest') {
+    query.sort = 'newest'
+  }
   return query
 }
 
-function submitSearch(): void {
-  const next = draft.value.trim()
-  searchInput.value?.blur()
+function submitSearch(value: string): void {
+  const next = value.trim()
+  if (next) {
+    historyStore.remember(next)
+  }
   if (!next) {
     void router.push({ name: 'search' })
     return
@@ -522,6 +571,19 @@ function selectType(type: SearchType): void {
   void router.push({ name: 'search', query: buildQuery(type) })
 }
 
+function selectSort(sort: SearchSort): void {
+  if (!keyword.value || sort === sortBy.value) {
+    return
+  }
+  const query = buildQuery(activeType.value)
+  if (sort === 'newest') {
+    query.sort = 'newest'
+  } else {
+    delete query.sort
+  }
+  void router.push({ name: 'search', query })
+}
+
 function goToPage(next: number): void {
   if (!result.value || activeType.value === 'all') {
     return
@@ -533,11 +595,6 @@ function goToPage(next: number): void {
   void router.push({ name: 'search', query: buildQuery(activeType.value, next) })
 }
 
-function clearDraft(): void {
-  draft.value = ''
-  searchInput.value?.focus()
-}
-
 function clearSearch(): void {
   draft.value = ''
   void router.push({ name: 'search' })
@@ -545,6 +602,7 @@ function clearSearch(): void {
 
 function searchKeyword(term: string): void {
   draft.value = term
+  historyStore.remember(term)
   void router.push({ name: 'search', query: { q: term } })
 }
 
@@ -555,6 +613,7 @@ function retrySearch(): void {
   void searchStore.search({
     q: keyword.value,
     type: activeType.value,
+    sort: sortBy.value,
     page: currentPage.value,
     pageSize: SEARCH_PAGE_SIZE,
   })
@@ -612,69 +671,6 @@ function retrySearch(): void {
   color: var(--text-muted);
   font-size: 12.5px;
   line-height: 1.55;
-}
-
-.search-form {
-  display: flex;
-  width: 100%;
-  max-width: 392px;
-  height: 36px;
-  flex: 0 1 392px;
-  align-items: center;
-  gap: 7px;
-  padding-left: 10px;
-  border: 1px solid var(--border-strong);
-  border-radius: 3px;
-  background: var(--surface);
-}
-
-.search-form:focus-within {
-  border-color: var(--brand);
-  box-shadow: 0 0 0 2px var(--brand-soft);
-}
-
-.form-search-icon {
-  flex: 0 0 auto;
-  color: var(--text-muted);
-}
-
-.search-form input {
-  min-width: 0;
-  flex: 1;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: var(--text);
-  font-size: 12.5px;
-}
-
-.search-form input::placeholder {
-  color: var(--text-faint);
-}
-
-.search-form input::-webkit-search-cancel-button {
-  display: none;
-}
-
-.input-clear {
-  display: inline-flex;
-  padding: 2px;
-  border: 0;
-  border-radius: 2px;
-  background: transparent;
-  color: var(--text-faint);
-}
-
-.input-clear:hover {
-  background: var(--surface-muted);
-  color: var(--text-muted);
-}
-
-.search-submit {
-  height: 100%;
-  padding: 0 15px;
-  border-radius: 0 2px 2px 0;
-  font-size: 12.5px;
 }
 
 .scope-tabs {
@@ -760,6 +756,49 @@ function retrySearch(): void {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+}
+
+.summary-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sort-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--surface);
+}
+
+.sort-label {
+  padding: 0 4px 0 5px;
+  color: var(--text-faint);
+  font-size: 9.5px;
+}
+
+.sort-button {
+  min-height: 20px;
+  padding: 1px 7px;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.sort-button:hover {
+  background: var(--surface-subtle);
+  color: var(--text);
+}
+
+.sort-button.active {
+  background: var(--surface-muted);
+  color: var(--text);
+  font-weight: 500;
 }
 
 .clear-search {
@@ -998,6 +1037,91 @@ function retrySearch(): void {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.panel-action {
+  margin-left: auto;
+  align-self: flex-start;
+  padding: 1px 3px;
+  border: 0;
+  background: transparent;
+  color: var(--text-faint);
+  font-size: 9.5px;
+}
+
+.panel-action:hover {
+  color: var(--link-hover);
+}
+
+.recent-list {
+  padding: 4px 0;
+}
+
+.recent-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 8px 0 0;
+}
+
+.recent-row:hover {
+  background: var(--surface-subtle);
+}
+
+.recent-search {
+  display: flex;
+  min-width: 0;
+  min-height: 29px;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  text-align: left;
+}
+
+.recent-row:hover .recent-search {
+  color: var(--text);
+}
+
+.recent-search span {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-search svg {
+  flex: 0 0 auto;
+  color: var(--text-faint);
+}
+
+.recent-remove {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--text-faint);
+  opacity: 0;
+}
+
+.recent-row:hover .recent-remove,
+.recent-remove:focus-visible {
+  opacity: 1;
+}
+
+.recent-remove:hover {
+  background: var(--surface-muted);
+  color: var(--text-muted);
 }
 
 .popular-tags {

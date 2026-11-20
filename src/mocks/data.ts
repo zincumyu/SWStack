@@ -1272,7 +1272,25 @@ export const communityStats: CommunityStats = {
   onlineCount: 214,
 }
 
-export interface UserProfileSeed extends Omit<UserProfile, 'recentQuestions'> {
+const followerBaseByHandle: Record<string, number> = {
+  luxing: 1860,
+  zhouqi: 1420,
+  chenmo: 1180,
+  hejia: 1080,
+  xuzhou: 990,
+  suhe: 870,
+  linyi: 640,
+  zhaoqing: 520,
+  guyan: 460,
+  tanyue: 380,
+  jiangran: 410,
+  shenyan: 220,
+}
+
+export interface UserProfileSeed extends Omit<
+  UserProfile,
+  'recentQuestions' | 'followerCount' | 'followingCount'
+> {
   badges: UserBadge[]
 }
 
@@ -1510,7 +1528,12 @@ export function buildUserProfile(
     .slice(0, 5)
     .map(toQuestionSummary)
 
-  return { ...profile, recentQuestions }
+  return {
+    ...profile,
+    followerCount: followerBaseByHandle[handle] ?? 0,
+    followingCount: 0,
+    recentQuestions,
+  }
 }
 
 export const topMembers: TopMember[] = [

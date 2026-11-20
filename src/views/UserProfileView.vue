@@ -48,14 +48,17 @@
               </div>
             </div>
             <button
+              v-if="!isSelf"
               class="btn"
               :class="following ? 'btn-secondary' : 'btn-primary'"
               type="button"
+              :disabled="!followStore.statusLoaded || followPending"
+              :aria-pressed="following"
               @click="toggleFollow"
             >
               <UserCheck v-if="following" :size="14" />
               <UserPlus v-else :size="14" />
-              {{ following ? '已关注' : '关注' }}
+              {{ followPending ? '处理中' : following ? '已关注' : '关注' }}
             </button>
           </div>
 
@@ -75,6 +78,14 @@
             <div class="profile-stat">
               <strong>{{ formatCompact(profile.viewCount) }}</strong>
               <span>主页浏览</span>
+            </div>
+            <div class="profile-stat">
+              <strong>{{ formatCompact(followerCount) }}</strong>
+              <span>关注者</span>
+            </div>
+            <div class="profile-stat">
+              <strong>{{ formatCompact(profile.followingCount) }}</strong>
+              <span>正在关注</span>
             </div>
           </div>
         </section>
@@ -191,34 +202,63 @@ import EmptyState from '@/components/common/EmptyState.vue'
 import UserAvatar from '@/components/common/UserAvatar.vue'
 import TopMembersCard from '@/components/sidebar/TopMembersCard.vue'
 import CommunityOverviewCard from '@/components/sidebar/CommunityOverviewCard.vue'
+import { useFollowStore } from '@/stores/follows'
+import { useSessionStore } from '@/stores/session'
 import { useUserDirectoryStore } from '@/stores/users'
 import { useToastStore } from '@/stores/toast'
+import { getErrorMessage } from '@/utils/errors'
 import { formatCompact, formatNumber, formatRelativeTime, formatShortDate } from '@/utils/format'
 
 const route = useRoute()
+const sessionStore = useSessionStore()
 const userStore = useUserDirectoryStore()
+const followStore = useFollowStore()
 const toastStore = useToastStore()
-const following = ref(false)
+const followerCount = ref(0)
 
 const handle = computed(() => String(route.params.handle || ''))
 const profile = computed(() => userStore.profile)
+const isSelf = computed(() => sessionStore.user?.handle === handle.value)
+const following = computed(() => followStore.isFollowingUser(handle.value))
+const followPending = computed(() => followStore.isPendingUser(handle.value))
 
-function toggleFollow(): void {
-  if (!profile.value) {
+async function toggleFollow(): Promise<void> {
+  if (!profile.value || followPending.value || !followStore.statusLoaded) {
     return
   }
-  following.value = !following.value
-  if (following.value) {
-    toastStore.success(`已关注 ${profile.value.name}`)
-  } else {
-    toastStore.info(`已取消关注 ${profile.value.name}`)
+  const requestedHandle = handle.value
+  const name = profile.value.name
+  try {
+    const result = await followStore.toggleUser(requestedHandle)
+    if (handle.value !== requestedHandle) {
+      return
+    }
+    followerCount.value = result.followerCount
+    if (result.following) {
+      toastStore.success(`已关注 ${name}`)
+    } else {
+      toastStore.info(`已取消关注 ${name}`)
+    }
+  } catch (cause) {
+    if (handle.value === requestedHandle) {
+      toastStore.error(getErrorMessage(cause))
+    }
   }
 }
 
 watch(
+  profile,
+  (value) => {
+    followerCount.value = value?.followerCount ?? 0
+  },
+  { immediate: true },
+)
+
+watch(
   handle,
   (value) => {
-    following.value = false
+    followerCount.value = 0
+    void followStore.loadStatus()
     void userStore.loadProfile(value)
   },
   { immediate: true },
@@ -324,7 +364,7 @@ watchEffect(() => {
 
 .profile-stats {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   border-top: 1px solid var(--border);
   background: var(--surface-subtle);
 }
@@ -638,6 +678,18 @@ watchEffect(() => {
     width: 100%;
     margin-left: 0;
     margin-top: 4px;
+  }
+
+  .profile-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .profile-stat:nth-child(3n + 1) {
+    border-left: 0;
+  }
+
+  .profile-stat:nth-child(n + 4) {
+    border-top: 1px solid var(--border);
   }
 
   .profile-stat strong {

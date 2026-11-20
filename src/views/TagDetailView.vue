@@ -20,18 +20,33 @@
             </p>
           </div>
 
-          <div v-if="tag" class="tag-metrics">
-            <div class="tag-metric">
-              <strong>{{ formatNumber(tag.questionCount) }}</strong>
-              <span>个问题</span>
-            </div>
-            <div class="tag-metric">
-              <strong class="weekly">+{{ tag.weeklyCount }}</strong>
-              <span>本周新增</span>
-            </div>
-            <div class="tag-metric">
-              <strong>{{ formatCompact(tag.followerCount) }}</strong>
-              <span>关注者</span>
+          <div v-if="tag" class="tag-heading-side">
+            <button
+              class="btn btn-sm tag-follow-button"
+              :class="following ? 'btn-secondary' : 'btn-primary'"
+              type="button"
+              :disabled="!followStore.statusLoaded || followPending"
+              :aria-pressed="following"
+              @click="toggleFollow"
+            >
+              <UserCheck v-if="following" :size="13" />
+              <UserPlus v-else :size="13" />
+              {{ followPending ? '处理中' : following ? '已关注' : '关注标签' }}
+            </button>
+
+            <div class="tag-metrics">
+              <div class="tag-metric">
+                <strong>{{ formatNumber(tag.questionCount) }}</strong>
+                <span>个问题</span>
+              </div>
+              <div class="tag-metric">
+                <strong class="weekly">+{{ tag.weeklyCount }}</strong>
+                <span>本周新增</span>
+              </div>
+              <div class="tag-metric">
+                <strong>{{ formatCompact(followerCount) }}</strong>
+                <span>关注者</span>
+              </div>
             </div>
           </div>
         </header>
@@ -53,23 +68,64 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watchEffect } from 'vue'
+import { computed, ref, watch, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
-import { ChevronRight } from 'lucide-vue-next'
+import { ChevronRight, UserCheck, UserPlus } from 'lucide-vue-next'
 import QuestionFeed from '@/components/questions/QuestionFeed.vue'
 import CommunityOverviewCard from '@/components/sidebar/CommunityOverviewCard.vue'
 import PopularTagsCard from '@/components/sidebar/PopularTagsCard.vue'
 import TopMembersCard from '@/components/sidebar/TopMembersCard.vue'
 import { useCommunityStore } from '@/stores/community'
+import { useFollowStore } from '@/stores/follows'
+import { useToastStore } from '@/stores/toast'
+import { getErrorMessage } from '@/utils/errors'
 import { formatCompact, formatNumber } from '@/utils/format'
 
 const route = useRoute()
 const communityStore = useCommunityStore()
+const followStore = useFollowStore()
+const toastStore = useToastStore()
+const followerCount = ref(0)
 
 const slug = computed(() => String(route.params.slug || ''))
 const tag = computed(() => communityStore.allTags.find((item) => item.slug === slug.value))
+const following = computed(() => followStore.isFollowingTag(slug.value))
+const followPending = computed(() => followStore.isPendingTag(slug.value))
+
+watch(
+  tag,
+  (value) => {
+    followerCount.value = value?.followerCount ?? 0
+  },
+  { immediate: true },
+)
+
+async function toggleFollow(): Promise<void> {
+  if (!tag.value || followPending.value || !followStore.statusLoaded) {
+    return
+  }
+  const requestedSlug = slug.value
+  const name = tag.value.name
+  try {
+    const result = await followStore.toggleTag(requestedSlug)
+    if (slug.value !== requestedSlug) {
+      return
+    }
+    followerCount.value = result.followerCount
+    if (result.following) {
+      toastStore.success(`已关注 ${name} 标签`)
+    } else {
+      toastStore.info(`已取消关注 ${name} 标签`)
+    }
+  } catch (cause) {
+    if (slug.value === requestedSlug) {
+      toastStore.error(getErrorMessage(cause))
+    }
+  }
+}
 
 void communityStore.loadTags()
+void followStore.loadStatus()
 
 watchEffect(() => {
   document.title = `${tag.value?.name || slug.value} - 标签 - SWStack`
@@ -151,6 +207,18 @@ watchEffect(() => {
   line-height: 1.6;
 }
 
+.tag-heading-side {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 9px;
+}
+
+.tag-follow-button {
+  min-width: 88px;
+}
+
 .tag-metrics {
   display: flex;
   flex: 0 0 auto;
@@ -189,8 +257,14 @@ watchEffect(() => {
     gap: 12px;
   }
 
-  .tag-metrics {
+  .tag-heading-side {
+    width: calc(100% - 35px);
+    align-items: flex-start;
     margin-left: 35px;
+  }
+
+  .tag-metrics {
+    width: 100%;
     padding-top: 9px;
     border-top: 1px solid var(--border);
   }
@@ -207,6 +281,11 @@ watchEffect(() => {
   }
 
   .tag-description {
+    margin-left: 0;
+  }
+
+  .tag-heading-side {
+    width: 100%;
     margin-left: 0;
   }
 

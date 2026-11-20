@@ -815,6 +815,17 @@ export function listPublicColumns(query: ColumnQuery): PageResult<ColumnSummary>
   return pageResult(filtered, page, pageSize)
 }
 
+export function listPublishedColumns(): ColumnSummary[] {
+  return columnSeeds
+    .filter((seed) => seed.status === 'published')
+    .sort(
+      (a, b) =>
+        new Date(b.publishedAt ?? b.createdAt).getTime() -
+        new Date(a.publishedAt ?? a.createdAt).getTime(),
+    )
+    .map(toSummary)
+}
+
 export function searchPublicColumns(keyword: string): ColumnSummary[] {
   const normalized = keyword.trim().toLowerCase()
   return columnSeeds

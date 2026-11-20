@@ -193,6 +193,12 @@ const deletingId = ref<number | null>(null)
 const pendingDeleteId = ref<number | null>(null)
 
 let loadSequence = 0
+let mutationSequence = 0
+
+interface MutationScope {
+  projectId: number
+  sequence: number
+}
 
 const project = computed(() => workspace.value?.project ?? null)
 const updates = computed(() => workspace.value?.updates ?? [])
@@ -204,6 +210,9 @@ watch(
   projectId,
   () => {
     loadSequence += 1
+    mutationSequence += 1
+    loading.value = false
+    deletingId.value = null
     workspace.value = null
     error.value = ''
     pendingDeleteId.value = null
@@ -250,16 +259,24 @@ async function loadWorkspace(force = false): Promise<void> {
   }
 }
 
-async function syncWorkspace(): Promise<void> {
+async function syncWorkspace(targetProjectId = projectId.value): Promise<void> {
   const sequence = ++loadSequence
   try {
-    const result = await adminApi.projectUpdates(projectId.value)
+    const result = await adminApi.projectUpdates(targetProjectId)
     if (sequence === loadSequence) {
       workspace.value = result
     }
   } catch {
     // Keep the locally updated workspace when the silent refresh fails.
   }
+}
+
+function beginMutation(): MutationScope {
+  return { projectId: projectId.value, sequence: ++mutationSequence }
+}
+
+function isMutationCurrent(scope: MutationScope): boolean {
+  return scope.sequence === mutationSequence && scope.projectId === projectId.value
 }
 
 function requestDelete(id: number): void {
@@ -270,9 +287,13 @@ async function confirmDelete(id: number): Promise<void> {
   if (deletingId.value !== null) {
     return
   }
+  const scope = beginMutation()
   deletingId.value = id
   try {
     await adminApi.deleteProjectUpdate(id)
+    if (!isMutationCurrent(scope)) {
+      return
+    }
     if (workspace.value) {
       workspace.value.updates = workspace.value.updates.filter((item) => item.id !== id)
       workspace.value.project.updateCount = workspace.value.updates.length
@@ -281,11 +302,15 @@ async function confirmDelete(id: number): Promise<void> {
     toastStore.success('开发日志已删除')
     adminStore.invalidateProjects()
     projectStore.invalidateAll()
-    await syncWorkspace()
+    await syncWorkspace(scope.projectId)
   } catch (cause) {
-    toastStore.error(getErrorMessage(cause))
+    if (isMutationCurrent(scope)) {
+      toastStore.error(getErrorMessage(cause))
+    }
   } finally {
-    deletingId.value = null
+    if (isMutationCurrent(scope)) {
+      deletingId.value = null
+    }
   }
 }
 </script>

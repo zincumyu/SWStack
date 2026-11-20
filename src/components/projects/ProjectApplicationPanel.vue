@@ -246,6 +246,7 @@ const errors = reactive({ focus: '', skills: '', message: '' })
 const form = reactive<ProjectApplicationInput>({ skills: [], focus: '', message: '' })
 
 const submittedApplication = ref<ProjectApplication | null>(null)
+let submissionSequence = 0
 const viewerApplication = computed<ProjectApplication | null>(
   () => submittedApplication.value ?? props.project.viewerApplication ?? null,
 )
@@ -260,6 +261,8 @@ const contactUrl = computed(() => props.project.githubUrl ?? '')
 watch(
   () => props.project.id,
   () => {
+    submissionSequence += 1
+    submitting.value = false
     submittedApplication.value = null
     form.focus = ''
     form.skills = []
@@ -335,14 +338,19 @@ async function submit(): Promise<void> {
     return
   }
 
+  const projectId = props.project.id
+  const sequence = ++submissionSequence
   submitting.value = true
   formError.value = ''
   try {
-    const created = await projectApi.apply(props.project.id, {
+    const created = await projectApi.apply(projectId, {
       focus: form.focus.trim(),
       skills: [...form.skills],
       message: form.message.trim(),
     })
+    if (sequence !== submissionSequence || props.project.id !== projectId) {
+      return
+    }
     submittedApplication.value = created
     if (projectStore.current?.id === created.projectId) {
       projectStore.current = {
@@ -356,9 +364,13 @@ async function submit(): Promise<void> {
     toastStore.success('组队申请已提交, 等待负责人处理')
     void notificationStore.refreshUnread()
   } catch (cause) {
-    formError.value = getErrorMessage(cause)
+    if (sequence === submissionSequence && props.project.id === projectId) {
+      formError.value = getErrorMessage(cause)
+    }
   } finally {
-    submitting.value = false
+    if (sequence === submissionSequence) {
+      submitting.value = false
+    }
   }
 }
 </script>
