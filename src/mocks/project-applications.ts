@@ -51,11 +51,13 @@ const seeds: ProjectApplicationSeed[] = [
     projectId: 1,
     applicantHandle: 'hejia',
     skills: ['Go', 'PostgreSQL', 'Docker'],
-    focus: '后端接口与权限',
+    focus: '后端与数据库',
     message:
       '在实验室维护过 Go 服务, 熟悉 PostgreSQL 查询优化. 想参与课程空间权限与通知服务的设计, 每周可投入 8-12 小时.',
-    status: 'pending',
+    status: 'accepted',
+    reviewNote: '已经以成员身份加入项目, 负责后端与数据库.',
     createdDaysAgo: 2,
+    reviewedDaysAgo: 2,
   },
   {
     projectId: 1,
@@ -203,6 +205,10 @@ export function createProjectApplication(
   const list = recordsByProjectId.get(projectId) ?? []
   recordsByProjectId.set(projectId, [record, ...list])
   return toProjectApplication(record)
+}
+
+export function deleteProjectApplications(projectId: number): void {
+  recordsByProjectId.delete(projectId)
 }
 
 export function reviewProjectApplication(

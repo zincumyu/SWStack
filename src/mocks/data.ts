@@ -285,8 +285,6 @@ export interface QuestionRecord {
   author: UserSummary
   createdAt: string
   lastActivityAt: string
-  viewerVote: -1 | 0 | 1
-  bookmarked: boolean
   answersList: Answer[]
   comments: QuestionComment[]
 }
@@ -337,8 +335,6 @@ export function useProjectFilters() {
     author: userByHandle('zhouqi'),
     createdAt: ago({ hours: 3, minutes: 12 }),
     lastActivityAt: ago({ minutes: 18 }),
-    viewerVote: 0,
-    bookmarked: false,
     comments: [
       comment(
         'luxing',
@@ -456,8 +452,6 @@ async def list_projects(
     author: userByHandle('chenmo'),
     createdAt: ago({ hours: 7 }),
     lastActivityAt: ago({ hours: 1, minutes: 10 }),
-    viewerVote: 0,
-    bookmarked: true,
     comments: [
       comment(
         'shenyan',
@@ -547,8 +541,6 @@ type Project = {
     author: userByHandle('xuzhou'),
     createdAt: ago({ hours: 11 }),
     lastActivityAt: ago({ hours: 2 }),
-    viewerVote: 0,
-    bookmarked: false,
     comments: [],
     answers: [
       makeAnswer(103, {
@@ -642,8 +634,6 @@ func fetchAll(ctx context.Context) error {
     author: userByHandle('hejia'),
     createdAt: ago({ days: 1, hours: 2 }),
     lastActivityAt: ago({ hours: 3 }),
-    viewerVote: 0,
-    bookmarked: false,
     comments: [],
     answers: [
       makeAnswer(104, {
@@ -731,8 +721,6 @@ CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0"]
     author: userByHandle('suhe'),
     createdAt: ago({ days: 1, hours: 6 }),
     lastActivityAt: ago({ hours: 5 }),
-    viewerVote: 0,
-    bookmarked: false,
     comments: [],
     answers: [
       makeAnswer(105, {
@@ -814,8 +802,6 @@ impl Service<'_> {
     author: userByHandle('linyi'),
     createdAt: ago({ days: 2, hours: 3 }),
     lastActivityAt: ago({ hours: 6 }),
-    viewerVote: 0,
-    bookmarked: false,
     comments: [],
     answers: [
       makeAnswer(106, {
@@ -921,8 +907,6 @@ limit 20;
     author: userByHandle('zhaoqing'),
     createdAt: ago({ days: 2, hours: 8 }),
     lastActivityAt: ago({ days: 1 }),
-    viewerVote: 0,
-    bookmarked: false,
     comments: [],
     answers: [],
   }),
@@ -953,8 +937,6 @@ useEffect(() => {
     author: userByHandle('guyan'),
     createdAt: ago({ days: 3 }),
     lastActivityAt: ago({ hours: 4 }),
-    viewerVote: 0,
-    bookmarked: false,
     comments: [],
     answers: [
       makeAnswer(108, {
@@ -1015,8 +997,6 @@ watch(active, (value) => {
     author: userByHandle('tanyue'),
     createdAt: ago({ days: 3, hours: 5 }),
     lastActivityAt: ago({ hours: 8 }),
-    viewerVote: 0,
-    bookmarked: false,
     comments: [],
     answers: [
       makeAnswer(109, {
@@ -1064,8 +1044,6 @@ watch(active, (value, _oldValue, onCleanup) => {
     author: userByHandle('jiangran'),
     createdAt: ago({ days: 4 }),
     lastActivityAt: ago({ minutes: 42 }),
-    viewerVote: 0,
-    bookmarked: false,
     comments: [
       comment(
         'suhe',
@@ -1153,8 +1131,6 @@ async with aiohttp.ClientSession() as session:
     author: userByHandle('shenyan'),
     createdAt: ago({ days: 4, hours: 2 }),
     lastActivityAt: ago({ days: 1, hours: 4 }),
-    viewerVote: 0,
-    bookmarked: false,
     comments: [],
     answers: [
       makeAnswer(111, {
@@ -1233,8 +1209,6 @@ def search(nums: list[int], target: int) -> int:
     author: userByHandle('luxing'),
     createdAt: ago({ days: 5, hours: 4 }),
     lastActivityAt: ago({ days: 2, hours: 3 }),
-    viewerVote: 0,
-    bookmarked: false,
     comments: [],
     answers: [
       makeAnswer(112, {
@@ -1498,14 +1472,7 @@ export const userProfiles: UserProfileSeed[] = users.map((user) => {
 })
 
 export function toQuestionSummary(record: QuestionRecord): QuestionSummary {
-  const {
-    answersList,
-    body: _body,
-    viewerVote: _viewerVote,
-    bookmarked: _bookmarked,
-    comments: _comments,
-    ...summary
-  } = record
+  const { answersList, body: _body, comments: _comments, ...summary } = record
   return {
     ...summary,
     answerCount: answersList.length,
@@ -1513,7 +1480,12 @@ export function toQuestionSummary(record: QuestionRecord): QuestionSummary {
   }
 }
 
-export function toQuestionDetail(record: QuestionRecord): QuestionDetail {
+export function toQuestionDetail(
+  record: QuestionRecord,
+  viewerVote: -1 | 0 | 1,
+  bookmarked: boolean,
+  getAnswerVote: (answerId: number) => -1 | 0 | 1 = () => 0,
+): QuestionDetail {
   const related = questions
     .filter((item) => item.id !== record.id)
     .map((item) => ({
@@ -1529,15 +1501,21 @@ export function toQuestionDetail(record: QuestionRecord): QuestionDetail {
   return {
     ...toQuestionSummary(record),
     body: record.body,
-    viewerVote: record.viewerVote,
-    bookmarked: record.bookmarked,
-    answersList: record.answersList,
+    viewerVote,
+    bookmarked,
+    answersList: record.answersList.map((answer) => ({
+      ...answer,
+      viewerVote: getAnswerVote(answer.id),
+    })),
     related,
     comments: record.comments,
   }
 }
 
-export function buildUserProfile(handle: string): UserProfile | undefined {
+export function buildUserProfile(
+  handle: string,
+  isQuestionPublished: (id: number) => boolean = () => true,
+): UserProfile | undefined {
   const profile = userProfiles.find((item) => item.handle === handle)
   if (!profile) {
     return undefined
@@ -1545,6 +1523,7 @@ export function buildUserProfile(handle: string): UserProfile | undefined {
 
   const recentQuestions = questions
     .filter((item) => item.author.handle === handle)
+    .filter((item) => isQuestionPublished(item.id))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5)
     .map(toQuestionSummary)
