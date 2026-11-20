@@ -1097,7 +1097,9 @@ const handlers = {
 
     userProfiles
       .filter((profile) => getUserStatus(profile.id) === 'active')
-      .map((profile) => buildUserProfile(profile.handle))
+      .map((profile) =>
+        buildUserProfile(profile.handle, (id) => getQuestionStatus(id) === 'published'),
+      )
       .filter((profile): profile is UserProfile => Boolean(profile))
       .filter((profile) =>
         [
