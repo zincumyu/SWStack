@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from ..models import (
@@ -102,8 +102,14 @@ def get_question(
     user=Depends(get_optional_user),
 ) -> dict:
     question = get_public_question(db, question_id)
-    question.view_count += 1
+    db.execute(
+        update(Question)
+        .where(Question.id == question.id)
+        .values(view_count=Question.view_count + 1)
+        .execution_options(synchronize_session=False)
+    )
     db.commit()
+    db.refresh(question)
 
     question_scores = question_score_map(db)
     answer_scores = answer_score_map(db)
@@ -183,6 +189,11 @@ def create_question(
         last_activity_at=timestamp,
         tags=selected_tags,
     )
+    user.profile_question_count += 1
+    for tag in selected_tags:
+        tag.base_question_count += 1
+        tag.weekly_count += 1
+
     db.add(question)
     db.commit()
 
@@ -273,6 +284,7 @@ def create_answer(
         created_at=timestamp,
     )
     db.add(answer)
+    user.profile_answer_count += 1
     question.last_activity_at = timestamp
     if question.author_id != user.id:
         notify(

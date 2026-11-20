@@ -128,7 +128,9 @@ def following_feed(
     )
     followed_tag_ids = set(
         db.scalars(
-            select(TagFollow.tag_id).where(TagFollow.user_id == user.id)
+            select(TagFollow.tag_id)
+            .join(Tag, Tag.id == TagFollow.tag_id)
+            .where(TagFollow.user_id == user.id, Tag.status == "active")
         ).all()
     )
 

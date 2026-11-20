@@ -60,7 +60,7 @@ def list_notifications(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
-    current_page = max(1, coerce_int(page, 1))
+    current_page = min(1_000_000, max(1, coerce_int(page, 1)))
     page_size = min(50, max(1, coerce_int(pageSize, 10)))
     unread_only = filter == "unread"
 
