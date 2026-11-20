@@ -2,3 +2,8 @@ dist
 coverage
 node_modules
 package-lock.json
+
+# Python backend and browser audit tooling
+server/.venv
+server/.pytest_cache
+e2e/__pycache__

@@ -57,10 +57,10 @@ on port 8000.
 
 ## Demo accounts
 
-| Role  | Email                 | Password     | Seeded user |
-| ----- | --------------------- | ------------ | ----------- |
-| Admin | `admin@swstack.dev`   | `admin123`   | `luxing` (id 1) |
-| Student | `student@swstack.dev` | `student123` | `suhe` (id 6) |
+| Role    | Email                 | Password     | Seeded user     |
+| ------- | --------------------- | ------------ | --------------- |
+| Admin   | `admin@swstack.dev`   | `admin123`   | `luxing` (id 1) |
+| Student | `student@swstack.dev` | `student123` | `suhe` (id 6)   |
 
 Email matching is case-insensitive. The admin has `role: "admin"` and
 `canWriteColumns: true`; the student is a normal member. Other seeded users
@@ -104,35 +104,35 @@ JSON objects (the frontend transport accepts raw payloads or `{ "data": ... }`).
 Errors are `{ "detail": "..." }` with a string message; validation errors are
 normalized to the same shape.
 
-| Method | Path | Notes |
-| ------ | ---- | ----- |
-| GET | `/api/health` | Public health check |
-| POST | `/api/auth/login` | `{ email, password, remember }` -> `{ user }` + cookie |
-| POST | `/api/auth/logout` | -> `{ success: true }` |
-| GET | `/api/session/me` | Requires session -> `AuthUser`; guests get 401 |
-| GET | `/api/questions` | `page`, `pageSize`, `sort`, `tag`, `q`; default 8, max 30 |
-| GET | `/api/questions/{id}` | Public detail; increments `viewCount` |
-| POST | `/api/questions` | Auth required; title >= 8, body >= 20, 1-5 tags |
-| POST | `/api/questions/{id}/vote` | Auth required; `value` -1/0/1 |
-| POST | `/api/questions/{id}/bookmark` | Auth required; `bookmarked` bool or omitted to toggle |
-| POST | `/api/questions/{id}/answers` | Auth required; body >= 20 |
-| POST | `/api/answers/{id}/vote` | Auth required; `value` -1/0/1 |
-| GET | `/api/tags` | Public tag directory, sorted by question count |
-| GET | `/api/users` | Public developer directory, sorted by reputation |
-| GET | `/api/users/{handle}` | Public profile with top tags and recent questions |
-| GET | `/api/me/follows` | Auth required -> `{ users: [handle], tags: [slug] }` |
-| POST | `/api/users/{handle}/follow` | Auth required; toggles; self-follow 422 |
-| POST | `/api/tags/{slug}/follow` | Auth required; toggles |
-| GET | `/api/feed/following` | Auth required; `page`, `pageSize` (default 12, max 24) |
-| GET | `/api/search` | Auth required; `q`, `type`, `sort`, `page`, `pageSize` |
-| GET | `/api/search/suggest` | Auth required; `q`, `limit` (default 8, max 10) |
-| GET | `/api/search/trending` | Auth required; top 8 tags by weekly count |
-| GET | `/api/community/overview` | Public sidebar stats, popular tags and top members |
-| GET | `/api/projects/board` | Public; reports `{ enabled: false }` until the projects slice lands |
-| GET | `/api/notifications` | Auth required; `page`, `pageSize`, `filter=all\|unread` |
-| GET | `/api/notifications/unread-count` | Auth required -> `{ unread }` |
-| PATCH | `/api/notifications/{id}` | Auth required; `{ read: bool }` |
-| POST | `/api/notifications/read-all` | Auth required -> `{ updated }` |
+| Method | Path                              | Notes                                                               |
+| ------ | --------------------------------- | ------------------------------------------------------------------- |
+| GET    | `/api/health`                     | Public health check                                                 |
+| POST   | `/api/auth/login`                 | `{ email, password, remember }` -> `{ user }` + cookie              |
+| POST   | `/api/auth/logout`                | -> `{ success: true }`                                              |
+| GET    | `/api/session/me`                 | Requires session -> `AuthUser`; guests get 401                      |
+| GET    | `/api/questions`                  | `page`, `pageSize`, `sort`, `tag`, `q`; default 8, max 30           |
+| GET    | `/api/questions/{id}`             | Public detail; increments `viewCount`                               |
+| POST   | `/api/questions`                  | Auth required; title >= 8, body >= 20, 1-5 tags                     |
+| POST   | `/api/questions/{id}/vote`        | Auth required; `value` -1/0/1                                       |
+| POST   | `/api/questions/{id}/bookmark`    | Auth required; `bookmarked` bool or omitted to toggle               |
+| POST   | `/api/questions/{id}/answers`     | Auth required; body >= 20                                           |
+| POST   | `/api/answers/{id}/vote`          | Auth required; `value` -1/0/1                                       |
+| GET    | `/api/tags`                       | Public tag directory, sorted by question count                      |
+| GET    | `/api/users`                      | Public developer directory, sorted by reputation                    |
+| GET    | `/api/users/{handle}`             | Public profile with top tags and recent questions                   |
+| GET    | `/api/me/follows`                 | Auth required -> `{ users: [handle], tags: [slug] }`                |
+| POST   | `/api/users/{handle}/follow`      | Auth required; toggles; self-follow 422                             |
+| POST   | `/api/tags/{slug}/follow`         | Auth required; toggles                                              |
+| GET    | `/api/feed/following`             | Auth required; `page`, `pageSize` (default 12, max 24)              |
+| GET    | `/api/search`                     | Auth required; `q`, `type`, `sort`, `page`, `pageSize`              |
+| GET    | `/api/search/suggest`             | Auth required; `q`, `limit` (default 8, max 10)                     |
+| GET    | `/api/search/trending`            | Auth required; top 8 tags by weekly count                           |
+| GET    | `/api/community/overview`         | Public sidebar stats, popular tags and top members                  |
+| GET    | `/api/projects/board`             | Public; reports `{ enabled: false }` until the projects slice lands |
+| GET    | `/api/notifications`              | Auth required; `page`, `pageSize`, `filter=all\|unread`             |
+| GET    | `/api/notifications/unread-count` | Auth required -> `{ unread }`                                       |
+| PATCH  | `/api/notifications/{id}`         | Auth required; `{ read: bool }`                                     |
+| POST   | `/api/notifications/read-all`     | Auth required -> `{ updated }`                                      |
 
 Pagination responses are always:
 
@@ -172,11 +172,11 @@ Because projects and columns are absent:
 
 Environment variables (all optional):
 
-| Variable | Default | Purpose |
-| -------- | ------- | ------- |
-| `SWSTACK_DB_URL` | `sqlite:///./data/swstack.db` | SQLAlchemy database URL |
-| `SWSTACK_CORS_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173` | Comma-separated allowed origins |
-| `SWSTACK_COOKIE_SECURE` | `false` | Set `true` behind HTTPS |
+| Variable                | Default                                                                                   | Purpose                         |
+| ----------------------- | ----------------------------------------------------------------------------------------- | ------------------------------- |
+| `SWSTACK_DB_URL`        | `sqlite:///./data/swstack.db`                                                             | SQLAlchemy database URL         |
+| `SWSTACK_CORS_ORIGINS`  | `http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173` | Comma-separated allowed origins |
+| `SWSTACK_COOKIE_SECURE` | `false`                                                                                   | Set `true` behind HTTPS         |
 
 `DATABASE_URL` is also accepted as a fallback for `SWSTACK_DB_URL`.
 
