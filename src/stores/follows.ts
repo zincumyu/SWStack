@@ -23,6 +23,7 @@ export const useFollowStore = defineStore('follows', () => {
 
   let statusPromise: Promise<void> | null = null
   let feedSequence = 0
+  let scope = 0
 
   function isFollowingUser(handle: string): boolean {
     return userHandles.value.includes(handle)
@@ -48,22 +49,35 @@ export const useFollowStore = defineStore('follows', () => {
       return Promise.resolve()
     }
 
+    const currentScope = scope
     statusLoading.value = true
     statusError.value = null
-    statusPromise = followApi
+    let request: Promise<void> | null = null
+    request = followApi
       .status()
       .then((result) => {
+        if (currentScope !== scope) {
+          return
+        }
         userHandles.value = result.users
         tagSlugs.value = result.tags
         statusLoaded.value = true
       })
       .catch((cause) => {
-        statusError.value = getErrorMessage(cause)
+        if (currentScope === scope) {
+          statusError.value = getErrorMessage(cause)
+        }
       })
       .finally(() => {
+        if (currentScope !== scope) {
+          return
+        }
         statusLoading.value = false
-        statusPromise = null
+        if (statusPromise === request) {
+          statusPromise = null
+        }
       })
+    statusPromise = request
 
     return statusPromise
   }
@@ -72,9 +86,13 @@ export const useFollowStore = defineStore('follows', () => {
     if (isPendingUser(handle)) {
       throw new Error('关注操作正在进行')
     }
+    const currentScope = scope
     pendingUsers.value = [...pendingUsers.value, handle]
     try {
       const result = await followApi.toggleUser(handle)
+      if (currentScope !== scope) {
+        return result
+      }
       const next = new Set(userHandles.value)
       if (result.following) {
         next.add(handle)
@@ -87,7 +105,9 @@ export const useFollowStore = defineStore('follows', () => {
       }
       return result
     } finally {
-      pendingUsers.value = pendingUsers.value.filter((item) => item !== handle)
+      if (currentScope === scope) {
+        pendingUsers.value = pendingUsers.value.filter((item) => item !== handle)
+      }
     }
   }
 
@@ -95,9 +115,13 @@ export const useFollowStore = defineStore('follows', () => {
     if (isPendingTag(slug)) {
       throw new Error('关注操作正在进行')
     }
+    const currentScope = scope
     pendingTags.value = [...pendingTags.value, slug]
     try {
       const result = await followApi.toggleTag(slug)
+      if (currentScope !== scope) {
+        return result
+      }
       const next = new Set(tagSlugs.value)
       if (result.following) {
         next.add(slug)
@@ -110,7 +134,9 @@ export const useFollowStore = defineStore('follows', () => {
       }
       return result
     } finally {
-      pendingTags.value = pendingTags.value.filter((item) => item !== slug)
+      if (currentScope === scope) {
+        pendingTags.value = pendingTags.value.filter((item) => item !== slug)
+      }
     }
   }
 
@@ -144,6 +170,8 @@ export const useFollowStore = defineStore('follows', () => {
   }
 
   function reset(): void {
+    scope += 1
+    statusPromise = null
     userHandles.value = []
     tagSlugs.value = []
     statusLoaded.value = false

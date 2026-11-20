@@ -29,9 +29,14 @@ async function copyText(text: string): Promise<void> {
   area.style.position = 'fixed'
   area.style.opacity = '0'
   document.body.appendChild(area)
-  area.select()
-  document.execCommand('copy')
-  document.body.removeChild(area)
+  try {
+    area.select()
+    if (!document.execCommand('copy')) {
+      throw new Error('复制失败')
+    }
+  } finally {
+    area.remove()
+  }
 }
 
 async function handleClick(event: MouseEvent): Promise<void> {

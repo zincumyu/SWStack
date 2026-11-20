@@ -153,6 +153,35 @@ describe('ProjectApplicationPanel', () => {
     expect(wrapper.find('.application-form').exists()).toBe(false)
   })
 
+  it('does not show an old application after switching projects', async () => {
+    let resolveApplication: (value: unknown) => void = () => undefined
+    applyMock.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveApplication = resolve
+      }) as never,
+    )
+    const wrapper = mountPanel(project())
+    await fillForm(wrapper)
+    await wrapper.find('.form-actions button').trigger('submit')
+
+    await wrapper.setProps({ project: project({ id: 6, slug: 'other-project' }) })
+    resolveApplication({
+      id: 99,
+      projectId: 5,
+      applicant: project().owner,
+      skills: ['TypeScript'],
+      focus: '题库审核',
+      message: '我整理过两轮实习面经, 每周可以投入 6 小时, 希望负责题目审核与追问记录整理.',
+      status: 'pending',
+      createdAt: '2026-11-14T00:00:00.000Z',
+      updatedAt: '2026-11-14T00:00:00.000Z',
+    })
+    await flushPromises()
+
+    expect(wrapper.find('.application-form').exists()).toBe(true)
+    expect(wrapper.text()).not.toContain('申请审核中')
+  })
+
   it('shows the member state for an existing project member', async () => {
     const wrapper = mountPanel(project({ members: [] }))
     const session = (await import('@/stores/session')).useSessionStore()

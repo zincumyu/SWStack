@@ -16,11 +16,13 @@ export const useNotificationStore = defineStore('notifications', () => {
   const markingId = ref<number | null>(null)
   const markingAll = ref(false)
   let sequence = 0
+  let scope = 0
 
   async function load(options: { page?: number; filter?: NotificationFilter } = {}): Promise<void> {
     const nextPage = Math.max(1, options.page ?? page.value)
     const nextFilter = options.filter ?? filter.value
     const current = ++sequence
+    const currentScope = scope
 
     page.value = nextPage
     filter.value = nextFilter
@@ -34,34 +36,40 @@ export const useNotificationStore = defineStore('notifications', () => {
     }
 
     try {
-      const [result, count] = await Promise.all([
+      const [listResult, countResult] = await Promise.allSettled([
         notificationApi.list(query),
         notificationApi.unreadCount(),
       ])
-      if (current !== sequence) {
+      if (current !== sequence || currentScope !== scope) {
         return
       }
-      items.value = result.items
-      total.value = result.total
-      unread.value = count.unread
-    } catch (cause) {
-      if (current !== sequence) {
-        return
+
+      if (listResult.status === 'fulfilled') {
+        items.value = listResult.value.items
+        total.value = listResult.value.total
+      } else {
+        items.value = []
+        total.value = 0
+        error.value = getErrorMessage(listResult.reason)
       }
-      items.value = []
-      total.value = 0
-      error.value = getErrorMessage(cause)
+
+      if (countResult.status === 'fulfilled') {
+        unread.value = countResult.value.unread
+      }
     } finally {
-      if (current === sequence) {
+      if (current === sequence && currentScope === scope) {
         loading.value = false
       }
     }
   }
 
   async function refreshUnread(): Promise<void> {
+    const currentScope = scope
     try {
       const result = await notificationApi.unreadCount()
-      unread.value = result.unread
+      if (currentScope === scope) {
+        unread.value = result.unread
+      }
     } catch {
       // Keep the previous count if the background refresh fails.
     }
@@ -73,9 +81,13 @@ export const useNotificationStore = defineStore('notifications', () => {
       return
     }
 
+    const currentScope = scope
     markingId.value = id
     try {
       const updated = await notificationApi.markRead(id)
+      if (currentScope !== scope) {
+        return
+      }
       if (filter.value === 'unread') {
         items.value = items.value.filter((entry) => entry.id !== id)
         total.value = Math.max(0, total.value - 1)
@@ -95,14 +107,20 @@ export const useNotificationStore = defineStore('notifications', () => {
         }
       }
     } finally {
-      markingId.value = null
+      if (currentScope === scope && markingId.value === id) {
+        markingId.value = null
+      }
     }
   }
 
   async function markAllRead(): Promise<number> {
+    const currentScope = scope
     markingAll.value = true
     try {
       const result = await notificationApi.markAllRead()
+      if (currentScope !== scope) {
+        return 0
+      }
       items.value =
         filter.value === 'unread' ? [] : items.value.map((item) => ({ ...item, read: true }))
       if (filter.value === 'unread') {
@@ -112,11 +130,14 @@ export const useNotificationStore = defineStore('notifications', () => {
       unread.value = 0
       return result.updated
     } finally {
-      markingAll.value = false
+      if (currentScope === scope) {
+        markingAll.value = false
+      }
     }
   }
 
   function clear(): void {
+    scope += 1
     sequence += 1
     items.value = []
     total.value = 0

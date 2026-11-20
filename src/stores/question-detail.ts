@@ -38,34 +38,42 @@ export const useQuestionDetailStore = defineStore('question-detail', () => {
   }
 
   async function vote(value: -1 | 0 | 1): Promise<void> {
-    if (!question.value) {
+    const current = question.value
+    if (!current) {
       return
     }
-    const next = question.value.viewerVote === value ? 0 : value
-    const result = await questionApi.vote(question.value.id, next)
-    if (question.value) {
-      question.value.score = result.score
-      question.value.viewerVote = result.viewerVote
+    const questionId = current.id
+    const next = current.viewerVote === value ? 0 : value
+    const result = await questionApi.vote(questionId, next)
+    if (question.value?.id !== questionId) {
+      return
     }
+    question.value.score = result.score
+    question.value.viewerVote = result.viewerVote
   }
 
   async function toggleBookmark(): Promise<boolean> {
-    if (!question.value) {
+    const current = question.value
+    if (!current) {
       return false
     }
-    const result = await questionApi.bookmark(question.value.id, !question.value.bookmarked)
-    if (question.value) {
-      question.value.bookmarked = result.bookmarked
+    const questionId = current.id
+    const result = await questionApi.bookmark(questionId, !current.bookmarked)
+    if (question.value?.id !== questionId) {
+      return result.bookmarked
     }
+    question.value.bookmarked = result.bookmarked
     return result.bookmarked
   }
 
   async function submitAnswer(body: string): Promise<Answer> {
-    if (!question.value) {
+    const current = question.value
+    if (!current) {
       throw new Error('问题尚未加载')
     }
-    const answer = await questionApi.createAnswer(question.value.id, { body })
-    if (question.value) {
+    const questionId = current.id
+    const answer = await questionApi.createAnswer(questionId, { body })
+    if (question.value?.id === questionId) {
       question.value.answersList.push(answer)
       question.value.answerCount = question.value.answersList.length
       question.value.lastActivityAt = answer.createdAt
@@ -74,20 +82,30 @@ export const useQuestionDetailStore = defineStore('question-detail', () => {
   }
 
   async function voteAnswer(answerId: number, value: -1 | 0 | 1): Promise<void> {
-    if (!question.value) {
+    const current = question.value
+    if (!current) {
       return
     }
-    const target = question.value.answersList.find((answer) => answer.id === answerId)
+    const questionId = current.id
+    const target = current.answersList.find((answer) => answer.id === answerId)
     if (!target) {
       return
     }
     const next = target.viewerVote === value ? 0 : value
     const result = await questionApi.voteAnswer(answerId, next)
-    target.score = result.score
-    target.viewerVote = result.viewerVote
+    const latest = question.value
+    if (latest?.id !== questionId) {
+      return
+    }
+    const latestTarget = latest.answersList.find((answer) => answer.id === answerId)
+    if (latestTarget) {
+      latestTarget.score = result.score
+      latestTarget.viewerVote = result.viewerVote
+    }
   }
 
   function reset(): void {
+    requestSequence += 1
     question.value = null
     loading.value = false
     error.value = null

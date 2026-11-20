@@ -150,7 +150,9 @@ export const useMyProjectsStore = defineStore('my-projects', () => {
       const updated = await projectApi.update(id, input)
       if ((sessionStore.user?.handle ?? null) === ownerHandle) {
         upsertItem(updated)
-        editor.value = null
+        if (editor.value?.id === updated.id) {
+          editor.value = null
+        }
       }
       return updated
     } finally {

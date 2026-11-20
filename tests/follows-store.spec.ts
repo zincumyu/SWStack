@@ -288,6 +288,61 @@ describe('follow store', () => {
     expect(store.feedLoaded).toBe(false)
   })
 
+  it('ignores an in-flight follow status response after reset', async () => {
+    const pending = deferred<FollowStatus>()
+    statusMock.mockReturnValueOnce(pending.promise)
+    const store = useFollowStore()
+
+    const loading = store.loadStatus()
+    store.reset()
+    pending.resolve({ users: ['zhouqi'], tags: ['vue3'] })
+    await loading
+
+    expect(store.userHandles).toEqual([])
+    expect(store.tagSlugs).toEqual([])
+    expect(store.statusLoaded).toBe(false)
+    expect(store.statusLoading).toBe(false)
+  })
+
+  it('lets a new account load status while the previous account request is pending', async () => {
+    const previous = deferred<FollowStatus>()
+    const current = deferred<FollowStatus>()
+    statusMock.mockReturnValueOnce(previous.promise).mockReturnValueOnce(current.promise)
+    const store = useFollowStore()
+
+    const oldRequest = store.loadStatus()
+    store.reset()
+    const newRequest = store.loadStatus()
+
+    previous.resolve({ users: ['old-user'], tags: ['old-tag'] })
+    await oldRequest
+
+    expect(store.statusLoaded).toBe(false)
+    expect(store.statusLoading).toBe(true)
+    expect(store.userHandles).toEqual([])
+
+    current.resolve({ users: ['new-user'], tags: ['new-tag'] })
+    await newRequest
+
+    expect(store.statusLoaded).toBe(true)
+    expect(store.userHandles).toEqual(['new-user'])
+    expect(store.tagSlugs).toEqual(['new-tag'])
+  })
+
+  it('does not apply a follow toggle that resolves after reset', async () => {
+    const pending = deferred<FollowResult>()
+    toggleUserMock.mockReturnValueOnce(pending.promise)
+    const store = useFollowStore()
+
+    const action = store.toggleUser('zhouqi')
+    store.reset()
+    pending.resolve({ following: true, followerCount: 1421 })
+    await action
+
+    expect(store.userHandles).toEqual([])
+    expect(store.pendingUsers).toEqual([])
+  })
+
   it('resets all follow and feed state', async () => {
     statusMock.mockResolvedValueOnce({ users: ['zhouqi'], tags: ['vue3'] })
     feedMock.mockResolvedValueOnce(

@@ -334,6 +334,12 @@ const reviewStatus = ref<ProjectApplicationReviewInput['status']>('accepted')
 const reviewNote = ref('')
 
 let loadSequence = 0
+let mutationSequence = 0
+
+interface MutationScope {
+  projectId: number
+  sequence: number
+}
 
 const project = computed(() => workspace.value?.project ?? null)
 const applications = computed(() => workspace.value?.applications ?? [])
@@ -350,8 +356,13 @@ const canViewPublic = computed(
 watch(
   projectId,
   () => {
+    loadSequence += 1
+    mutationSequence += 1
+    loading.value = false
+    reviewing.value = false
     workspace.value = null
     error.value = ''
+    reviewError.value = ''
     activeId.value = null
     if (invalidId.value) {
       return
@@ -431,14 +442,20 @@ async function submitReview(application: ProjectApplication): Promise<void> {
     return
   }
 
+  const scope = beginMutation()
+  const status = reviewStatus.value
+
   reviewing.value = true
   reviewError.value = ''
   try {
     const updated = await projectApi.reviewApplication(application.id, {
-      status: reviewStatus.value,
+      status,
       reviewNote: note || undefined,
     })
-    if (reviewStatus.value === 'accepted' && workspace.value) {
+    if (!isMutationCurrent(scope)) {
+      return
+    }
+    if (status === 'accepted' && workspace.value) {
       workspace.value.project.memberCount += 1
     }
     if (workspace.value) {
@@ -447,27 +464,39 @@ async function submitReview(application: ProjectApplication): Promise<void> {
       )
     }
     activeId.value = null
-    toastStore.success(reviewStatus.value === 'accepted' ? '已接受申请' : '已拒绝申请')
+    toastStore.success(status === 'accepted' ? '已接受申请' : '已拒绝申请')
     invalidateCaches()
     void notificationStore.refreshUnread()
-    await syncWorkspace()
+    await syncWorkspace(scope.projectId)
   } catch (cause) {
-    reviewError.value = getErrorMessage(cause)
+    if (isMutationCurrent(scope)) {
+      reviewError.value = getErrorMessage(cause)
+    }
   } finally {
-    reviewing.value = false
+    if (isMutationCurrent(scope)) {
+      reviewing.value = false
+    }
   }
 }
 
-async function syncWorkspace(): Promise<void> {
+async function syncWorkspace(targetProjectId = projectId.value): Promise<void> {
   const sequence = ++loadSequence
   try {
-    const result = await projectApi.applications(projectId.value)
+    const result = await projectApi.applications(targetProjectId)
     if (sequence === loadSequence) {
       workspace.value = result
     }
   } catch {
     // Keep the locally updated list when the silent refresh fails.
   }
+}
+
+function beginMutation(): MutationScope {
+  return { projectId: projectId.value, sequence: ++mutationSequence }
+}
+
+function isMutationCurrent(scope: MutationScope): boolean {
+  return scope.sequence === mutationSequence && scope.projectId === projectId.value
 }
 
 function invalidateCaches(): void {

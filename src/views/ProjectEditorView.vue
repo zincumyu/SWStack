@@ -732,6 +732,13 @@ const coverUploading = ref(false)
 const screenshotsUploading = ref(false)
 const screenshotError = ref('')
 let formVersion = 0
+let submitSequence = 0
+
+interface SubmitScope {
+  sequence: number
+  routeName: string
+  routeId: string
+}
 
 const coverPreview = computed(() => form.coverImage.trim() || DEFAULT_COVER)
 
@@ -804,12 +811,30 @@ async function loadEditor(): Promise<void> {
     return
   }
   await myStore.loadEditor(id)
+  if (!isEdit.value || editId.value !== id) {
+    return
+  }
   hydrate(myStore.editor)
+}
+
+function currentRouteKey(): { name: string; id: string } {
+  return { name: String(route.name ?? ''), id: String(route.params.id ?? '') }
+}
+
+function isSubmitCurrent(scope: SubmitScope): boolean {
+  const current = currentRouteKey()
+  return (
+    scope.sequence === submitSequence &&
+    scope.routeName === current.name &&
+    scope.routeId === current.id
+  )
 }
 
 watch(
   () => [route.name, route.params.id] as const,
   () => {
+    submitSequence += 1
+    submitting.value = false
     submitError.value = ''
     if (isEdit.value) {
       void loadEditor()
@@ -1101,20 +1126,36 @@ async function submit(): Promise<void> {
     return
   }
 
+  const routeKey = currentRouteKey()
+  const scope: SubmitScope = {
+    sequence: ++submitSequence,
+    routeName: routeKey.name,
+    routeId: routeKey.id,
+  }
+  const editing = isEdit.value
+  const id = editId.value
+  const payload = buildPayload()
+
   submitting.value = true
   try {
-    if (isEdit.value) {
-      await myStore.update(editId.value, buildPayload())
-      toastStore.success('项目已重新提交审核')
+    if (editing) {
+      await myStore.update(id, payload)
     } else {
-      await myStore.create(buildPayload())
-      toastStore.success('项目已提交审核')
+      await myStore.create(payload)
     }
+    if (!isSubmitCurrent(scope)) {
+      return
+    }
+    toastStore.success(editing ? '项目已重新提交审核' : '项目已提交审核')
     await router.push({ name: 'my-projects' })
   } catch (cause) {
-    submitError.value = getErrorMessage(cause)
+    if (isSubmitCurrent(scope)) {
+      submitError.value = getErrorMessage(cause)
+    }
   } finally {
-    submitting.value = false
+    if (isSubmitCurrent(scope)) {
+      submitting.value = false
+    }
   }
 }
 </script>

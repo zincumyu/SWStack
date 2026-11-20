@@ -104,16 +104,23 @@ async function toggleFollow(): Promise<void> {
   if (!tag.value || followPending.value || !followStore.statusLoaded) {
     return
   }
+  const requestedSlug = slug.value
+  const name = tag.value.name
   try {
-    const result = await followStore.toggleTag(slug.value)
+    const result = await followStore.toggleTag(requestedSlug)
+    if (slug.value !== requestedSlug) {
+      return
+    }
     followerCount.value = result.followerCount
     if (result.following) {
-      toastStore.success(`已关注 ${tag.value.name} 标签`)
+      toastStore.success(`已关注 ${name} 标签`)
     } else {
-      toastStore.info(`已取消关注 ${tag.value.name} 标签`)
+      toastStore.info(`已取消关注 ${name} 标签`)
     }
   } catch (cause) {
-    toastStore.error(getErrorMessage(cause))
+    if (slug.value === requestedSlug) {
+      toastStore.error(getErrorMessage(cause))
+    }
   }
 }
 

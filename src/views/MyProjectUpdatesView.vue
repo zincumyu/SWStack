@@ -343,6 +343,12 @@ const titleInput = ref<HTMLInputElement | null>(null)
 const form = reactive<ProjectUpdateInput>({ title: '', body: '' })
 
 let loadSequence = 0
+let mutationSequence = 0
+
+interface MutationScope {
+  projectId: number
+  sequence: number
+}
 
 const project = computed(() => workspace.value?.project ?? null)
 const updates = computed(() => workspace.value?.updates ?? [])
@@ -400,6 +406,11 @@ const publishNotice = computed<{
 watch(
   projectId,
   () => {
+    loadSequence += 1
+    mutationSequence += 1
+    loading.value = false
+    saving.value = false
+    deletingId.value = null
     workspace.value = null
     error.value = ''
     pendingDeleteId.value = null
@@ -456,16 +467,24 @@ async function loadWorkspace(force = false): Promise<void> {
   }
 }
 
-async function syncWorkspace(): Promise<void> {
+async function syncWorkspace(targetProjectId = projectId.value): Promise<void> {
   const sequence = ++loadSequence
   try {
-    const result = await projectApi.updates(projectId.value)
+    const result = await projectApi.updates(targetProjectId)
     if (sequence === loadSequence) {
       workspace.value = result
     }
   } catch {
     // Keep the locally updated workspace when the silent refresh fails.
   }
+}
+
+function beginMutation(): MutationScope {
+  return { projectId: projectId.value, sequence: ++mutationSequence }
+}
+
+function isMutationCurrent(scope: MutationScope): boolean {
+  return scope.sequence === mutationSequence && scope.projectId === projectId.value
 }
 
 function sortUpdates(items: ProjectUpdate[]): ProjectUpdate[] {
@@ -522,30 +541,42 @@ async function submit(): Promise<void> {
   if (saving.value || deletingId.value !== null || !validateForm()) {
     return
   }
-  saving.value = true
-  formError.value = ''
+  const scope = beginMutation()
+  const editing = editingId.value
   const input: ProjectUpdateInput = {
     title: form.title.trim(),
     body: form.body.trim(),
   }
 
+  saving.value = true
+  formError.value = ''
   try {
-    if (editingId.value === null) {
-      const created = await projectApi.createUpdate(projectId.value, input)
+    if (editing === null) {
+      const created = await projectApi.createUpdate(scope.projectId, input)
+      if (!isMutationCurrent(scope)) {
+        return
+      }
       applyCreated(created)
       toastStore.success('开发日志已发布')
     } else {
-      const updated = await projectApi.updateUpdate(editingId.value, input)
+      const updated = await projectApi.updateUpdate(editing, input)
+      if (!isMutationCurrent(scope)) {
+        return
+      }
       applyEdited(updated)
       toastStore.success('开发日志已更新')
     }
     resetForm()
     invalidateCaches()
-    await syncWorkspace()
+    await syncWorkspace(scope.projectId)
   } catch (cause) {
-    formError.value = getErrorMessage(cause)
+    if (isMutationCurrent(scope)) {
+      formError.value = getErrorMessage(cause)
+    }
   } finally {
-    saving.value = false
+    if (isMutationCurrent(scope)) {
+      saving.value = false
+    }
   }
 }
 
@@ -590,10 +621,14 @@ async function confirmDelete(id: number): Promise<void> {
   if (deletingId.value !== null) {
     return
   }
-  deletingId.value = id
+  const scope = beginMutation()
   const wasEditing = editingId.value === id
+  deletingId.value = id
   try {
     await projectApi.deleteUpdate(id)
+    if (!isMutationCurrent(scope)) {
+      return
+    }
     if (workspace.value) {
       workspace.value.updates = workspace.value.updates.filter((item) => item.id !== id)
       workspace.value.project.updateCount = workspace.value.updates.length
@@ -604,11 +639,15 @@ async function confirmDelete(id: number): Promise<void> {
     pendingDeleteId.value = null
     toastStore.success('开发日志已删除')
     invalidateCaches()
-    await syncWorkspace()
+    await syncWorkspace(scope.projectId)
   } catch (cause) {
-    toastStore.error(getErrorMessage(cause))
+    if (isMutationCurrent(scope)) {
+      toastStore.error(getErrorMessage(cause))
+    }
   } finally {
-    deletingId.value = null
+    if (isMutationCurrent(scope)) {
+      deletingId.value = null
+    }
   }
 }
 

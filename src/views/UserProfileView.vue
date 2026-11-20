@@ -226,9 +226,13 @@ async function toggleFollow(): Promise<void> {
   if (!profile.value || followPending.value || !followStore.statusLoaded) {
     return
   }
+  const requestedHandle = handle.value
   const name = profile.value.name
   try {
-    const result = await followStore.toggleUser(handle.value)
+    const result = await followStore.toggleUser(requestedHandle)
+    if (handle.value !== requestedHandle) {
+      return
+    }
     followerCount.value = result.followerCount
     if (result.following) {
       toastStore.success(`已关注 ${name}`)
@@ -236,7 +240,9 @@ async function toggleFollow(): Promise<void> {
       toastStore.info(`已取消关注 ${name}`)
     }
   } catch (cause) {
-    toastStore.error(getErrorMessage(cause))
+    if (handle.value === requestedHandle) {
+      toastStore.error(getErrorMessage(cause))
+    }
   }
 }
 

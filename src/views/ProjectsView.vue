@@ -63,7 +63,7 @@
     <ProjectBoardClosed v-else-if="projectStore.isBoardClosed" />
 
     <template v-else>
-      <form class="project-filters panel" role="search" @submit.prevent="load">
+      <form class="project-filters panel" role="search" @submit.prevent="applyFilters">
         <label class="project-search">
           <Search :size="14" aria-hidden="true" />
           <input
@@ -77,7 +77,7 @@
           v-model="statusFilter"
           class="project-select"
           aria-label="按项目状态筛选"
-          @change="load"
+          @change="applyFilters"
         >
           <option value="all">全部状态</option>
           <option value="idea">构思中</option>
@@ -90,7 +90,7 @@
           v-model="needFilter"
           class="project-select"
           aria-label="按项目需求筛选"
-          @change="load"
+          @change="applyFilters"
         >
           <option value="all">全部需求</option>
           <option value="feedback">求反馈</option>
@@ -139,11 +139,21 @@
         </EmptyState>
       </div>
 
-      <div v-else class="projects-grid">
-        <ProjectCard
-          v-for="project in projectStore.projects"
-          :key="project.id"
-          :project="project"
+      <div v-else>
+        <div class="projects-grid">
+          <ProjectCard
+            v-for="project in projectStore.projects"
+            :key="project.id"
+            :project="project"
+          />
+        </div>
+        <AdminPagination
+          class="projects-pagination"
+          :page="page"
+          :total="projectStore.total"
+          :page-size="pageSize"
+          :disabled="projectStore.listLoading"
+          @change="goToPage"
         />
       </div>
     </template>
@@ -154,6 +164,7 @@
 import { computed, ref } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 import { FolderGit2, Plus, Search } from 'lucide-vue-next'
+import AdminPagination from '@/components/admin/AdminPagination.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import ProjectBoardClosed from '@/components/projects/ProjectBoardClosed.vue'
 import ProjectCard from '@/components/projects/ProjectCard.vue'
@@ -166,6 +177,7 @@ const sessionStore = useSessionStore()
 const searchDraft = ref('')
 const statusFilter = ref<ProjectStatusFilter>('all')
 const needFilter = ref<ProjectNeedFilter>('all')
+const page = ref(1)
 const pageSize = 12
 
 const submitTarget = computed<RouteLocationRaw>(() =>
@@ -205,28 +217,50 @@ const headCaption = computed(() => {
   return '由社区成员维护与更新'
 })
 
-function load(): void {
-  void projectStore.loadProjects({
-    page: 1,
+async function load(): Promise<void> {
+  await projectStore.loadProjects({
+    page: page.value,
     pageSize,
     q: searchDraft.value.trim() || undefined,
     status: statusFilter.value,
     need: needFilter.value,
   })
+
+  if (projectStore.projects.length === 0 && projectStore.total > 0 && !projectStore.listError) {
+    const lastPage = Math.max(1, Math.ceil(projectStore.total / pageSize))
+    if (lastPage !== page.value) {
+      page.value = lastPage
+      await load()
+    }
+  }
+}
+
+function applyFilters(): void {
+  page.value = 1
+  void load()
 }
 
 function resetFilters(): void {
   searchDraft.value = ''
   statusFilter.value = 'all'
   needFilter.value = 'all'
-  load()
+  applyFilters()
+}
+
+function goToPage(next: number): void {
+  const totalPages = Math.max(1, Math.ceil(projectStore.total / pageSize))
+  if (next < 1 || next > totalPages || next === page.value) {
+    return
+  }
+  page.value = next
+  void load()
 }
 
 function retry(): void {
   void projectStore.loadBoard(true).then(() => load())
 }
 
-load()
+void load()
 </script>
 
 <style scoped>
@@ -399,6 +433,13 @@ load()
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
+}
+
+.projects-pagination {
+  margin-top: 14px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface);
 }
 
 .project-skeleton {
